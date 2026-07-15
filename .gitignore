@@ -1,0 +1,27 @@
+# Dependencies
+**/node_modules
+
+# Environment files
+**/.env
+
+# Logs
+**/*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# Build folders
+dist/
+build/
+
+# Expo
+.expo/
+
+# Coverage
+coverage/
+
+.agents
