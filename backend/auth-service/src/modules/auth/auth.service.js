@@ -76,3 +76,18 @@ export const loginUserService = async ({ email, password }) => {
     refreshToken,
   };
 };
+
+
+export const logoutUserService = async (userId) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new Error("User not found.");
+  }
+
+  user.refreshToken = "";
+
+  await user.save();
+
+  return true;
+};
