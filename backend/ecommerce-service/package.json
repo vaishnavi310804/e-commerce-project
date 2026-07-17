@@ -2,9 +2,9 @@
   "name": "ecommerce-service",
   "version": "1.0.0",
   "main": "index.js",
-  "type":"module",
+  "type": "module",
   "scripts": {
-    "dev": "nodemon index.js"
+    "dev": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
