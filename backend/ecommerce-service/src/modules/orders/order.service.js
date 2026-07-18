@@ -1,23 +1,16 @@
 import Order from "./order.model.js";
 import Address from "../address/address.model.js";
 import Cart from "../cart/cart.model.js";
-import Product from "../products/product.model.js"
+import Product from "../products/product.model.js";
 
-
-export const createOrderService = async (
-  userId,
-  addressId,
-  paymentMethod
-) => {
-    const cart = await Cart.findOne({ user: userId }).populate(
-    "items.product"
-  );
+export const createOrderService = async (userId, addressId, paymentMethod) => {
+  const cart = await Cart.findOne({ user: userId }).populate("items.product");
 
   if (!cart || cart.items.length === 0) {
     throw new Error("Cart is empty.");
   }
 
-   const address = await Address.findOne({
+  const address = await Address.findOne({
     _id: addressId,
     user: userId,
   });
@@ -40,9 +33,7 @@ export const createOrderService = async (
     }
 
     if (product.stock < item.quantity) {
-      throw new Error(
-        `Only ${product.stock} ${product.name} left in stock.`
-      );
+      throw new Error(`Only ${product.stock} ${product.name} left in stock.`);
     }
     const price = product.discountPrice || product.price;
 
@@ -60,8 +51,16 @@ export const createOrderService = async (
     address: addressId,
     totalAmount,
     paymentMethod,
+    paymentStatus: "Pending",
+    orderStatus: "Placed",
+
+    orderStatusHistory: [
+      {
+        status: "Placed",
+      },
+    ],
   });
-   for (const item of cart.items) {
+  for (const item of cart.items) {
     item.product.stock -= item.quantity;
     await item.product.save();
   }
@@ -86,9 +85,7 @@ export const getOrderByIdService = async (userId, orderId) => {
     user: userId,
   })
     .populate("address")
-    .populate("items.product",
-        "name productImage price discountPrice slug"
-    );
+    .populate("items.product", "name productImage price discountPrice slug");
 
   if (!order) {
     throw new Error("Order not found.");
@@ -106,15 +103,13 @@ export const cancelOrderService = async (userId, orderId) => {
   if (!order) {
     throw new Error("Order not found.");
   }
-  const cancelStatus =[
-    "Placed",
-    "Confirmed",
-    "Packed",
-  ];
-  if(!cancelStatus.includes(order.orderStatus)){
-    throw new Error(
-      `Order cannot be cancelled as it is ${order.orderStatus}.`
-    );
+  if (order.orderStatus === "Cancelled") {
+  throw new Error("Order is already cancelled.");
+}
+
+  const cancelStatus = ["Placed", "Confirmed", "Packed"];
+  if (!cancelStatus.includes(order.orderStatus)) {
+    throw new Error(`Order cannot be cancelled as it is ${order.orderStatus}.`);
   }
   for (const item of order.items) {
     item.product.stock += item.quantity;
@@ -122,11 +117,88 @@ export const cancelOrderService = async (userId, orderId) => {
   }
 
   order.orderStatus = "Cancelled";
+  order.orderStatusHistory.push({
+    status: "Cancelled",
+  });
 
-   if (order.paymentMethod === "COD") {
+  if (order.paymentMethod === "COD") {
     order.paymentStatus = "Pending";
   }
-   await order.save();
+  await order.save();
+
+  return order;
+};
+
+
+
+//Admin Services
+
+export const getAllOrdersService = async () => {
+  return await Order.find()
+    .populate("user", "name email")
+    .populate("address")
+    .populate("items.product", "name productImage")
+    .sort({ createdAt: -1 });
+};
+
+export const getOrderDetailsService = async (orderId) => {
+  const order = await Order.findById(orderId)
+    .populate("user", "name email")
+    .populate("address")
+    .populate("items.product");
+
+  if (!order) {
+    throw new Error("Order not found.");
+  }
+
+  return order;
+};
+
+export const updateOrderStatusService = async (
+  orderId,
+  orderStatus
+) => {
+  const order = await Order.findById(orderId);
+
+  if (!order) {
+    throw new Error("Order not found.");
+  }
+
+  const flow = [
+    "Placed",
+    "Confirmed",
+    "Packed",
+    "Shipped",
+    "Out for Delivery",
+    "Delivered",
+  ];
+
+  if (order.orderStatus === "Cancelled") {
+    throw new Error("Cancelled orders cannot be updated.");
+  }
+
+  const currentIndex = flow.indexOf(order.orderStatus);
+  const nextIndex = flow.indexOf(orderStatus);
+
+  if (nextIndex !== currentIndex + 1) {
+    throw new Error(
+      `Order can only move to the next status. Current status is ${order.orderStatus}.`
+    );
+  }
+
+  order.orderStatus = orderStatus;
+
+  order.orderStatusHistory.push({
+    status: orderStatus,
+  });
+  if (
+    orderStatus === "Delivered" &&
+    order.paymentMethod === "COD"
+  ) {
+    order.paymentStatus = "Paid";
+  }
+
+  await order.save();
 
   return order;
 };

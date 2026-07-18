@@ -70,6 +70,26 @@ const orderSchema = new mongoose.Schema(
       ],
       default: "Placed",
     },
+    orderStatusHistory: [
+      {
+        status: {
+          type: String,
+          enum: [
+            "Placed",
+            "Confirmed",
+            "Packed",
+            "Shipped",
+            "Out for Delivery",
+            "Delivered",
+            "Cancelled",
+          ],
+        },
+        updatedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
   },
   {
     timestamps: true,

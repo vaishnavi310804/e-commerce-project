@@ -8,6 +8,7 @@ import cartRoutes from "./src/modules/cart/cart.routes.js";
 import errorHandler from "./src/middleware/error.middleware.js";
 import addressRoutes from "./src/modules/address/address.routes.js";
 import orderRoutes from "./src/modules/orders/order.routes.js"
+import reviewRoutes from "./src/modules/reviews/review.routes.js";
 
 const app=express();
 
@@ -22,6 +23,7 @@ app.use("/api/v1/wishlist", wishlistRoutes)
 app.use("/api/v1/cart", cartRoutes);
 app.use("/api/v1/address", addressRoutes)
 app.use("/api/v1/order", orderRoutes)
+app.use("/api/v1/reviews", reviewRoutes);
 
 
 app.get("/",(req,res)=>{
