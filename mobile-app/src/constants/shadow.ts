@@ -5,14 +5,14 @@ const Shadow = {
     ios: {
       shadowColor: "#000",
       shadowOpacity: 0.08,
-      shadowRadius: 12,
+      shadowRadius: 18,
       shadowOffset: {
         width: 0,
-        height: 6,
+        height: 10,
       },
     },
     android: {
-      elevation: 4,
+      elevation: 8,
     },
   }),
 };

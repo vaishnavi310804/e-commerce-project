@@ -5,6 +5,7 @@ import {
   comparePassword,
   generateAccessToken,
   generateRefreshToken,
+  verifyRefreshToken,
 } from "./auth.utils.js";
 
 export const registerUserService = async (userData) => {
@@ -85,9 +86,45 @@ export const logoutUserService = async (userId) => {
     throw new Error("User not found.");
   }
 
-  user.refreshToken = "";
+  user.refreshToken = null;
 
   await user.save();
 
   return true;
+};
+
+
+export const refreshTokenService = async (refreshToken) => {
+  if (!refreshToken) {
+    throw new Error("Refresh token is required.");
+  }
+
+  let decoded;
+
+  try {
+    decoded = verifyRefreshToken(refreshToken);
+  } catch (error) {
+    throw new Error("Invalid or expired refresh token.");
+  }
+
+  const user = await User.findById(decoded.id).select("+refreshToken");
+
+  if (!user) {
+    throw new Error("User not found.");
+  }
+
+  if (user.refreshToken !== refreshToken) {
+    throw new Error("Invalid refresh token.");
+  }
+
+  const newAccessToken = generateAccessToken(user);
+  const newRefreshToken = generateRefreshToken(user);
+
+  user.refreshToken = newRefreshToken;
+  await user.save();
+
+  return {
+    accessToken: newAccessToken,
+    refreshToken: newRefreshToken,
+  };
 };

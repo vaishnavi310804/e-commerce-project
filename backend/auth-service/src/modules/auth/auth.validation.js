@@ -33,3 +33,11 @@ export const loginValidation = [
     .notEmpty()
     .withMessage("Password is required"),
 ];
+
+import { body } from "express-validator";
+
+export const refreshTokenValidation = [
+  body("refreshToken")
+    .notEmpty()
+    .withMessage("Refresh token is required."),
+];

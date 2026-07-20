@@ -1,24 +1,21 @@
 const Colors = {
-  primary: "#6C4CF1",
+  primary: "#6C63FF",
+  secondary: "#8B5CF6",
 
-  background: "#FFFFFF",
+background: "#F8F7FF",
+surface: "#FFFFFF",
+card: "#FFFFFF",
 
-  surface: "#F8F8F8",
+  text: "#1E293B",
+  textSecondary: "#64748B",
 
-  text: "#1D1D1D",
+  border: "#E2E8F0",
 
-  textSecondary: "#7B7B7B",
-
-  border: "#ECECEC",
-
-  success: "#28C76F",
-
-  error: "#EA5455",
-
-  warning: "#FF9F43",
+  success: "#22C55E",
+  warning: "#F59E0B",
+  error: "#EF4444",
 
   white: "#FFFFFF",
-
   black: "#000000",
 };
 

@@ -42,3 +42,25 @@ export const protect = async (req, res, next) => {
     });
   }
 };
+
+export const refreshTokenService = async (refreshToken) => {
+  if (!refreshToken) {
+    throw new Error("Refresh token is required.");
+  }
+  const decoded = verifyRefreshToken(refreshToken);
+  const user = await User.findById(decoded.id).select("+refreshToken");
+  if (!user) {
+    throw new Error("User not found.");
+  }
+  if (user.refreshToken !== refreshToken) {
+    throw new Error("Invalid refresh token.");
+  }
+  const newAccessToken = generateAccessToken(user);
+  const newRefreshToken = generateRefreshToken(user);
+  user.refreshToken = newRefreshToken;
+  await user.save();
+  return {
+    accessToken: newAccessToken,
+    refreshToken: newRefreshToken,
+  };
+};
