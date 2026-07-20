@@ -1,352 +1,377 @@
 # E-Commerce
 
-A production-style cross-platform e-commerce application built as an internship project to demonstrate full-stack application development, microservices architecture, mobile development, web development, authentication, REST APIs, and scalable backend design.
+A full-stack e-commerce project with a customer mobile app, an admin web app, and two Node.js backend services.
 
-The project consists of three independent applications:
+The codebase is split into independent apps so each part can be developed, run, and deployed separately.
 
-* **Customer Mobile App** built with React Native (Expo)
-* **Admin Dashboard** built with React + Vite
-* **Backend** built with Node.js, Express, MongoDB, following a two-microservice architecture
+## Applications
 
-The objective is to build the application using clean architecture, reusable components, scalable code organization, and production-ready development practices.
+- `mobile-app` - Customer app built with Expo, React Native, TypeScript, and Expo Router.
+- `admin-web` - Admin dashboard built with React and Vite.
+- `backend/auth-service` - Authentication service for users, JWT tokens, logout, and password reset.
+- `backend/ecommerce-service` - Product, category, cart, wishlist, address, order, and review service.
 
----
+## Tech Stack
 
-# Tech Stack
+### Mobile App
 
-## Mobile Application
+- Expo
+- React Native
+- TypeScript
+- Expo Router
+- Axios
+- React Native Confirmation Code Field
 
-* React Native
-* Expo
-* JavaScript
-* React Navigation
-* Axios
-* React Hook Form
+### Admin Web
 
----
+- React
+- Vite
+- ESLint
 
-## Admin Dashboard
+### Backend
 
-* React
-* Vite
-* JavaScript
-* Tailwind CSS
-* React Router DOM
-* Axios
-* React Hook Form
+- Node.js
+- Express
+- MongoDB
+- Mongoose
+- ES Modules
+- JWT
+- bcrypt
+- express-validator
+- Multer
+- Cloudinary
+- Nodemailer
+- CORS
+- dotenv
 
----
-
-## Backend
-
-* Node.js
-* Express.js
-* MongoDB
-* Mongoose
-* ES Modules (`"type": "module"`)
-* JWT Authentication
-* Refresh Tokens
-* bcrypt
-* Cloudinary
-* Multer
-* Nodemailer
-* dotenv
-* CORS
-* express-validator
-
----
-
-# Project Structure
+## Project Structure
 
 ```text
 E-Commerce/
-
-├── backend/
-│   ├── auth-service/
-│   └── ecommerce-service/
-│
-├── admin/
-│
-├── mobile/
-│
-├── .gitignore
-└── README.md
+|-- admin-web/
+|   |-- src/
+|   |-- package.json
+|   `-- vite.config.js
+|
+|-- backend/
+|   |-- auth-service/
+|   |   |-- src/
+|   |   |   |-- config/
+|   |   |   |-- middleware/
+|   |   |   |-- modules/auth/
+|   |   |   `-- services/
+|   |   |-- index.js
+|   |   `-- package.json
+|   |
+|   `-- ecommerce-service/
+|       |-- src/
+|       |   |-- config/
+|       |   |-- middleware/
+|       |   |-- modules/
+|       |   |   |-- address/
+|       |   |   |-- cart/
+|       |   |   |-- categories/
+|       |   |   |-- orders/
+|       |   |   |-- products/
+|       |   |   |-- profile/
+|       |   |   |-- reviews/
+|       |   |   |-- users/
+|       |   |   `-- wishlist/
+|       |   `-- utils/
+|       |-- index.js
+|       |-- server.js
+|       `-- package.json
+|
+|-- mobile-app/
+|   |-- app/
+|   |-- assets/
+|   |-- src/
+|   |   |-- api/
+|   |   |-- components/
+|   |   |-- constants/
+|   |   `-- screens/
+|   |-- app.json
+|   |-- package.json
+|   `-- tsconfig.json
+|
+`-- README.md
 ```
 
-Each project is completely independent.
+## Backend Services
 
----
+### Auth Service
 
-# Backend Architecture
+Default port: `5000`
 
-The backend follows a **microservices architecture** with only two services.
-
-## 1. Auth Service
-
-Responsible only for authentication and authorization.
-
-Responsibilities include:
-
-* User Registration
-* Login
-* Logout
-* JWT Authentication
-* Refresh Tokens
-* Google Login
-* Apple Login
-* Email Verification
-* Forgot Password
-* Reset Password
-* Change Password
-* Role-Based Authorization
-
-The Auth Service should not contain business logic related to products, orders, or carts.
-
----
-
-## 2. Ecommerce Service
-
-Responsible for all e-commerce functionality.
-
-Responsibilities include:
-
-* Products
-* Categories
-* Cart
-* Wishlist
-* Orders
-* Customer Profile
-* Profile Image Upload
-* Admin Product Management
-
----
-
-# Backend Folder Structure
-
-The backend uses a **feature-based architecture** instead of the traditional MVC structure.
-
-Example:
+Base URL:
 
 ```text
-src/
-
-├── modules/
-│
-│   ├── auth/
-│   │   ├── auth.controller.js
-│   │   ├── auth.routes.js
-│   │   ├── auth.service.js
-│   │   ├── auth.model.js
-│   │   ├── auth.validation.js
-│   │   └── auth.utils.js
-│
-├── config/
-├── constants/
-├── database/
-├── middleware/
-├── services/
-├── templates/
-├── utils/
-├── validators/
-├── app.js
-└── server.js
+http://localhost:5000/api/v1/auth
 ```
 
-The Ecommerce Service should follow the same feature-based structure, with each module (products, categories, cart, orders, etc.) containing its own controller, routes, service, model, and validation files.
+Implemented auth features:
 
----
+- Register
+- Login
+- Get current user
+- Logout
+- Refresh access token
+- Forgot password OTP email
+- Verify reset OTP
+- Reset password with reset token
+- JWT protected routes
+- Role field on users: `CUSTOMER` or `ADMIN`
 
-# Database
-
-During development the application uses **Local MongoDB**.
-
-Later it will be migrated to **MongoDB Atlas**.
-
-Each microservice owns its own database.
-
-Example:
+Auth routes:
 
 ```text
-Local MongoDB
-
-├── auth-db
-│
-└── ecommerce-db
+POST /api/v1/auth/register
+POST /api/v1/auth/login
+GET  /api/v1/auth/me
+POST /api/v1/auth/logout
+POST /api/v1/auth/refresh-token
+POST /api/v1/auth/forgot-password
+POST /api/v1/auth/verify-reset-otp
+POST /api/v1/auth/reset-password
 ```
 
-Each service manages its own MongoDB connection.
+Password reset flow:
 
-Microservices must never directly access another service's database.
+1. `POST /forgot-password` with `{ "email": "user@example.com" }`
+2. User receives a 6 digit OTP by email.
+3. `POST /verify-reset-otp` with `{ "email": "user@example.com", "otp": "123456" }`
+4. API returns `{ "resetToken": "..." }`
+5. `POST /reset-password` with `{ "resetToken": "...", "newPassword": "newPassword123" }`
 
----
+### Ecommerce Service
 
-# User Roles
+Default port: `5001`
 
-Current roles:
+Implemented modules:
 
-* Admin
-* Customer
+- Categories
+- Products
+- Wishlist
+- Cart
+- Address
+- Orders
+- Reviews
 
-The system should be designed so that additional roles such as **Vendor** can be added later with minimal code changes.
-
-Role-Based Access Control (RBAC) should be implemented from the beginning.
-
----
-
-# Authentication
-
-Authentication should support:
-
-* Email & Password
-* Google Login
-* Apple Login
-* JWT Access Tokens
-* Refresh Tokens
-* Email Verification
-* Forgot Password
-* Reset Password
-* Change Password
-* Logout
-
-Passwords must always be hashed using bcrypt.
-
-Never store plain text passwords.
-
----
-
-# Admin Dashboard
-
-The Admin Dashboard is a completely separate React application.
-
-It consumes REST APIs only.
-
-It must never connect directly to MongoDB.
-
-The dashboard manages:
-
-* Customers
-* Products
-* Categories
-* Orders
-* Dashboard Analytics
-
----
-
-# Mobile Application
-
-The customer application is built using React Native with Expo.
-
-The UI follows the provided Behance design.
-
-The application should include reusable components, responsive layouts, and maintainable code.
-
-Avoid hardcoded values whenever possible.
-
----
-
-# Image Upload
-
-User profile images should be uploaded to Cloudinary.
-
-Only the image URL should be stored in MongoDB.
-
-Images should never be stored permanently on the local server.
-
----
-
-# REST API Standards
-
-Use RESTful API design.
-
-Example:
+Base route groups:
 
 ```text
-POST   /api/v1/auth/register
-POST   /api/v1/auth/login
-POST   /api/v1/auth/logout
-POST   /api/v1/auth/refresh
-
-GET    /api/v1/products
-POST   /api/v1/products
-PUT    /api/v1/products/:id
-DELETE /api/v1/products/:id
+/api/v1/category
+/api/v1/product
+/api/v1/wishlist
+/api/v1/cart
+/api/v1/address
+/api/v1/order
+/api/v1/reviews
 ```
 
-Use proper HTTP status codes.
+Important ecommerce routes:
 
-Return consistent JSON responses.
+```text
+POST   /api/v1/category/create
+GET    /api/v1/category/getAll
+GET    /api/v1/category/get/:id
+PUT    /api/v1/category/update/:id
+PATCH  /api/v1/category/status/:id
 
----
+POST   /api/v1/product/create
+GET    /api/v1/product/getAll
+GET    /api/v1/product/admin/getAll
+GET    /api/v1/product/get/:id
+PUT    /api/v1/product/update/:id
+PATCH  /api/v1/product/status/:id
 
-# Security
+POST   /api/v1/wishlist/add/:productId
+GET    /api/v1/wishlist/get
+DELETE /api/v1/wishlist/remove/:productId
+POST   /api/v1/wishlist/toggle/:productId
 
-Always implement:
+POST   /api/v1/cart/add/:productId
+GET    /api/v1/cart/get
+PATCH  /api/v1/cart/update/:productId
+DELETE /api/v1/cart/remove/:productId
+DELETE /api/v1/cart/clear
 
-* JWT Authentication
-* Refresh Tokens
-* Password Hashing (bcrypt)
-* Role-Based Authorization
-* CORS
-* Request Validation
-* Centralized Error Handling
-* Environment Variables
-* Secure Cookies (where appropriate)
+POST   /api/v1/address
+GET    /api/v1/address/get
+GET    /api/v1/address/:id
+PATCH  /api/v1/address/:id
+DELETE /api/v1/address/:id
 
-Never expose secrets or sensitive information.
+POST   /api/v1/order
+GET    /api/v1/order/getOrders
+GET    /api/v1/order/:id
+PATCH  /api/v1/order/cancel/:id
+GET    /api/v1/order/admin/all
+GET    /api/v1/order/admin/:id
+PATCH  /api/v1/order/admin/:id/status
 
----
+GET    /api/v1/reviews/product/:productId
+POST   /api/v1/reviews/:productId
+PATCH  /api/v1/reviews/:reviewId
+DELETE /api/v1/reviews/:reviewId
+```
 
-# Coding Standards
+## Mobile API Layer
 
-The project should follow production-quality coding practices.
+The mobile app keeps backend calls in `mobile-app/src/api`.
 
-Guidelines:
+Auth API functions currently include:
 
-* Use ES Modules (`import` / `export`)
-* Use async/await
-* Keep business logic inside services
-* Avoid duplicated code
-* Use reusable utility functions
-* Use meaningful naming conventions
-* Write modular, scalable, and maintainable code
-* Follow feature-based architecture
-* Use consistent folder organization
-* Prefer composition over duplication
+- `register`
+- `login`
+- `getCurrentUser`
+- `logout`
+- `refreshAccessToken`
+- `forgotPassword`
+- `verifyResetOtp`
+- `resetPassword`
+- `setAuthToken`
 
----
+The auth client base URL is currently configured in:
 
-# Development Principles
+```text
+mobile-app/src/api/client.ts
+```
 
-This project is intended to simulate a real-world production application.
+Current value:
 
-Whenever generating code:
+```text
+http://192.168.29.120:5000/api/v1/auth
+```
 
-* Follow scalable architecture.
-* Prefer clean and maintainable code over shortcuts.
-* Explain architectural decisions when necessary.
-* Avoid unnecessary dependencies.
-* Keep the code reusable and modular.
-* Write code that can later be containerized using Docker.
-* Assume the application will eventually be deployed with MongoDB Atlas.
+Update this IP address when running the mobile app on a different local network.
 
----
+## Environment Variables
 
-# Future Enhancements
+Create a `.env` file inside each backend service that needs one.
 
-The architecture should make it easy to add features such as:
+### Auth Service
 
-* Vendor Module
-* Payment Gateway Integration
-* Notifications
-* Coupons
-* Product Reviews
-* Inventory Management
-* Search & Filtering
-* Analytics
-* Docker
-* CI/CD
-* API Gateway
-* Redis Caching
-* Kubernetes Deployment
+```env
+DATABASE_URL=mongodb://127.0.0.1:27017/auth-db
+JWT_SECRET=your_access_token_secret
+JWT_REFRESH_SECRET=your_refresh_token_secret
+ACCESS_TOKEN_EXPIRES=15m
+REFRESH_TOKEN_EXPIRES=7d
+PASSWORD_RESET_SECRET=your_password_reset_secret
+PASSWORD_RESET_EXPIRES=10m
+EMAIL_HOST=smtp.example.com
+EMAIL_PORT=587
+EMAIL_USER=your_email_user
+EMAIL_PASS=your_email_password
+EMAIL_FROM=ShopEase <no-reply@example.com>
+```
 
-The codebase should remain flexible enough to support these additions without major restructuring.
+### Ecommerce Service
+
+```env
+DATABASE_URL=mongodb://127.0.0.1:27017/ecommerce-db
+JWT_SECRET=your_access_token_secret
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+PORT=5001
+```
+
+Use the same `JWT_SECRET` in the auth service and ecommerce service so protected ecommerce routes can verify access tokens issued by auth-service.
+
+## Getting Started
+
+Install dependencies separately for each app.
+
+### Auth Service
+
+```bash
+cd backend/auth-service
+npm install
+npm run dev
+```
+
+### Ecommerce Service
+
+```bash
+cd backend/ecommerce-service
+npm install
+npm run dev
+```
+
+### Mobile App
+
+```bash
+cd mobile-app
+npm install
+npm start
+```
+
+Useful mobile commands:
+
+```bash
+npm run android
+npm run ios
+npm run web
+npm run lint
+```
+
+### Admin Web
+
+```bash
+cd admin-web
+npm install
+npm run dev
+```
+
+Other admin commands:
+
+```bash
+npm run build
+npm run lint
+npm run preview
+```
+
+## API Response Shape
+
+Backend responses use a consistent JSON shape:
+
+```json
+{
+  "success": true,
+  "message": "Operation completed successfully.",
+  "data": {}
+}
+```
+
+Some success responses may omit `message` or `data` when there is nothing extra to return.
+
+## Security Notes
+
+- Passwords are hashed with bcrypt.
+- Protected routes expect an access token in the `Authorization` header.
+- Use the format `Bearer <accessToken>`.
+- Refresh tokens are stored on the user record and rotated when refreshed.
+- Password reset OTPs are hashed before being stored.
+- Secrets must stay in `.env` files and should not be committed.
+
+## Current Development Notes
+
+- The auth-service runs on port `5000`.
+- The ecommerce-service runs on `process.env.PORT || 5001`.
+- The mobile app currently points directly to the auth-service local network IP.
+- Product image upload uses Multer and Cloudinary.
+- Admin-only backend actions use role authorization middleware.
+
+## Future Enhancements
+
+- Wire the mobile forgot-password, OTP, and reset-password screens to the updated auth API methods.
+- Add payment gateway integration.
+- Add coupons and promotions.
+- Add inventory management.
+- Add search and filtering.
+- Add analytics for the admin dashboard.
+- Add Docker support.
+- Add CI/CD.
+- Add an API gateway for service routing.

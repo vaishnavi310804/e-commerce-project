@@ -6,24 +6,85 @@ import {
   TouchableOpacity,
   Image,
   ImageBackground,
+  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { AntDesign, Ionicons } from "@expo/vector-icons";
-
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import * as SecureStore from "expo-secure-store";
+import { AxiosError } from "axios";
 import Colors from "@/src/constants/colors";
 import Fonts from "@/src/constants/fonts";
 import ScreenWrapper from "@/src/components/common/ScreenWrapper";
 import Input from "@/src/components/common/Input";
 import PrimaryButton from "@/src/components/common/PrimaryButton";
+import { login, setAuthToken } from "@/src/api/auth.api";
+
+type ApiErrorResponse = {
+  message?: string;
+  errors?: {
+    msg: string;
+  }[];
+};
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const isDisabled = !email.trim() || !password.trim() || loading;
+  const getErrorMessage = (err: unknown) => {
+    const axiosError = err as AxiosError<ApiErrorResponse>;
+    const validationMessage = axiosError.response?.data?.errors?.[0]?.msg;
+
+    return (
+      validationMessage ||
+      axiosError.response?.data?.message ||
+      axiosError.message ||
+      "Unable to sign in. Please try again."
+    );
+  };
+
+  const handleLogin = async () => {
+    if (isDisabled) return;
+
+    try {
+      setError("");
+      setLoading(true);
+
+      const response = await login({
+        email: email.trim().toLowerCase(),
+        password,
+      });
+
+      if (!response.data) {
+        throw new Error(response.message || "Login failed.");
+      }
+
+      const { accessToken, refreshToken, user } = response.data;
+
+      await SecureStore.setItemAsync("accessToken", accessToken);
+      await SecureStore.setItemAsync("refreshToken", refreshToken);
+      await SecureStore.setItemAsync("authUser", JSON.stringify(user));
+
+      setAuthToken(accessToken);
+      router.replace("/(tabs)/home");
+    } catch (err) {
+      const message = getErrorMessage(err);
+      setError(message);
+      Alert.alert("Sign in failed", message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <ScreenWrapper>
+    <ScreenWrapper
+      safeArea={false}
+      statusBarStyle="light"
+      backgroundColor="#F8F7FF"
+    >
       <View style={styles.container}>
-        {/* Header */}
         <ImageBackground
           source={require("../../../assets/images/bgimage.png")}
           style={styles.header}
@@ -48,7 +109,6 @@ export default function LoginScreen() {
         </ImageBackground>
 
         <View style={styles.card}>
-          {/* Social Login */}
           <View style={styles.socialContainer}>
             <TouchableOpacity style={styles.socialButton}>
               <Image
@@ -73,29 +133,44 @@ export default function LoginScreen() {
             label="Email"
             placeholder="example@gmail.com"
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(text) => {
+              setEmail(text);
+              setError("");
+            }}
             keyboardType="email-address"
           />
 
           <Input
             label="Password"
-            placeholder="••••••••••"
+            placeholder="Password"
             value={password}
-            onChangeText={setPassword}
+            onChangeText={(text) => {
+              setPassword(text);
+              setError("");
+            }}
             secureTextEntry
           />
 
-          {/* Forgot Password */}
-          <TouchableOpacity style={styles.forgotContainer}>
+          <TouchableOpacity
+            style={styles.forgotContainer}
+            onPress={() => router.push("/(auth)/forgot_password")}
+          >
             <Text style={styles.forgotText}>Forgot Password?</Text>
           </TouchableOpacity>
 
-          <PrimaryButton title="Sign In" onPress={() => {}} />
+          {!!error && <Text style={styles.errorText}>{error}</Text>}
+
+          <PrimaryButton
+            title="Sign In"
+            loading={loading}
+            disabled={isDisabled}
+            onPress={handleLogin}
+          />
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Don't have an account?</Text>
+            <Text style={styles.footerText}>Do not have an account?</Text>
 
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push("/(auth)/register")}>
               <Text style={styles.signupText}> Sign Up</Text>
             </TouchableOpacity>
           </View>
@@ -112,9 +187,9 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    height: 300,
-    borderBottomLeftRadius: 40,
-    borderBottomRightRadius: 40,
+    height: 320,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
     overflow: "hidden",
   },
 
@@ -158,7 +233,6 @@ const styles = StyleSheet.create({
       width: 0,
       height: 8,
     },
-
     elevation: 8,
   },
 
@@ -176,7 +250,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     justifyContent: "center",
     alignItems: "center",
-
     shadowColor: "#000",
     shadowOpacity: 0.25,
     shadowRadius: 14,
@@ -184,7 +257,6 @@ const styles = StyleSheet.create({
       width: 0,
       height: 8,
     },
-
     elevation: 8,
   },
 
@@ -210,7 +282,7 @@ const styles = StyleSheet.create({
   forgotContainer: {
     alignItems: "flex-end",
     marginTop: 4,
-    marginBottom: 24,
+    marginBottom: 20,
   },
 
   forgotText: {
@@ -219,10 +291,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 
+  errorText: {
+    color: Colors.error,
+    fontFamily: Fonts.medium,
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 14,
+    textAlign: "center",
+  },
+
   footer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 24,
+    marginTop: 14,
   },
 
   footerText: {
@@ -236,8 +317,9 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     fontSize: 14,
   },
-  googleIcon:{
+
+  googleIcon: {
     width: 45,
-  height: 45,
-  }
+    height: 45,
+  },
 });

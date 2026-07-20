@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
 
   text: {
     fontFamily: Fonts.semibold,
-    fontSize: 16,
+    fontSize: 18,
     color: Colors.white,
   },
 });

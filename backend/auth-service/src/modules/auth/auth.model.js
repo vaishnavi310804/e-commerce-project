@@ -49,10 +49,23 @@ const userSchema = new mongoose.Schema(
       default: null,
       select: false,
     },
+    resetPasswordOTP: {
+      type: String,
+      select: false,
+    },
+    isResetOTPVerified: {
+      type: Boolean,
+      default: false,
+      select: false,
+    },
+    resetPasswordOTPExpires: {
+      type: Date,
+      select: false,
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export default mongoose.model("User", userSchema);
