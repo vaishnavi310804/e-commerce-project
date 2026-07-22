@@ -62,6 +62,21 @@ const userSchema = new mongoose.Schema(
       type: Date,
       select: false,
     },
+    phoneNumber: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    gender: {
+      type: String,
+      enum: ["Male", "Female", "Other", "Prefer not to say"],
+      default: undefined,
+    },
+    isProfileCompleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

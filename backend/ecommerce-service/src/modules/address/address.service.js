@@ -104,3 +104,10 @@ export const deleteAddressService = async (userId, addressId) => {
     message: "Address deleted successfully.",
   };
 };
+
+export const getDefaultAddressService = async (userId) => {
+  return await Address.findOne({
+    user: userId,
+    isDefault: true,
+  });
+};

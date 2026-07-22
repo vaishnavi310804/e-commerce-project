@@ -1,4 +1,4 @@
-import { addAddressService, getAllAddressService, getAddressByIdService, updateAddressService, deleteAddressService } from "./address.service.js";
+import { addAddressService, getAllAddressService, getAddressByIdService, updateAddressService, deleteAddressService, getDefaultAddressService } from "./address.service.js";
 
 export const addAddress = async (req, res, next) => {
   try {
@@ -73,6 +73,19 @@ export const deleteAddress = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: result.message,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getDefaultAddress = async (req, res, next) => {
+  try {
+    const address = await getDefaultAddressService(req.user._id);
+
+    res.status(200).json({
+      success: true,
+      data: address,
     });
   } catch (error) {
     next(error);

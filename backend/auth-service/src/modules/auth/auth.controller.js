@@ -5,7 +5,9 @@ import {
   refreshTokenService,
   forgotPasswordService,
   verifyResetOTPService,
-  resetPasswordService
+  resetPasswordService,
+  updateProfileService,
+  adminLoginService
 } from "./auth.service.js";
 
 
@@ -50,7 +52,7 @@ export const loginUser = async (req, res, next) => {
 export const refreshAccessToken = async (req, res, next) => {
   try {
     const { refreshToken } = req.body;
-
+    console.log(req.body);
     const tokens = await refreshTokenService(refreshToken);
 
     return res.status(200).json({
@@ -148,5 +150,45 @@ export const resetPassword = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  }
+};
+
+export const updateProfile = async (req, res, next) => {
+  try {
+    const user = await updateProfileService(
+      req.user._id,
+      req.body,
+      req.file
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully.",
+      data: user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const adminLogin = async (req, res, next) => {
+  try {
+    const data = await adminLoginService(req.body);
+
+    console.log("Controller data:", data);
+
+    return res.status(200).json({
+      success: true,
+      message: "Admin login successful.",
+      data,
+    });
+  } catch (error) {
+    console.error("ADMIN LOGIN ERROR:");
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };

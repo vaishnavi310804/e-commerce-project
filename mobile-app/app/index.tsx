@@ -8,7 +8,7 @@ import Colors from "@/src/constants/colors";
 const Index = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
-      router.replace("/welcome");
+      router.replace("/onboarding");
     }, 3000);
 
     return () => clearTimeout(timer);

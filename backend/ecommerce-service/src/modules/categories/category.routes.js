@@ -9,9 +9,9 @@ const router = express.Router();
 
 router.post("/create", protect, authorize("ADMIN"), createCategoryValidation,validate ,createCategory);
 
-router.get("/getAll", getAllCategories);
+router.get("/", getAllCategories);
 
-router.get("/get/:id", getCategoryById);
+router.get("/:id", getCategoryById);
 
 router.put("/update/:id",protect, authorize("ADMIN"), updateCategoryValidation, validate, updateCategory);
 

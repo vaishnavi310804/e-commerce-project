@@ -1,15 +1,19 @@
-import client from "./client";
+import client from "./authClient";
+import ecommerceClient from "./ecommerceClient";
+
 
 export type UserRole = "CUSTOMER" | "ADMIN";
-
 export type AuthUser = {
   _id: string;
   fullName: string;
   email: string;
   profileImage?: string;
+  phoneNumber?: string;
+  gender?: "Male" | "Female" | "Other";
   role: UserRole;
   isEmailVerified: boolean;
   isActive: boolean;
+  isProfileCompleted?: boolean;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -74,11 +78,17 @@ export type ApiResponse<T> = {
 
 export const setAuthToken = (accessToken?: string) => {
   if (accessToken) {
-    client.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
+    client.defaults.headers.common.Authorization =
+      `Bearer ${accessToken}`;
+
+    ecommerceClient.defaults.headers.common.Authorization =
+      `Bearer ${accessToken}`;
+
     return;
   }
 
   delete client.defaults.headers.common.Authorization;
+  delete ecommerceClient.defaults.headers.common.Authorization;
 };
 
 export const register = async (payload: RegisterPayload) => {
@@ -97,6 +107,7 @@ export const login = async (payload: LoginPayload) => {
 };
 
 export const getCurrentUser = async (accessToken?: string) => {
+
   const { data } = await client.get<ApiResponse<AuthUser>>("/me", {
     headers: accessToken
       ? {
@@ -160,6 +171,16 @@ export const resetPassword = async (payload: ResetPasswordPayload) => {
   return data;
 };
 
+export const updateProfile = async (formData: FormData) => {
+  const response = await client.patch("/profile", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return response.data;
+};
+
 const authApi = {
   register,
   login,
@@ -170,6 +191,7 @@ const authApi = {
   verifyResetOtp,
   resetPassword,
   setAuthToken,
+  updateProfile
 };
 
 export default authApi;

@@ -71,3 +71,26 @@ export const resetPasswordValidation = [
     .isLength({ min: 8 })
     .withMessage("Password must be at least 8 characters long."),
 ];
+
+export const updateProfileValidation = [
+  body("phoneNumber")
+    .optional()
+    .isMobilePhone("en-IN")
+    .withMessage("Invalid phone number"),
+
+  body("gender")
+    .optional()
+    .isIn(["Male", "Female", "Other", "Prefer not to say"])
+    .withMessage("Invalid gender"),
+];
+
+export const adminLoginValidation = [
+  body("email")
+    .trim()
+    .isEmail()
+    .withMessage("Please enter a valid email."),
+
+  body("password")
+    .notEmpty()
+    .withMessage("Password is required."),
+];

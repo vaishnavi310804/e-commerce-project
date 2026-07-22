@@ -11,6 +11,7 @@ import {
 import { generateOTP, hashOTP } from "./auth.utils.js";
 import { sendForgotPasswordOTP } from "../../services/email.service.js";
 
+
 export const registerUserService = async (userData) => {
   const { fullName, email, password, profileImage } = userData;
 
@@ -228,4 +229,75 @@ export const resetPasswordService = async ({
   user.refreshToken = "";
 
   await user.save();
+};
+
+export const updateProfileService = async (userId, body, file) => {
+  const updateData = {
+    isProfileCompleted: true,
+  };
+
+  if (body.phoneNumber) {
+    updateData.phoneNumber = body.phoneNumber;
+  }
+
+  if (body.gender) {
+    updateData.gender = body.gender;
+  }
+
+  if (file) {
+    updateData.profileImage = file.path;
+  }
+
+  return await User.findByIdAndUpdate(userId, updateData, {
+    new: true,
+  });
+};
+
+export const adminLoginService = async ({ email, password }) => {
+
+  console.log("Login attempt:", email);
+
+const user = await User.findOne({ email }).select("+password +refreshToken");
+
+console.log("User:", user);
+
+if (!user) {
+  throw new Error("Invalid email or password");
+}
+
+const isMatch = await comparePassword(password, user.password);
+
+console.log("Password match:", isMatch);
+
+if (!isMatch) {
+  throw new Error("Invalid email or password");
+}
+
+console.log("Role:", user.role);
+  if (user.role !== "ADMIN") {
+    throw new Error("Access denied. Admins only.");
+  }
+
+  const accessToken = generateAccessToken(user);
+console.log("Access token generated");
+
+const refreshToken = generateRefreshToken(user);
+console.log("Refresh token generated");
+
+
+  user.refreshToken = refreshToken;
+  console.log("Saving user...");
+  await user.save();
+  console.log("User saved");
+
+  const userObject = user.toObject();
+
+  delete userObject.password;
+  delete userObject.refreshToken;
+
+  return {
+    user: userObject,
+    accessToken,
+    refreshToken,
+  };
 };

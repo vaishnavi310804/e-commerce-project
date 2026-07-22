@@ -93,7 +93,7 @@ export default function RegisterScreen() {
       await SecureStore.setItemAsync("authUser", JSON.stringify(user));
 
       setAuthToken(accessToken);
-      router.replace("/(tabs)/home");
+      router.replace("/complete-profile");
     } catch (err) {
       const message = getErrorMessage(err);
       setError(message);
