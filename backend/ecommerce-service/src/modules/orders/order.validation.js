@@ -1,28 +1,26 @@
 import { body } from "express-validator";
 
-export const createOrderValidation = [
-  body("addressId")
-    .notEmpty()
-    .withMessage("Address is required."),
-
-  body("paymentMethod")
-    .notEmpty()
-    .withMessage("Payment method is required.")
-    .isIn(["COD", "ONLINE"])
-    .withMessage("Invalid payment method."),
-];
-
-
 export const updateOrderStatusValidation = [
   body("orderStatus")
+    .notEmpty()
+    .withMessage("Order status is required")
     .isIn([
+      "Pending",
       "Placed",
       "Confirmed",
+      "Processing",
       "Packed",
       "Shipped",
-      "Out for Delivery",
       "Delivered",
       "Cancelled",
     ])
-    .withMessage("Invalid order status."),
+    .withMessage("Invalid order status"),
+];
+
+export const updatePaymentStatusValidation = [
+  body("paymentStatus")
+    .notEmpty()
+    .withMessage("Payment status is required")
+    .isIn(["Pending", "Paid", "Failed", "Refunded"])
+    .withMessage("Invalid payment status"),
 ];

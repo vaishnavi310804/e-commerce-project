@@ -1,31 +1,25 @@
 import express from "express";
 import { protect } from "../../middleware/auth.middleware.js";
-import validate from "../../middleware/validate.js";
+import { authorize } from "../../middleware/role.middleware.js";
 import {
-  addReview,
-  getProductReviews,
-  updateReview,
+  getAllReviews,
+  getReviewById,
+  toggleHideReview,
   deleteReview,
+  bulkHideReviews,
+  bulkDeleteReviews,
+  getReviewStats,
 } from "./review.controller.js";
-import {
-  addReviewValidation,
-  updateReviewValidation,
-} from "./review.validate.js";
 
 const router = express.Router();
 
-router.get("/product/:productId", getProductReviews);
+router.get("/stats", protect, authorize("ADMIN"), getReviewStats);
+router.post("/bulk-hide", protect, authorize("ADMIN"), bulkHideReviews);
+router.post("/bulk-delete", protect, authorize("ADMIN"), bulkDeleteReviews);
 
-router.post("/:productId", protect, addReviewValidation, validate, addReview);
-
-router.patch(
-  "/:reviewId",
-  protect,
-  updateReviewValidation,
-  validate,
-  updateReview
-);
-
-router.delete("/:reviewId", protect, deleteReview);
+router.get("/", protect, authorize("ADMIN"), getAllReviews);
+router.get("/:id", protect, authorize("ADMIN"), getReviewById);
+router.patch("/hide/:id", protect, authorize("ADMIN"), toggleHideReview);
+router.delete("/:id", protect, authorize("ADMIN"), deleteReview);
 
 export default router;

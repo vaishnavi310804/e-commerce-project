@@ -1,34 +1,80 @@
-import express from "express"
+import express from "express";
 import { protect } from "../../middleware/auth.middleware.js";
+import { authorize } from "../../middleware/role.middleware.js";
 import validate from "../../middleware/validate.js";
-import { createOrderValidation, updateOrderStatusValidation } from "./order.validation.js";
-import { createOrder, getMyOrders, getOrderById, cancelOrder, getAllOrders, getOrderDetails, updateOrderStatus } from "./order.controller.js";
-import { authorize } from '../../middleware/role.middleware.js';
+import {
+  updateOrderStatusValidation,
+  updatePaymentStatusValidation,
+} from "./order.validation.js";
+import {
+  getAllOrders,
+  getOrderDetails,
+  updateOrderStatus,
+  updatePaymentStatus,
+  getOrderStats,
+} from "./order.controller.js";
 
-const router =express.Router();
+const router = express.Router();
 
-router.post("/", protect, createOrderValidation, validate, createOrder)
+router.get("/stats", protect, authorize("ADMIN"), getOrderStats);
 
-router.get( "/getOrders", protect, getMyOrders );
-
-router.get( "/:id", protect, getOrderById );
-
-router.patch( "/cancel/:id", protect, cancelOrder );
-
-
-
-//Admin Routes
-
-router.get(
-  "/admin/all", protect, authorize("ADMIN"), getAllOrders
+router.patch(
+  "/status/:id",
+  protect,
+  authorize("ADMIN"),
+  updateOrderStatusValidation,
+  validate,
+  updateOrderStatus
 );
 
-router.get( "/admin/:id", protect, authorize("ADMIN"), getOrderDetails
+router.patch(
+  "/payment-status/:id",
+  protect,
+  authorize("ADMIN"),
+  updatePaymentStatusValidation,
+  validate,
+  updatePaymentStatus
 );
 
-router.patch( "/admin/:id/status", protect, authorize("ADMIN"), updateOrderStatusValidation, 
-validate ,updateOrderStatus
+router.patch(
+  "/admin/status/:id",
+  protect,
+  authorize("ADMIN"),
+  updateOrderStatusValidation,
+  validate,
+  updateOrderStatus
 );
 
+router.patch(
+  "/admin/payment-status/:id",
+  protect,
+  authorize("ADMIN"),
+  updatePaymentStatusValidation,
+  validate,
+  updatePaymentStatus
+);
+
+router.patch(
+  "/admin/:id/status",
+  protect,
+  authorize("ADMIN"),
+  updateOrderStatusValidation,
+  validate,
+  updateOrderStatus
+);
+
+router.patch(
+  "/admin/:id/payment-status",
+  protect,
+  authorize("ADMIN"),
+  updatePaymentStatusValidation,
+  validate,
+  updatePaymentStatus
+);
+
+router.get("/", protect, authorize("ADMIN"), getAllOrders);
+router.get("/admin/all", protect, authorize("ADMIN"), getAllOrders);
+router.get("/admin/:id", protect, authorize("ADMIN"), getOrderDetails);
+router.get("/:id", protect, authorize("ADMIN"), getOrderDetails);
 
 export default router;

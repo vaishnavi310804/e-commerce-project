@@ -7,33 +7,38 @@ import wishlistRoutes from './src/modules/wishlist/wishlist.routes.js';
 import cartRoutes from "./src/modules/cart/cart.routes.js";
 import errorHandler from "./src/middleware/error.middleware.js";
 import addressRoutes from "./src/modules/address/address.routes.js";
-import orderRoutes from "./src/modules/orders/order.routes.js"
+import orderRoutes from "./src/modules/orders/order.routes.js";
 import reviewRoutes from "./src/modules/reviews/review.routes.js";
+import customerRoutes from "./src/modules/customers/customer.routes.js";
+import dashboardRoutes from "./src/modules/dashboard/dashboard.routes.js";
 
-const app=express();
+const app = express();
 
 await db();
 
-app.use(cors())
+app.use(cors());
 app.use(express.json());
 
 app.use("/api/v1/category", categoryRoutes);
 app.use("/api/v1/product", productRoutes);
-app.use("/api/v1/wishlist", wishlistRoutes)
+app.use("/api/v1/wishlist", wishlistRoutes);
 app.use("/api/v1/cart", cartRoutes);
-app.use("/api/v1/address", addressRoutes)
-app.use("/api/v1/order", orderRoutes)
+app.use("/api/v1/address", addressRoutes);
+app.use("/api/v1/order", orderRoutes);
+app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/reviews", reviewRoutes);
+app.use("/api/v1/customers", customerRoutes);
+app.use("/api/v1/customer", customerRoutes);
+app.use("/api/v1/dashboard", dashboardRoutes);
 
+app.get("/", (req, res) => {
+  res.send("API running");
+});
 
-app.get("/",(req,res)=>{
-   res.send("API running")
-  }); 
-
-  app.use(errorHandler);
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5001;
 
-app.listen(PORT,()=>{
-    console.log(`Server running successfully on ${PORT}`)
-})
+app.listen(PORT, () => {
+  console.log(`Server running successfully on ${PORT}`);
+});

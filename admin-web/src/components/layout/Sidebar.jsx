@@ -6,6 +6,7 @@ import {
   FaLayerGroup,
   FaShoppingCart,
   FaUsers,
+  FaStar,
   FaCog,
 } from "react-icons/fa";
 
@@ -44,6 +45,12 @@ const Sidebar = () => {
         />
 
         <SidebarItem
+          icon={FaStar}
+          title="Reviews"
+          path="/reviews"
+        />
+
+        <SidebarItem
           icon={FaCog}
           title="Settings"
           path="/settings"
@@ -53,4 +60,4 @@ const Sidebar = () => {
   );
 }
 
-export default Sidebar
+export default Sidebar;

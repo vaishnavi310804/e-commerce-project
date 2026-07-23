@@ -1,38 +1,30 @@
-import { useEffect, useState } from "react";
-import {
-  FlatList,
-  View,
-} from "react-native";
-import {
-  Category,
-  getCategories,
-} from "@/src/api/category.api";
+import React, { useEffect, useState } from "react";
+import { FlatList, StyleSheet, View } from "react-native";
+import {Category,getCategories} from "@/src/api/category.api";
 import CategoryItem from "./CategoryItem";
 import SectionHeader from "./SectionHeader";
 
-export default function CategorySection() {
-  const [categories, setCategories] =
-    useState<Category[]>([]);
+const CategorySection = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
     fetchCategories();
   }, []);
 
- const fetchCategories = async () => {
-  try {
-    const response = await getCategories();
+  const fetchCategories = async () => {
+    try {
+      const response = await getCategories();
 
-    console.log("Category API Response:", response);
-    console.log("Categories:", response.data);
+      setCategories(response.data ?? []);
+    } catch (error) {
+      console.log("Category Error:", error);
+    }
+  };
 
-    setCategories(response.data ?? []);
-  } catch (error) {
-    console.log("Category Error:", error);
-  }
-};
-console.log("Categories State:", categories);
+  console.log("Categories State:", categories);
+
   return (
-    <View className="mt-2">
+    <View style={styles.container}>
       <SectionHeader
         title="Categories"
         onSeeAll={() => {}}
@@ -43,9 +35,7 @@ console.log("Categories State:", categories);
         data={categories}
         keyExtractor={(item) => item._id}
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingHorizontal: 20,
-        }}
+        contentContainerStyle={styles.listContent}
         renderItem={({ item }) => (
           <CategoryItem
             item={item}
@@ -55,4 +45,16 @@ console.log("Categories State:", categories);
       />
     </View>
   );
-}
+};
+
+export default CategorySection;
+
+const styles = StyleSheet.create({
+  container: {
+    marginTop: 8,
+  },
+  listContent: {
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+  },
+});

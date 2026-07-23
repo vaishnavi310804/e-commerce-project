@@ -8,7 +8,7 @@ const router = express.Router()
 
 router.post("/add/:productId", protect, addToCart)
 
-router.get("/get", protect, getCart);
+router.get("/", protect, getCart);
 
 router.patch("/update/:productId", protect, updateCartValidation, validate, updateCart)
 

@@ -58,7 +58,7 @@ export default BannerCarousel;
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 15,
+    marginTop: 10,
   },
 
   bannerWrapper: {
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   pagination: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 14,
+    marginTop: 2,
   },
 
   dot: {

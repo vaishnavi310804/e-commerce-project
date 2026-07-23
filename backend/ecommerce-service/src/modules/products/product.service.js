@@ -8,6 +8,7 @@ export const createProductService = async (productData, file) => {
     name,
     description,
     price,
+    brand,
     category,
     stock,
     isFeatured,
@@ -30,9 +31,15 @@ export const createProductService = async (productData, file) => {
     throw new Error("Product already exists.");
   }
 
+  const parsedDiscountPrice =
+    discountPrice !== undefined && discountPrice !== ""
+      ? Number(discountPrice)
+      : 0;
+  const parsedPrice = Number(price);
+
   if (
-    discountPrice !== undefined &&
-    Number(discountPrice) >= Number(price)
+    parsedDiscountPrice > 0 &&
+    parsedDiscountPrice >= parsedPrice
   ) {
     throw new Error("Discount price must be less than the original price.");
   }
@@ -54,12 +61,13 @@ export const createProductService = async (productData, file) => {
     name,
     slug,
     description,
-    price,
+    price: parsedPrice,
+    brand,
     category,
     productImage,
-    stock,
-    isFeatured,
-    discountPrice,
+    stock: Number(stock),
+    isFeatured: isFeatured === "true" || isFeatured === true,
+    discountPrice: parsedDiscountPrice,
   });
 
   return product;
@@ -132,21 +140,27 @@ export const updateProductService = async (productId, productData, file) => {
   }
 
   const price =
-    updateData.price !== undefined
+    updateData.price !== undefined && updateData.price !== ""
       ? Number(updateData.price)
       : Number(existingProduct.price);
 
   const discountPrice =
-    updateData.discountPrice !== undefined
+    updateData.discountPrice !== undefined && updateData.discountPrice !== ""
       ? Number(updateData.discountPrice)
-      : Number(existingProduct.discountPrice);
+      : Number(existingProduct.discountPrice || 0);
 
   if (
     updateData.discountPrice !== undefined &&
+    discountPrice > 0 &&
     discountPrice >= price
   ) {
     throw new Error("Discount price must be less than the original price.");
   }
+
+  if (updateData.price !== undefined) updateData.price = price;
+  if (updateData.discountPrice !== undefined) updateData.discountPrice = discountPrice;
+  if (updateData.stock !== undefined) updateData.stock = Number(updateData.stock);
+
   if (file) {
     // Delete previous image
     if (existingProduct.productImage?.public_id) {

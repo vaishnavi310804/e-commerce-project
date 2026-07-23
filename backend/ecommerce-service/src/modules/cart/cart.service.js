@@ -15,7 +15,6 @@ export const addToCartService = async (userId, productId) => {
   }
 
   let cart = await Cart.findOne({ user: userId });
-
   if (!cart) {
     cart = await Cart.create({
       user: userId,
@@ -69,7 +68,7 @@ export const getCartService = async (userId) => {
   const items = cart.items.map((item) => {
     const product = item.product;
 
-    if (!product) return null;
+    if (!product|| !product.isActive) return null;
 
     const price = product.discountPrice || product.price;
     const itemTotal = price * item.quantity;
@@ -101,7 +100,6 @@ export const updateCartService = async (
   if (!cart) {
     throw new Error("Cart not found.");
   }
-
   const item = cart.items.find(
     (item) => item.product.toString() === productId
   );
@@ -125,7 +123,11 @@ export const updateCartService = async (
   }
   item.quantity = quantity;
   await cart.save();
-  return cart;
+  const updatedCart = await Cart.findOne({user:userId}).populate({
+    path:"items.product",
+    select:"name brand price discountPrice stock productImage isActive"
+  })
+  return updatedCart;
 };
 
 export const removeFromCartService = async (userId, productId) => {

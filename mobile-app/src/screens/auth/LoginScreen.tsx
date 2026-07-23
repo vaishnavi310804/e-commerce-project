@@ -68,7 +68,7 @@ export default function LoginScreen() {
       await SecureStore.setItemAsync("authUser", JSON.stringify(user));
 
       setAuthToken(accessToken);
-      router.replace("/(tabs)/home");
+      router.replace("/(tabs)");
     } catch (err) {
       const message = getErrorMessage(err);
       setError(message);

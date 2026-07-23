@@ -14,7 +14,7 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
     category: "",
     brand: "",
     price: "",
-    discount: "",
+    discountPrice: "",
     stock: "",
     featured: false,
     trending: false,
@@ -28,6 +28,7 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
     images: [],
   });
 
+  // Fetch categories when modal opens
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -52,7 +53,7 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
         category: product.category?._id || product.category || "",
         brand: product.brand || "",
         price: product.price ?? "",
-        discount: product.discount ?? "",
+        discountPrice: product.discountPrice ?? "",
         stock: product.stock ?? "",
         featured: !!product.featured,
         trending: !!product.trending,
@@ -60,7 +61,7 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
         images: [],
       });
       setPreview({
-        image: product.image?.url || null,
+        image: product.productImage?.url || product.image?.url || null,
         images: product.images?.map((img) => img.url) || [],
       });
     } else {
@@ -70,7 +71,7 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
         category: "",
         brand: "",
         price: "",
-        discount: "",
+        discountPrice: "",
         stock: "",
         featured: false,
         trending: false,
@@ -116,7 +117,7 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
       category: "",
       brand: "",
       price: "",
-      discount: "",
+      discountPrice: "",
       stock: "",
       featured: false,
       trending: false,
@@ -140,6 +141,13 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
       alert("Price is required.");
       return false;
     }
+    if (
+      formData.discountPrice !== "" &&
+      Number(formData.discountPrice) >= Number(formData.price)
+    ) {
+      alert("Discount price must be less than original price.");
+      return false;
+    }
     return true;
   };
 
@@ -152,7 +160,7 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
       if (key === "images") {
         value.forEach((file) => payload.append("images", file));
       } else if (key === "image") {
-        if (value) payload.append("image", value);
+        if (value) payload.append("productImage", value);
       } else {
         payload.append(key, value);
       }
@@ -180,6 +188,7 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl bg-white shadow-xl">
+        {/* Header */}
         <div className="flex items-center justify-between border-b px-6 py-4">
           <h2 className="text-xl font-semibold text-gray-800">
             {product ? "Edit Product" : "Add Product"}
@@ -193,8 +202,10 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
           </button>
         </div>
 
+        {/* Form Container with vertical scroll */}
         <form onSubmit={handleSubmit} className="flex flex-1 flex-col overflow-hidden">
           <div className="flex-1 overflow-y-auto p-6 space-y-5">
+            {/* Product Name */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
                 Product Name
@@ -210,6 +221,7 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
               />
             </div>
 
+            {/* Description */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
                 Description
@@ -225,6 +237,7 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
               />
             </div>
 
+            {/* Category Dropdown */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
                 Category
@@ -234,6 +247,7 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
                 value={formData.category}
                 onChange={handleChange}
                 className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                required
               >
                 <option value="">Select category</option>
                 {categories.map((cat) => (
@@ -244,6 +258,7 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
               </select>
             </div>
 
+            {/* Brand */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
                 Brand
@@ -258,6 +273,7 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
               />
             </div>
 
+            {/* Price & Discount Price Side by Side */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-700">
@@ -276,19 +292,20 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
 
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-700">
-                  Discount (%)
+                  Discount Price
                 </label>
                 <input
                   type="number"
-                  name="discount"
-                  value={formData.discount}
+                  name="discountPrice"
+                  value={formData.discountPrice}
                   onChange={handleChange}
-                  placeholder="0"
+                  placeholder="0.00"
                   className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
                 />
               </div>
             </div>
 
+            {/* Stock */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
                 Stock
@@ -300,9 +317,11 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
                 onChange={handleChange}
                 placeholder="0"
                 className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                required
               />
             </div>
 
+            {/* Featured & Trending Checkboxes */}
             <div className="flex items-center gap-8 py-1">
               <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-gray-700">
                 <input
@@ -327,6 +346,7 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
               </label>
             </div>
 
+            {/* Primary Image */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
                 Primary Image
@@ -346,6 +366,7 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
               />
             </div>
 
+            {/* Gallery Images */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
                 Gallery Images
@@ -372,6 +393,7 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
             </div>
           </div>
 
+          {/* Footer Action Buttons */}
           <div className="flex justify-end gap-3 border-t bg-white px-6 py-4">
             <button
               type="button"

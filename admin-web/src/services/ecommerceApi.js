@@ -3,9 +3,6 @@ import api from "./api";
 
 const ecommerceApi = axios.create({
   baseURL: "http://localhost:5001/api/v1",
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
 ecommerceApi.interceptors.request.use((config) => {
@@ -18,42 +15,71 @@ ecommerceApi.interceptors.request.use((config) => {
   return config;
 });
 
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 ecommerceApi.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return ecommerceApi(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
 
       try {
         const refreshToken = localStorage.getItem("refreshToken");
-        console.log("Refresh Token from LocalStorage:", refreshToken);
         const response = await api.post("/refresh-token", {
           refreshToken,
         });
-        console.log(response.data);
 
-        const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data.data;
+        const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+          response.data.data;
 
         localStorage.setItem("accessToken", newAccessToken);
         localStorage.setItem("refreshToken", newRefreshToken);
 
+        ecommerceApi.defaults.headers.common["Authorization"] = `Bearer ${newAccessToken}`;
+        api.defaults.headers.common["Authorization"] = `Bearer ${newAccessToken}`;
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
+        processQueue(null, newAccessToken);
         return ecommerceApi(originalRequest);
       } catch (err) {
+        processQueue(err, null);
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
-
-        window.location.href = "/login";
-
+        window.location.href = "/";
         return Promise.reject(err);
+      } finally {
+        isRefreshing = false;
       }
     }
 
     return Promise.reject(error);
-  },
+  }
 );
 
 export default ecommerceApi;

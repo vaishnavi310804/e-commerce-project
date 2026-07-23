@@ -44,7 +44,7 @@ const handleCompleteProfile = async () => {
 
     await updateProfile(formData);
 
-    router.replace("/(tabs)/home");
+    router.replace("/(tabs)");
   } catch (error) {
     console.error("Profile update failed:", error);
   }

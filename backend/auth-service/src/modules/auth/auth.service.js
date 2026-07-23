@@ -117,10 +117,6 @@ export const refreshTokenService = async (refreshToken) => {
     throw new Error("User not found.");
   }
 
-  if (user.refreshToken !== refreshToken) {
-    throw new Error("Invalid refresh token.");
-  }
-
   const newAccessToken = generateAccessToken(user);
   const newRefreshToken = generateRefreshToken(user);
 

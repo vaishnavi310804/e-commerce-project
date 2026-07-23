@@ -4,7 +4,6 @@ import DashboardLayout from "../../layouts/DashboardLayout";
 import SearchBar from "../../components/common/SearchBar";
 import ProductTable from "../../components/products/ProductTable";
 import ProductModel from "../../components/products/ProductModel";
-
 import {
   getAllProducts,
   updateProductStatus,
@@ -21,16 +20,17 @@ const Products = () => {
   const [statusFilter, setStatusFilter] = useState("active");
 
   const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      const response = await getAllProducts();
-      setProducts(response.data);
-    } catch (error) {
-      console.error("Failed to fetch products:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    setLoading(true);
+    const response = await getAllProducts();
+    console.log("Response:", response);
+    setProducts(response.data);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchProducts();

@@ -10,14 +10,11 @@ const router = express.Router();
 
 router.post('/create',protect, authorize("ADMIN"), upload.single("productImage"), createProductValidation , validate, createProduct);
 
-router.get('/getAll', getAllProducts);
+router.get('/', getAllProducts);
 
-router.get(
-  "/admin/getAll", protect, authorize("ADMIN"),
-  getAllProductsAdmin
-);
+router.get( "/admin/getAll", protect, authorize("ADMIN"), getAllProductsAdmin );
 
-router.get('/get/:id', getProductById);
+router.get('/:id', getProductById);
 
 router.put('/update/:id',protect, authorize("ADMIN"), upload.single("productImage"),  updateProductValidation, validate, updateProduct);
 

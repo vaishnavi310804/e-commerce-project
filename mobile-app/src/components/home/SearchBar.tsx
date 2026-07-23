@@ -3,8 +3,7 @@ import {
   Pressable,
   StyleSheet,
   TextInput,
-  View,
-} from "react-native";
+  View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/src/constants/colors";
 import Fonts from "@/src/constants/fonts";
@@ -30,7 +29,7 @@ const SearchBar = ({
       >
         <Ionicons
           name="search"
-          size={22}
+          size={20}
           color={Colors.gray}
         />
 
@@ -49,7 +48,7 @@ const SearchBar = ({
       >
         <Ionicons
           name="options-outline"
-          size={22}
+          size={20}
           color={Colors.primary}
         />
       </Pressable>
@@ -70,7 +69,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flex: 1,
     backgroundColor: Colors.white,
-    height: 55,
+    height: 45,
     borderRadius: 28,
     flexDirection: "row",
     alignItems: "center",
@@ -96,15 +95,13 @@ const styles = StyleSheet.create({
   },
 
   filterButton: {
-    width: 55,
-    height: 55,
+    width: 45,
+    height: 45,
     marginLeft: 12,
-    borderRadius: 28,
+    borderRadius: 30,
     backgroundColor: Colors.white,
-
     justifyContent: "center",
     alignItems: "center",
-
     shadowColor: "#000",
     shadowOpacity: 0.08,
     shadowRadius: 8,
@@ -112,7 +109,6 @@ const styles = StyleSheet.create({
       width: 0,
       height: 3,
     },
-
     elevation: 4,
   },
 });

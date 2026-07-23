@@ -1,15 +1,5 @@
 import React, { useRef, useState } from "react";
-import {
-  Dimensions,
-  FlatList,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-} from "react-native";
+import { Dimensions, FlatList, Image, StyleSheet, Text, TouchableOpacity, View, NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import { useRouter } from "expo-router";
 import ScreenWrapper from "@/src/components/common/ScreenWrapper";
 import PageDots from "@/src/components/onboarding/PageDots";
@@ -71,12 +61,12 @@ export default function OnboardingScreen() {
         data={onboardingData}
         horizontal
         pagingEnabled
+        scrollEnabled={false}
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={handleScroll}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={[styles.page, { width }]}>
-            {/* Skip */}
             <TouchableOpacity
               style={styles.skipButton}
               onPress={handleSkip}
@@ -84,7 +74,6 @@ export default function OnboardingScreen() {
               <Text style={styles.skipText}>Skip</Text>
             </TouchableOpacity>
 
-            {/* Image */}
             <View style={styles.imageContainer}>
               <Image
                 source={item.image}

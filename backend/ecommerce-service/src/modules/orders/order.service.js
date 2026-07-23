@@ -1,151 +1,29 @@
 import Order from "./order.model.js";
-import Address from "../address/address.model.js";
-import Cart from "../cart/cart.model.js";
-import Product from "../products/product.model.js";
 
-export const createOrderService = async (userId, addressId, paymentMethod) => {
-  const cart = await Cart.findOne({ user: userId }).populate("items.product");
+export const getAllOrdersService = async (query = {}) => {
+  const filter = {};
 
-  if (!cart || cart.items.length === 0) {
-    throw new Error("Cart is empty.");
+  if (query.orderStatus) {
+    filter.orderStatus = query.orderStatus;
+  }
+  if (query.paymentStatus) {
+    filter.paymentStatus = query.paymentStatus;
   }
 
-  const address = await Address.findOne({
-    _id: addressId,
-    user: userId,
-  });
-
-  if (!address) {
-    throw new Error("Address not found.");
-  }
-  let totalAmount = 0;
-  const orderItems = [];
-
-  for (const item of cart.items) {
-    const product = item.product;
-
-    if (!product) {
-      throw new Error("Product not found.");
-    }
-
-    if (!product.isActive) {
-      throw new Error(`${product.name} not available.`);
-    }
-
-    if (product.stock < item.quantity) {
-      throw new Error(`Only ${product.stock} ${product.name} left in stock.`);
-    }
-    const price = product.discountPrice || product.price;
-
-    totalAmount += price * item.quantity;
-
-    orderItems.push({
-      product: product._id,
-      quantity: item.quantity,
-      price,
-    });
-  }
-  const order = await Order.create({
-    user: userId,
-    items: orderItems,
-    address: addressId,
-    totalAmount,
-    paymentMethod,
-    paymentStatus: "Pending",
-    orderStatus: "Placed",
-
-    orderStatusHistory: [
-      {
-        status: "Placed",
-      },
-    ],
-  });
-  for (const item of cart.items) {
-    item.product.stock -= item.quantity;
-    await item.product.save();
-  }
-  cart.items = [];
-  await cart.save();
-
-  return order;
-};
-
-export const getMyOrdersService = async (userId) => {
-  const orders = await Order.find({ user: userId })
+  return await Order.find(filter)
+    .populate("user", "fullName email name")
     .populate("address")
-    .populate("items.product", "name productImage")
-    .sort({ createdAt: -1 });
-
-  return orders;
-};
-
-export const getOrderByIdService = async (userId, orderId) => {
-  const order = await Order.findOne({
-    _id: orderId,
-    user: userId,
-  })
-    .populate("address")
-    .populate("items.product", "name productImage price discountPrice slug");
-
-  if (!order) {
-    throw new Error("Order not found.");
-  }
-
-  return order;
-};
-
-export const cancelOrderService = async (userId, orderId) => {
-  const order = await Order.findOne({
-    _id: orderId,
-    user: userId,
-  }).populate("items.product");
-
-  if (!order) {
-    throw new Error("Order not found.");
-  }
-  if (order.orderStatus === "Cancelled") {
-  throw new Error("Order is already cancelled.");
-}
-
-  const cancelStatus = ["Placed", "Confirmed", "Packed"];
-  if (!cancelStatus.includes(order.orderStatus)) {
-    throw new Error(`Order cannot be cancelled as it is ${order.orderStatus}.`);
-  }
-  for (const item of order.items) {
-    item.product.stock += item.quantity;
-    await item.product.save();
-  }
-
-  order.orderStatus = "Cancelled";
-  order.orderStatusHistory.push({
-    status: "Cancelled",
-  });
-
-  if (order.paymentMethod === "COD") {
-    order.paymentStatus = "Pending";
-  }
-  await order.save();
-
-  return order;
-};
-
-
-
-//Admin Services
-
-export const getAllOrdersService = async () => {
-  return await Order.find()
-    .populate("user", "name email")
-    .populate("address")
-    .populate("items.product", "name productImage")
+    .populate("products.product", "name price productImage image brand")
+    .populate("items.product", "name price productImage image brand")
     .sort({ createdAt: -1 });
 };
 
 export const getOrderDetailsService = async (orderId) => {
   const order = await Order.findById(orderId)
-    .populate("user", "name email")
+    .populate("user", "fullName email name phoneNumber")
     .populate("address")
-    .populate("items.product");
+    .populate("products.product", "name price productImage image brand")
+    .populate("items.product", "name price productImage image brand");
 
   if (!order) {
     throw new Error("Order not found.");
@@ -154,51 +32,51 @@ export const getOrderDetailsService = async (orderId) => {
   return order;
 };
 
-export const updateOrderStatusService = async (
-  orderId,
-  orderStatus
-) => {
+export const updateOrderStatusService = async (orderId, orderStatus) => {
   const order = await Order.findById(orderId);
 
   if (!order) {
     throw new Error("Order not found.");
   }
 
-  const flow = [
-    "Placed",
-    "Confirmed",
-    "Packed",
-    "Shipped",
-    "Out for Delivery",
-    "Delivered",
-  ];
-
-  if (order.orderStatus === "Cancelled") {
-    throw new Error("Cancelled orders cannot be updated.");
-  }
-
-  const currentIndex = flow.indexOf(order.orderStatus);
-  const nextIndex = flow.indexOf(orderStatus);
-
-  if (nextIndex !== currentIndex + 1) {
-    throw new Error(
-      `Order can only move to the next status. Current status is ${order.orderStatus}.`
-    );
-  }
-
   order.orderStatus = orderStatus;
 
-  order.orderStatusHistory.push({
-    status: orderStatus,
-  });
-  if (
-    orderStatus === "Delivered" &&
-    order.paymentMethod === "COD"
-  ) {
+  if (orderStatus === "Delivered" && order.paymentMethod === "COD") {
     order.paymentStatus = "Paid";
   }
 
   await order.save();
-
   return order;
+};
+
+export const updatePaymentStatusService = async (orderId, paymentStatus) => {
+  const order = await Order.findById(orderId);
+
+  if (!order) {
+    throw new Error("Order not found.");
+  }
+
+  order.paymentStatus = paymentStatus;
+  await order.save();
+  return order;
+};
+
+export const getOrderStatsService = async () => {
+  const orders = await Order.find();
+
+  const totalOrders = orders.length;
+  const pendingOrders = orders.filter((o) => o.orderStatus === "Pending" || o.orderStatus === "Placed").length;
+  const deliveredOrders = orders.filter((o) => o.orderStatus === "Delivered").length;
+  const cancelledOrders = orders.filter((o) => o.orderStatus === "Cancelled").length;
+  const totalRevenue = orders
+    .filter((o) => o.paymentStatus === "Paid")
+    .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+
+  return {
+    totalOrders,
+    pendingOrders,
+    deliveredOrders,
+    cancelledOrders,
+    totalRevenue,
+  };
 };

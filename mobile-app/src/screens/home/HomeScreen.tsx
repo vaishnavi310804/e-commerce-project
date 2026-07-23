@@ -9,6 +9,7 @@ import CategorySection from "@/src/components/home/CategorySection";
 import { getCurrentUser, AuthUser } from "@/src/api/auth.api";
 import { router } from "expo-router";
 import { Address, getDefaultAddress } from "@/src/api/address.api";
+import BestSellerSection from "@/src/components/home/BestSellerSection";
 
 const HomeScreen = () => {
   const [search, setSearch] = useState("");
@@ -22,10 +23,8 @@ const HomeScreen = () => {
   const fetchData = async () => {
   try {
     const userRes = await getCurrentUser();
-    console.log("User:", userRes);
 
     const addressRes = await getDefaultAddress();
-    console.log("Address:", addressRes);
 
     setUser(userRes.data ?? null);
     setAddress(addressRes.data ?? null);
@@ -57,6 +56,7 @@ const HomeScreen = () => {
 
         <BannerCarousel />
         <CategorySection />
+        <BestSellerSection/>
       </ScrollView>
     </ScreenWrapper>
   );
