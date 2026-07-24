@@ -10,8 +10,8 @@ export const addressValidation = [
     .trim()
     .notEmpty()
     .withMessage("Phone number is required.")
-    .isMobilePhone("en-IN")
-    .withMessage("Invalid phone number."),
+    .isLength({ min: 7, max: 15 })
+    .withMessage("Phone number must be between 7 and 15 digits."),
 
   body("addressLine1")
     .trim()
@@ -32,8 +32,8 @@ export const addressValidation = [
     .trim()
     .notEmpty()
     .withMessage("Postal code is required.")
-    .isPostalCode("IN")
-    .withMessage("Invalid postal code."),
+    .isLength({ min: 3, max: 10 })
+    .withMessage("Invalid postal code format."),
 ];
 
 export const updateAddressValidation = [
@@ -46,8 +46,8 @@ export const updateAddressValidation = [
   body("phoneNumber")
     .optional()
     .trim()
-    .isMobilePhone("en-IN")
-    .withMessage("Invalid phone number."),
+    .isLength({ min: 7, max: 15 })
+    .withMessage("Phone number must be between 7 and 15 digits."),
 
   body("addressLine1")
     .optional()
@@ -70,8 +70,8 @@ export const updateAddressValidation = [
   body("postalCode")
     .optional()
     .trim()
-    .isPostalCode("IN")
-    .withMessage("Invalid postal code."),
+    .isLength({ min: 3, max: 10 })
+    .withMessage("Invalid postal code format."),
 
   body("country")
     .optional()

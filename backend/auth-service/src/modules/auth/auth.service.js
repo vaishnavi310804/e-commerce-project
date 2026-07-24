@@ -3,14 +3,11 @@ import {
   hashPassword,
   comparePassword,
   generateAccessToken,
-  generateRefreshToken,
-  verifyRefreshToken,
   generatePasswordResetToken,
   verifyPasswordResetToken,
 } from "./auth.utils.js";
 import { generateOTP, hashOTP } from "./auth.utils.js";
 import { sendForgotPasswordOTP } from "../../services/email.service.js";
-
 
 export const registerUserService = async (userData) => {
   const { fullName, email, password, profileImage } = userData;
@@ -31,24 +28,18 @@ export const registerUserService = async (userData) => {
   });
 
   const accessToken = generateAccessToken(user);
-  const refreshToken = generateRefreshToken(user);
-
-  user.refreshToken = refreshToken;
-  await user.save();
 
   const userObject = user.toObject();
   delete userObject.password;
-  delete userObject.refreshToken;
 
   return {
     user: userObject,
     accessToken,
-    refreshToken,
   };
 };
 
 export const loginUserService = async ({ email, password }) => {
-  const user = await User.findOne({ email }).select("+password +refreshToken");
+  const user = await User.findOne({ email }).select("+password");
 
   if (!user) {
     throw new Error("Invalid email or password");
@@ -65,23 +56,15 @@ export const loginUserService = async ({ email, password }) => {
   }
 
   const accessToken = generateAccessToken(user);
-  const refreshToken = generateRefreshToken(user);
-
-  user.refreshToken = refreshToken;
-  await user.save();
 
   const userObject = user.toObject();
-
   delete userObject.password;
-  delete userObject.refreshToken;
 
   return {
     user: userObject,
     accessToken,
-    refreshToken,
   };
 };
-
 
 export const logoutUserService = async (userId) => {
   const user = await User.findById(userId);
@@ -90,43 +73,7 @@ export const logoutUserService = async (userId) => {
     throw new Error("User not found.");
   }
 
-  user.refreshToken = null;
-
-  await user.save();
-
   return true;
-};
-
-
-export const refreshTokenService = async (refreshToken) => {
-  if (!refreshToken) {
-    throw new Error("Refresh token is required.");
-  }
-
-  let decoded;
-
-  try {
-    decoded = verifyRefreshToken(refreshToken);
-  } catch (error) {
-    throw new Error("Invalid or expired refresh token.");
-  }
-
-  const user = await User.findById(decoded.id).select("+refreshToken");
-
-  if (!user) {
-    throw new Error("User not found.");
-  }
-
-  const newAccessToken = generateAccessToken(user);
-  const newRefreshToken = generateRefreshToken(user);
-
-  user.refreshToken = newRefreshToken;
-  await user.save();
-
-  return {
-    accessToken: newAccessToken,
-    refreshToken: newRefreshToken,
-  };
 };
 
 export const forgotPasswordService = async (email) => {
@@ -203,15 +150,14 @@ export const resetPasswordService = async ({
   resetToken,
   newPassword,
 }) => {
-  const decoded =
-    verifyPasswordResetToken(resetToken);
+  const decoded = verifyPasswordResetToken(resetToken);
 
   if (decoded.purpose !== "password-reset") {
     throw new Error("Invalid reset token.");
   }
 
   const user = await User.findById(decoded.id).select(
-    "+refreshToken +resetPasswordOTP +resetPasswordOTPExpires"
+    "+resetPasswordOTP +resetPasswordOTPExpires"
   );
 
   if (!user) {
@@ -221,8 +167,6 @@ export const resetPasswordService = async ({
   user.password = await hashPassword(newPassword);
   user.resetPasswordOTP = null;
   user.resetPasswordOTPExpires = null;
-
-  user.refreshToken = "";
 
   await user.save();
 };
@@ -250,50 +194,29 @@ export const updateProfileService = async (userId, body, file) => {
 };
 
 export const adminLoginService = async ({ email, password }) => {
+  const user = await User.findOne({ email }).select("+password");
 
-  console.log("Login attempt:", email);
+  if (!user) {
+    throw new Error("Invalid email or password");
+  }
 
-const user = await User.findOne({ email }).select("+password +refreshToken");
+  const isMatch = await comparePassword(password, user.password);
 
-console.log("User:", user);
+  if (!isMatch) {
+    throw new Error("Invalid email or password");
+  }
 
-if (!user) {
-  throw new Error("Invalid email or password");
-}
-
-const isMatch = await comparePassword(password, user.password);
-
-console.log("Password match:", isMatch);
-
-if (!isMatch) {
-  throw new Error("Invalid email or password");
-}
-
-console.log("Role:", user.role);
   if (user.role !== "ADMIN") {
     throw new Error("Access denied. Admins only.");
   }
 
   const accessToken = generateAccessToken(user);
-console.log("Access token generated");
-
-const refreshToken = generateRefreshToken(user);
-console.log("Refresh token generated");
-
-
-  user.refreshToken = refreshToken;
-  console.log("Saving user...");
-  await user.save();
-  console.log("User saved");
 
   const userObject = user.toObject();
-
   delete userObject.password;
-  delete userObject.refreshToken;
 
   return {
     user: userObject,
     accessToken,
-    refreshToken,
   };
 };

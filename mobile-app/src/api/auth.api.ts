@@ -1,7 +1,6 @@
 import client from "./authClient";
 import ecommerceClient from "./ecommerceClient";
 
-
 export type UserRole = "CUSTOMER" | "ADMIN";
 export type AuthUser = {
   _id: string;
@@ -30,10 +29,6 @@ export type LoginPayload = {
   password: string;
 };
 
-export type RefreshTokenPayload = {
-  refreshToken: string;
-};
-
 export type ForgotPasswordPayload = {
   email: string;
 };
@@ -58,7 +53,6 @@ export type ResetPasswordPayload = {
 
 export type AuthTokens = {
   accessToken: string;
-  refreshToken: string;
 };
 
 export type AuthData = AuthTokens & {
@@ -78,12 +72,8 @@ export type ApiResponse<T> = {
 
 export const setAuthToken = (accessToken?: string) => {
   if (accessToken) {
-    client.defaults.headers.common.Authorization =
-      `Bearer ${accessToken}`;
-
-    ecommerceClient.defaults.headers.common.Authorization =
-      `Bearer ${accessToken}`;
-
+    client.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
+    ecommerceClient.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
     return;
   }
 
@@ -107,7 +97,6 @@ export const login = async (payload: LoginPayload) => {
 };
 
 export const getCurrentUser = async (accessToken?: string) => {
-
   const { data } = await client.get<ApiResponse<AuthUser>>("/me", {
     headers: accessToken
       ? {
@@ -130,15 +119,6 @@ export const logout = async (accessToken?: string) => {
           }
         : undefined,
     }
-  );
-
-  return data;
-};
-
-export const refreshAccessToken = async (payload: RefreshTokenPayload) => {
-  const { data } = await client.post<ApiResponse<AuthTokens>>(
-    "/refresh-token",
-    payload
   );
 
   return data;
@@ -186,12 +166,11 @@ const authApi = {
   login,
   getCurrentUser,
   logout,
-  refreshAccessToken,
   forgotPassword,
   verifyResetOtp,
   resetPassword,
   setAuthToken,
-  updateProfile
+  updateProfile,
 };
 
 export default authApi;

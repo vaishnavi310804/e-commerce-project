@@ -5,9 +5,8 @@ import {
   Text,
   TouchableOpacity,
   Image,
-  ImageBackground,
-  Alert,
-} from "react-native";
+  ImageBackground,ScrollView,
+  Alert, KeyboardAvoidingView, Platform} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -61,10 +60,9 @@ export default function LoginScreen() {
         throw new Error(response.message || "Login failed.");
       }
 
-      const { accessToken, refreshToken, user } = response.data;
+      const { accessToken, user } = response.data;
 
       await SecureStore.setItemAsync("accessToken", accessToken);
-      await SecureStore.setItemAsync("refreshToken", refreshToken);
       await SecureStore.setItemAsync("authUser", JSON.stringify(user));
 
       setAuthToken(accessToken);
@@ -84,6 +82,12 @@ export default function LoginScreen() {
       statusBarStyle="light"
       backgroundColor="#F8F7FF"
     >
+      <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={20} // adjust if needed
+        >
+          <ScrollView>
       <View style={styles.container}>
         <ImageBackground
           source={require("../../../assets/images/bgimage.png")}
@@ -176,6 +180,8 @@ export default function LoginScreen() {
           </View>
         </View>
       </View>
+      </ScrollView>
+      </KeyboardAvoidingView>
     </ScreenWrapper>
   );
 }
@@ -184,6 +190,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F8F7FF",
+    flexGrow:1,
+    paddingBottom:20
   },
 
   header: {

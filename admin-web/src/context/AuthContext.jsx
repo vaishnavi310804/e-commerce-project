@@ -12,23 +12,21 @@ export function AuthProvider({ children }) {
     return localStorage.getItem("accessToken") || null;
   });
 
-  const login = (userData, accessToken, refreshToken) => {
-  localStorage.setItem("user", JSON.stringify(userData));
-  localStorage.setItem("accessToken", accessToken);
-  localStorage.setItem("refreshToken", refreshToken);
+  const login = (userData, accessToken) => {
+    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("accessToken", accessToken);
 
-  setUser(userData);
-  setToken(accessToken);
-};
+    setUser(userData);
+    setToken(accessToken);
+  };
 
   const logout = () => {
-  localStorage.removeItem("user");
-  localStorage.removeItem("accessToken");
-  localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
+    localStorage.removeItem("accessToken");
 
-  setUser(null);
-  setToken(null);
-};
+    setUser(null);
+    setToken(null);
+  };
 
   const isAuthenticated = !!token;
 

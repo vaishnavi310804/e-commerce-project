@@ -3,10 +3,14 @@ import { protect } from "../../middleware/auth.middleware.js";
 import { authorize } from "../../middleware/role.middleware.js";
 import validate from "../../middleware/validate.js";
 import {
+  createOrderValidation,
   updateOrderStatusValidation,
   updatePaymentStatusValidation,
 } from "./order.validation.js";
 import {
+  createOrder,
+  getMyOrders,
+  getMyOrderDetails,
   getAllOrders,
   getOrderDetails,
   updateOrderStatus,
@@ -16,6 +20,11 @@ import {
 
 const router = express.Router();
 
+// Customer Order Routes
+router.post("/", protect, createOrderValidation, validate, createOrder);
+router.get("/my-orders", protect, getMyOrders);
+router.get("/my-orders/:id", protect, getMyOrderDetails);
+
 router.get("/stats", protect, authorize("ADMIN"), getOrderStats);
 
 router.patch(
@@ -24,7 +33,7 @@ router.patch(
   authorize("ADMIN"),
   updateOrderStatusValidation,
   validate,
-  updateOrderStatus
+  updateOrderStatus,
 );
 
 router.patch(
@@ -33,7 +42,7 @@ router.patch(
   authorize("ADMIN"),
   updatePaymentStatusValidation,
   validate,
-  updatePaymentStatus
+  updatePaymentStatus,
 );
 
 router.patch(
@@ -42,7 +51,7 @@ router.patch(
   authorize("ADMIN"),
   updateOrderStatusValidation,
   validate,
-  updateOrderStatus
+  updateOrderStatus,
 );
 
 router.patch(
@@ -51,7 +60,7 @@ router.patch(
   authorize("ADMIN"),
   updatePaymentStatusValidation,
   validate,
-  updatePaymentStatus
+  updatePaymentStatus,
 );
 
 router.patch(
@@ -60,7 +69,7 @@ router.patch(
   authorize("ADMIN"),
   updateOrderStatusValidation,
   validate,
-  updateOrderStatus
+  updateOrderStatus,
 );
 
 router.patch(
@@ -69,7 +78,7 @@ router.patch(
   authorize("ADMIN"),
   updatePaymentStatusValidation,
   validate,
-  updatePaymentStatus
+  updatePaymentStatus,
 );
 
 router.get("/", protect, authorize("ADMIN"), getAllOrders);

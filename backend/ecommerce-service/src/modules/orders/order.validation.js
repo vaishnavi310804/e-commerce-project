@@ -1,5 +1,19 @@
 import { body } from "express-validator";
 
+export const createOrderValidation = [
+  body("addressId")
+    .notEmpty()
+    .withMessage("Address ID is required.")
+    .isMongoId()
+    .withMessage("Invalid address ID format."),
+
+  body("paymentMethod")
+    .notEmpty()
+    .withMessage("Payment method is required.")
+    .isIn(["COD", "ONLINE", "Card", "UPI"])
+    .withMessage("Invalid payment method."),
+];
+
 export const updateOrderStatusValidation = [
   body("orderStatus")
     .notEmpty()

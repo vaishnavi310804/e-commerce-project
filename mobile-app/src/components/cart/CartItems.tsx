@@ -1,51 +1,51 @@
-import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native'
-import React from 'react'
+import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
+import React from 'react';
 import { Ionicons } from "@expo/vector-icons";
 import Colors from '@/src/constants/colors';
 import Fonts from '@/src/constants/fonts';
 import { CartItem } from '@/src/api/cart.api';
 
-type CartItemsProps ={
-    item: CartItem;
-    onIncrese: ()=> void;
-    onDecrease: ()=> void;
-    onRemove: ()=> void;
-}
+type CartItemProps = {
+  item: CartItem;
+  onIncrease: () => void;
+  onDecrease: () => void;
+  onRemove: () => void;
+};
 
-const CartItems = ({item, onIncrese, onDecrease, onRemove}: CartItemsProps) => {
-    const price = item.product.discountPrice ?? item.product.price;
+const CartItems = ({ item, onIncrease, onDecrease, onRemove }: CartItemProps) => {
+  if (!item?.product) return null;
+
+  const hasDiscount = Boolean(
+    item.product.discountPrice &&
+    item.product.discountPrice > 0 &&
+    item.product.discountPrice < item.product.price
+  );
+
+  const price = hasDiscount ? item.product.discountPrice : item.product.price;
+
   return (
     <View style={styles.container}>
       <Image
-        source={{ uri: item.product.productImage.url }}
+        source={{ uri: item.product.productImage?.url }}
         style={styles.image}
         resizeMode="contain"
       />
 
       <View style={styles.details}>
-        <Text
-          style={styles.name}
-          numberOfLines={2}
-        >
+        <Text style={styles.name} numberOfLines={2}>
           {item.product.name}
         </Text>
 
         {item.product.brand ? (
-          <Text style={styles.brand}>
-            {item.product.brand}
-          </Text>
+          <Text style={styles.brand}>{item.product.brand}</Text>
         ) : null}
 
         <View style={styles.priceRow}>
-          <Text style={styles.price}>
-            ₹{price}
-          </Text>
+          <Text style={styles.price}>₹{price}</Text>
 
-          {item.product.discountPrice && (
-            <Text style={styles.oldPrice}>
-              ₹{item.product.price}
-            </Text>
-          )}
+          {hasDiscount ? (
+            <Text style={styles.oldPrice}>₹{item.product.price}</Text>
+          ) : null}
         </View>
 
         <View style={styles.bottomRow}>
@@ -53,44 +53,28 @@ const CartItems = ({item, onIncrese, onDecrease, onRemove}: CartItemsProps) => {
             <TouchableOpacity
               style={styles.qtyButton}
               onPress={onDecrease}
+              disabled={item.quantity <= 1}
             >
-              <Ionicons
-                name="remove"
-                size={18}
-                color={Colors.text}
-              />
+              <Ionicons name="remove" size={18} color={Colors.text} />
             </TouchableOpacity>
 
-            <Text style={styles.quantity}>
-              {item.quantity}
-            </Text>
+            <Text style={styles.quantity}>{item.quantity}</Text>
 
-            <TouchableOpacity
-              style={styles.qtyButton}
-              onPress={onIncrese}
-            >
-              <Ionicons
-                name="add"
-                size={18}
-                color={Colors.primary}
-              />
+            <TouchableOpacity style={styles.qtyButton} onPress={onIncrease}>
+              <Ionicons name="add" size={18} color={Colors.primary} />
             </TouchableOpacity>
           </View>
 
           <TouchableOpacity onPress={onRemove}>
-            <Ionicons
-              name="trash-outline"
-              size={22}
-              color="#EF4444"
-            />
+            <Ionicons name="trash-outline" size={22} color="#EF4444" />
           </TouchableOpacity>
         </View>
       </View>
     </View>
-  )
-}
+  );
+};
 
-export default CartItems
+export default CartItems;
 
 const styles = StyleSheet.create({
   container: {
@@ -98,8 +82,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     borderRadius: 20,
     padding: 20,
-    marginBottom: 20,
-    elevation: 2,
+    marginBottom: 10,
+    elevation: 8,
   },
 
   image: {
@@ -135,9 +119,9 @@ const styles = StyleSheet.create({
   },
 
   price: {
-    fontSize: 18,
+    fontSize: 16,
     color: Colors.primary,
-    fontFamily: Fonts.bold,
+    fontFamily: Fonts.semibold,
   },
 
   oldPrice: {
@@ -174,4 +158,4 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.semibold,
     color: Colors.text,
   },
-})
+});

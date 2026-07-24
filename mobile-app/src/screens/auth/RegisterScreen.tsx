@@ -86,10 +86,9 @@ export default function RegisterScreen() {
         throw new Error(response.message || "Registration failed.");
       }
 
-      const { accessToken, refreshToken, user } = response.data;
+      const { accessToken, user } = response.data;
 
       await SecureStore.setItemAsync("accessToken", accessToken);
-      await SecureStore.setItemAsync("refreshToken", refreshToken);
       await SecureStore.setItemAsync("authUser", JSON.stringify(user));
 
       setAuthToken(accessToken);

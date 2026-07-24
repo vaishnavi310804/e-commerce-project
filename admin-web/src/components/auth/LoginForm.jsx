@@ -45,11 +45,9 @@ const LoginForm = () => {
 
       const response = await loginUser(formData);
 
-      console.log("Login Response:", response);
+      const { user, accessToken } = response.data;
 
-      const { user, accessToken, refreshToken } = response.data;
-
-      login(user, accessToken, refreshToken);
+      login(user, accessToken);
 
       navigate("/dashboard");
     } catch (err) {

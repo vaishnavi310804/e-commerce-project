@@ -11,6 +11,7 @@ import orderRoutes from "./src/modules/orders/order.routes.js";
 import reviewRoutes from "./src/modules/reviews/review.routes.js";
 import customerRoutes from "./src/modules/customers/customer.routes.js";
 import dashboardRoutes from "./src/modules/dashboard/dashboard.routes.js";
+import PaymentRoutes from "../ecommerce-service/src/modules/payment/payment.routes.js"
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use("/api/v1/reviews", reviewRoutes);
 app.use("/api/v1/customers", customerRoutes);
 app.use("/api/v1/customer", customerRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
+app.use("/api/v1/payment", PaymentRoutes);
 
 app.get("/", (req, res) => {
   res.send("API running");

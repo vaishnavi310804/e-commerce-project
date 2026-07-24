@@ -63,7 +63,7 @@ export const getAllCustomersService = async (query = {}) => {
   ]);
 
   if (sort === "oldest") {
-    customers.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    customers.sort((a, b) => new Date(a.createdAt) - new Date(a.createdAt));
   } else if (sort === "spending") {
     customers.sort((a, b) => b.totalSpending - a.totalSpending);
   } else if (sort === "orders") {
@@ -77,7 +77,7 @@ export const getAllCustomersService = async (query = {}) => {
 
 export const getCustomerByIdService = async (customerId) => {
   const customer = await User.findOne({ _id: customerId, role: "CUSTOMER" }).select(
-    "-password -refreshToken"
+    "-password"
   );
 
   if (!customer) {

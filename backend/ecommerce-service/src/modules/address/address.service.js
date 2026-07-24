@@ -13,7 +13,7 @@ export const addAddressService = async (userId, addressData) => {
         $set: {
           isDefault: false,
         },
-      },
+      }
     );
   }
   const address = await Address.create({
@@ -63,7 +63,7 @@ export const updateAddressService = async (userId, addressId, updateData) => {
         $set: {
           isDefault: false,
         },
-      },
+      }
     );
   }
   Object.assign(address, updateData);
@@ -91,8 +91,9 @@ export const deleteAddressService = async (userId, addressId) => {
   });
 
   if (prevDefault) {
-    const nextDefault = await Address.findOne({ user: userId })
-      .sort({ createdAt: 1 });
+    const nextDefault = await Address.findOne({ user: userId }).sort({
+      createdAt: 1,
+    });
 
     if (nextDefault) {
       nextDefault.isDefault = true;
@@ -106,8 +107,14 @@ export const deleteAddressService = async (userId, addressId) => {
 };
 
 export const getDefaultAddressService = async (userId) => {
-  return await Address.findOne({
+  let address = await Address.findOne({
     user: userId,
     isDefault: true,
   });
+
+  if (!address) {
+    address = await Address.findOne({ user: userId }).sort({ createdAt: -1 });
+  }
+
+  return address;
 };

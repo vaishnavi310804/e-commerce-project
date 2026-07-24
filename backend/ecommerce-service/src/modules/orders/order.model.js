@@ -19,7 +19,7 @@ const orderItemSchema = new mongoose.Schema(
   },
   {
     _id: false,
-  }
+  },
 );
 
 const orderSchema = new mongoose.Schema(
@@ -97,17 +97,33 @@ const orderSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Address",
     },
+    razorpayOrderId: {
+      type: String,
+    },
+    razorpayPaymentId: {
+      type: String,
+    },
+    razorpaySignature: {
+      type: String,
+    },
+    paymentDate: {
+      type: Date,
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 orderSchema.pre("save", function () {
   if (!this.orderNumber) {
     this.orderNumber = `ORD-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
   }
-  if ((!this.products || this.products.length === 0) && this.items && this.items.length > 0) {
+  if (
+    (!this.products || this.products.length === 0) &&
+    this.items &&
+    this.items.length > 0
+  ) {
     this.products = this.items;
   }
 });

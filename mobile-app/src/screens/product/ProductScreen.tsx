@@ -1,14 +1,5 @@
 import react, { useEffect, useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  ActivityIndicator,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  Alert,
-} from "react-native";
+import { StyleSheet, Text, View, ActivityIndicator, ScrollView, TouchableOpacity, Image, Alert } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import ScreenWrapper from "@/src/components/common/ScreenWrapper";
 import Colors from "@/src/constants/colors";
@@ -26,9 +17,6 @@ export default function ProductScreen() {
   const [product, setProduct] = useState<Product | null>(null);
   const [isInCart, setIsInCart] = useState(false);
   const [cartLoading, setCartLoading] = useState(true);
-  useEffect(() => {
-    fetchProduct();
-  }, []);
 
   const fetchProduct = async () => {
     try {
@@ -41,26 +29,11 @@ export default function ProductScreen() {
     }
   };
 
-  if (loading) {
-    return (
-      <ScreenWrapper>
-        <ActivityIndicator size="large" color={Colors.primary} />
-      </ScreenWrapper>
-    );
-  }
-  if (!product) {
-    return (
-      <ScreenWrapper>
-        <Text>Product not found</Text>
-      </ScreenWrapper>
-    );
-  }
-
   const checkProductInCart = async () => {
     try {
       const response = await getCart();
       const exists = response.data.items.some(
-        (item: any) => item.product._id === product?._id,
+        (item: any) => item.product._id === product?._id
       );
       setIsInCart(exists);
     } catch (error) {
@@ -82,11 +55,35 @@ export default function ProductScreen() {
   };
 
   useEffect(() => {
+    if (id) {
+      fetchProduct();
+    }
+  }, [id]);
+
+  useEffect(() => {
     if (product) {
       checkProductInCart();
+    } else if (!loading) {
+      setCartLoading(false);
     }
-  }, [product]);
-if (loading || cartLoading) {
+  }, [product, loading]);
+
+  if (loading || cartLoading) {
+    return (
+      <ScreenWrapper>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </ScreenWrapper>
+    );
+  }
+
+  if (!product) {
+    return (
+      <ScreenWrapper>
+        <Text>Product not found</Text>
+      </ScreenWrapper>
+    );
+  }
+
   return (
     <ScreenWrapper>
       <View style={styles.container}>
@@ -120,6 +117,7 @@ if (loading || cartLoading) {
               resizeMode="contain"
             />
           </View>
+
           <View style={styles.infoContainer}>
             {product.brand ? (
               <Text style={styles.brand}>{product.brand}</Text>
@@ -144,9 +142,9 @@ if (loading || cartLoading) {
                 ₹{product.discountPrice ?? product.price}
               </Text>
 
-              {product.discountPrice && (
+              {Boolean(product.discountPrice && product.discountPrice < product.price) ? (
                 <Text style={styles.originalPrice}>₹{product.price}</Text>
-              )}
+              ) : null}
             </View>
 
             <View style={styles.descriptionContainer}>
@@ -156,6 +154,7 @@ if (loading || cartLoading) {
             </View>
           </View>
         </ScrollView>
+
         <View style={styles.bottomBar}>
           <TouchableOpacity
             style={styles.cartButton}
@@ -186,7 +185,6 @@ if (loading || cartLoading) {
       </View>
     </ScreenWrapper>
   );
-}
 }
 
 const styles = StyleSheet.create({
@@ -226,13 +224,13 @@ const styles = StyleSheet.create({
     height: 320,
     justifyContent: "center",
     alignItems: "center",
-    // backgroundColor:Colors.border,
   },
 
   image: {
     width: "90%",
     height: "100%",
   },
+
   infoContainer: {
     paddingHorizontal: 20,
   },
@@ -290,6 +288,7 @@ const styles = StyleSheet.create({
     color: Colors.gray,
     textDecorationLine: "line-through",
   },
+
   detailsContainer: {
     marginTop: 28,
     paddingHorizontal: 20,
@@ -297,7 +296,6 @@ const styles = StyleSheet.create({
 
   descriptionContainer: {
     marginTop: 20,
-    // paddingHorizontal: 2,
   },
 
   sectionTitle: {

@@ -2,7 +2,6 @@ import {
   registerUserService,
   loginUserService,
   logoutUserService,
-  refreshTokenService,
   forgotPasswordService,
   verifyResetOTPService,
   resetPasswordService,
@@ -10,11 +9,9 @@ import {
   adminLoginService
 } from "./auth.service.js";
 
-
 export const registerUser = async (req, res, next) => {
   try {
-    const { user, accessToken, refreshToken } =
-      await registerUserService(req.body);
+    const { user, accessToken } = await registerUserService(req.body);
 
     return res.status(201).json({
       success: true,
@@ -22,7 +19,6 @@ export const registerUser = async (req, res, next) => {
       data: {
         user,
         accessToken,
-        refreshToken,
       },
     });
   } catch (error) {
@@ -32,8 +28,7 @@ export const registerUser = async (req, res, next) => {
 
 export const loginUser = async (req, res, next) => {
   try {
-    const { user, accessToken, refreshToken } =
-      await loginUserService(req.body);
+    const { user, accessToken } = await loginUserService(req.body);
 
     return res.status(200).json({
       success: true,
@@ -41,24 +36,7 @@ export const loginUser = async (req, res, next) => {
       data: {
         user,
         accessToken,
-        refreshToken,
       },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const refreshAccessToken = async (req, res, next) => {
-  try {
-    const { refreshToken } = req.body;
-    console.log(req.body);
-    const tokens = await refreshTokenService(refreshToken);
-
-    return res.status(200).json({
-      success: true,
-      message: "Access token refreshed successfully.",
-      data: tokens,
     });
   } catch (error) {
     next(error);
@@ -116,11 +94,10 @@ export const verifyResetOTP = async (req, res, next) => {
   try {
     const { email, otp } = req.body;
 
-    const { resetToken } =
-      await verifyResetOTPService({
-        email,
-        otp,
-      });
+    const { resetToken } = await verifyResetOTPService({
+      email,
+      otp,
+    });
 
     return res.status(200).json({
       success: true,
@@ -133,7 +110,6 @@ export const verifyResetOTP = async (req, res, next) => {
     next(error);
   }
 };
-
 
 export const resetPassword = async (req, res, next) => {
   try {
@@ -175,16 +151,13 @@ export const adminLogin = async (req, res, next) => {
   try {
     const data = await adminLoginService(req.body);
 
-    console.log("Controller data:", data);
-
     return res.status(200).json({
       success: true,
       message: "Admin login successful.",
       data,
     });
   } catch (error) {
-    console.error("ADMIN LOGIN ERROR:");
-    console.error(error);
+    console.error("ADMIN LOGIN ERROR:", error);
 
     return res.status(500).json({
       success: false,

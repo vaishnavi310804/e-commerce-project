@@ -12,15 +12,30 @@ export type Address = {
   country: string;
   addressType: "Home" | "Office" | "Other";
   isDefault: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
-export type ApiResponse<T> = {
+export type CreateAddressPayload = Omit<Address, "_id" | "createdAt" | "updatedAt">;
+
+export interface ApiResponse<T> {
   success: boolean;
+  data: T;
   message?: string;
-  data?: T;
-};
+  count?: number;
+}
 
 export const getDefaultAddress = async () => {
   const { data } = await client.get<ApiResponse<Address>>("/address/default");
   return data;
+};
+
+export const getAddresses = async () => {
+  const response = await client.get<ApiResponse<Address[]>>("/address/get");
+  return response.data;
+};
+
+export const addAddress = async (data: CreateAddressPayload) => {
+  const response = await client.post<ApiResponse<Address>>("/address", data);
+  return response.data;
 };

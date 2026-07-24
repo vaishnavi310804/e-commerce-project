@@ -23,7 +23,7 @@ export const protect = async (req, res, next) => {
       });
     }
 
-    const user = await User.findById(decoded.id).select("-password -refreshToken");
+    const user = await User.findById(decoded.id).select("-password");
 
     if (!user) {
       return res.status(401).json({
@@ -49,26 +49,4 @@ export const protect = async (req, res, next) => {
       message: "Invalid or expired token.",
     });
   }
-};
-
-export const refreshTokenService = async (refreshToken) => {
-  if (!refreshToken) {
-    throw new Error("Refresh token is required.");
-  }
-  const decoded = verifyRefreshToken(refreshToken);
-  const user = await User.findById(decoded.id).select("+refreshToken");
-  if (!user) {
-    throw new Error("User not found.");
-  }
-  if (user.refreshToken !== refreshToken) {
-    throw new Error("Invalid refresh token.");
-  }
-  const newAccessToken = generateAccessToken(user);
-  const newRefreshToken = generateRefreshToken(user);
-  user.refreshToken = newRefreshToken;
-  await user.save();
-  return {
-    accessToken: newAccessToken,
-    refreshToken: newRefreshToken,
-  };
 };

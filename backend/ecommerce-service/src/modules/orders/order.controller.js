@@ -1,10 +1,51 @@
 import {
+  createOrderService,
+  getMyOrdersService,
+  getMyOrderDetailsService,
   getAllOrdersService,
   getOrderDetailsService,
   updateOrderStatusService,
   updatePaymentStatusService,
   getOrderStatsService,
 } from "./order.service.js";
+
+export const createOrder = async (req, res, next) => {
+  try {
+    const order = await createOrderService(req.user._id, req.body);
+    return res.status(201).json({
+      success: true,
+      message: "Order placed successfully.",
+      data: order,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getMyOrders = async (req, res, next) => {
+  try {
+    const orders = await getMyOrdersService(req.user._id);
+    return res.status(200).json({
+      success: true,
+      count: orders.length,
+      data: orders,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getMyOrderDetails = async (req, res, next) => {
+  try {
+    const order = await getMyOrderDetailsService(req.user._id, req.params.id);
+    return res.status(200).json({
+      success: true,
+      data: order,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const getAllOrders = async (req, res, next) => {
   try {
