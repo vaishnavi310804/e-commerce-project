@@ -20,7 +20,6 @@ import {
 
 const router = express.Router();
 
-// Customer Order Routes
 router.post("/", protect, createOrderValidation, validate, createOrder);
 router.get("/my-orders", protect, getMyOrders);
 router.get("/my-orders/:id", protect, getMyOrderDetails);

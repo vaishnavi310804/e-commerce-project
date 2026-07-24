@@ -81,8 +81,15 @@ export const createOrderService = async (userId, payload) => {
     address: addressDoc._id,
   });
 
-  cart.items = [];
-  await cart.save();
+  await Cart.findOneAndUpdate(
+  { user: userId },
+  {
+    $set: {
+      items: [],
+    },
+  },
+  { new: true }
+);
 
   return await Order.findById(order._id)
     .populate("user", "fullName email phoneNumber")

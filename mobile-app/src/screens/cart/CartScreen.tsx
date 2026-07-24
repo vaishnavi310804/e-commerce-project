@@ -1,28 +1,41 @@
-import { StyleSheet, Text, View, FlatList, ActivityIndicator, TouchableOpacity, Alert } from "react-native";
-import React, { useEffect, useState } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  ActivityIndicator,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
+import React, { useState, useEffect, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import ScreenWrapper from "@/src/components/common/ScreenWrapper";
-import { getCart, CartData,updateCart, removeFromCart,} from "@/src/api/cart.api";
+import {
+  getCart,
+  CartData,
+  updateCart,
+  removeFromCart,
+} from "@/src/api/cart.api";
 import { getDefaultAddress, Address } from "@/src/api/address.api";
 import Colors from "@/src/constants/colors";
 import CartItems from "@/src/components/cart/CartItems";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import Fonts from "@/src/constants/fonts";
 import PriceDetails from "@/src/components/cart/PriceDetails";
 import ShippingAddressCard from "@/src/components/cart/ShippingAddressCard";
 
 const CartScreen = () => {
+  const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState<CartData | null>(null);
   const [address, setAddress] = useState<Address | null>(null);
 
-  useEffect(() => {
-    fetchCartAndAddress();
-  }, []);
-
-  const fetchCartAndAddress = async () => {
+  const fetchCartAndAddress = async (showLoadingSpinner = false) => {
     try {
-      setLoading(true);
+      if (showLoadingSpinner) {
+        setLoading(true);
+      }
       const [cartRes, addressRes] = await Promise.allSettled([
         getCart(),
         getDefaultAddress(),
@@ -37,11 +50,17 @@ const CartScreen = () => {
         setAddress(null);
       }
     } catch (error) {
-      console.log(error);
+      console.log("Error fetching cart/address:", error);
     } finally {
       setLoading(false);
     }
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchCartAndAddress(false);
+    }, []),
+  );
 
   const handleFetchCart = async () => {
     try {
@@ -52,7 +71,7 @@ const CartScreen = () => {
     }
   };
 
-  if (loading) {
+  if (loading && !cart) {
     return (
       <ScreenWrapper>
         <ActivityIndicator size="large" color={Colors.primary} />
@@ -100,17 +119,24 @@ const CartScreen = () => {
         "Please add a shipping address before proceeding to checkout.",
         [
           { text: "Cancel", style: "cancel" },
-          { text: "Add Address", onPress: () => router.push("/address") },
-        ]
+          {
+            text: "Add Address",
+            onPress: () => router.push("/address"),
+          },
+        ],
       );
       return;
     }
+    router.push({
+      pathname: "/payment-method",
+      params: { addressId: address._id },
+    });
   };
 
   const rawSubtotal = cart?.items
     ? cart.items.reduce(
         (sum, item) => sum + (item.product?.price || 0) * item.quantity,
-        0
+        0,
       )
     : 0;
 
@@ -156,9 +182,7 @@ const CartScreen = () => {
               item.product?._id &&
               handleDecrease(item.product._id, item.quantity)
             }
-            onRemove={() =>
-              item.product?._id && handleRemove(item.product._id)
-            }
+            onRemove={() => item.product?._id && handleRemove(item.product._id)}
           />
         )}
         ListEmptyComponent={
