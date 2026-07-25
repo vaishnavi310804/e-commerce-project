@@ -51,6 +51,10 @@ const EmailChangeScreen = () => {
     const axiosError = err as AxiosError<ApiErrorResponse>;
     const validationMessage = axiosError.response?.data?.errors?.[0]?.msg;
 
+    if (axiosError.message === "Network Error" || axiosError.code === "ERR_NETWORK") {
+      return "Network connection error. Please check your internet connection or server availability and try again.";
+    }
+
     return (
       validationMessage ||
       axiosError.response?.data?.message ||

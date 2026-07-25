@@ -81,8 +81,9 @@ export type ApiResponse<T> = {
 
 export const setAuthToken = (accessToken?: string) => {
   if (accessToken) {
-    client.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
-    ecommerceClient.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
+    const cleanToken = accessToken.replace(/^"|"$/g, "").trim();
+    client.defaults.headers.common.Authorization = `Bearer ${cleanToken}`;
+    ecommerceClient.defaults.headers.common.Authorization = `Bearer ${cleanToken}`;
     return;
   }
 
@@ -163,7 +164,10 @@ export const resetPassword = async (payload: ResetPasswordPayload) => {
 export const sendEmailChangeOtp = async (payload: SendEmailChangeOtpPayload) => {
   const { data } = await client.post<ApiResponse<ForgotPasswordData>>(
     "/send-email-change-otp",
-    payload
+    {
+      email: payload.email,
+      newEmail: payload.email,
+    }
   );
 
   return data;
@@ -174,7 +178,11 @@ export const verifyEmailChangeOtp = async (
 ) => {
   const { data } = await client.post<ApiResponse<undefined>>(
     "/verify-email-change-otp",
-    payload
+    {
+      email: payload.email,
+      newEmail: payload.email,
+      otp: payload.otp,
+    }
   );
 
   return data;
