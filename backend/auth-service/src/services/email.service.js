@@ -1,6 +1,5 @@
 import nodemailer from "nodemailer";
 
-
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: Number(process.env.EMAIL_PORT),
@@ -11,28 +10,41 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+transporter.verify((err, success) => {
+  if (err) {
+    console.error("SMTP VERIFY ERROR:", err);
+  } else {
+    console.log("SMTP READY");
+  }
+});
 
 export const sendEmail = async ({ to, subject, html }) => {
-  await transporter.sendMail({
-    from: process.env.EMAIL_FROM,
-    to,
-    subject,
-    html,
-  });
-};
+  if (!process.env.EMAIL_HOST || !process.env.EMAIL_USER) {
+    throw new Error("Email service is not configured.");
+  }
 
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error("Email connection timed out")), 5000)
+  );
+
+  await Promise.race([
+    transporter.sendMail({
+      from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+      to,
+      subject,
+      html,
+    }),
+    timeoutPromise,
+  ]);
+};
 
 export const sendForgotPasswordOTP = async (email, otp) => {
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin:auto;">
       <h2>Reset Your Password</h2>
-
       <p>Hello,</p>
-
       <p>We received a request to reset your ShopEase account password.</p>
-
       <p>Your One-Time Password (OTP) is:</p>
-
       <h1 style="
           text-align:center;
           background:#f5f5f5;
@@ -41,13 +53,9 @@ export const sendForgotPasswordOTP = async (email, otp) => {
       ">
         ${otp}
       </h1>
-
       <p>This OTP is valid for <strong>10 minutes</strong>.</p>
-
       <p>If you didn't request a password reset, you can safely ignore this email.</p>
-
       <br>
-
       <p>Regards,</p>
       <p><strong>ShopEase Team</strong></p>
     </div>
@@ -64,13 +72,9 @@ export const sendEmailChangeOTP = async (email, otp) => {
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin:auto;">
       <h2>Verify Your New Email Address</h2>
-
       <p>Hello,</p>
-
       <p>We received a request to change the email address associated with your ShopEase account.</p>
-
       <p>Please use the following One-Time Password (OTP) to verify your new email:</p>
-
       <h1 style="
           text-align:center;
           background:#f5f5f5;
@@ -79,13 +83,9 @@ export const sendEmailChangeOTP = async (email, otp) => {
       ">
         ${otp}
       </h1>
-
       <p>This OTP is valid for <strong>10 minutes</strong>.</p>
-
       <p>If you didn't request this email change, please ignore this email. Your account will remain unchanged unless the OTP is verified.</p>
-
       <br>
-
       <p>Regards,</p>
       <p><strong>ShopEase Team</strong></p>
     </div>
