@@ -99,10 +99,6 @@ export const forgotPasswordService = async (email) => {
       emailSent: true,
     };
   } catch (error) {
-    if (process.env.NODE_ENV === "production") {
-      throw error;
-    }
-
     console.error("Failed to send password reset OTP email:", error.message);
 
     return {
@@ -256,14 +252,11 @@ export const sendEmailChangeOTPService = async (userId, newEmail) => {
       message: "OTP sent successfully.",
     };
   } catch (error) {
-    if (process.env.NODE_ENV === "production") {
-      throw error;
-    }
-
     console.error("Failed to send email change OTP:", error.message);
 
     return {
       emailSent: false,
+      message: "OTP generated successfully.",
       otp,
     };
   }

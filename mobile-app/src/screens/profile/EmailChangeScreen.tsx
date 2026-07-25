@@ -101,7 +101,7 @@ const EmailChangeScreen = () => {
       }
 
       router.push({
-        pathname: "/verify-otp",
+        pathname: "/(auth)/verify-otp",
         params: {
           email: trimmedNewEmail,
           type: "change-email",
