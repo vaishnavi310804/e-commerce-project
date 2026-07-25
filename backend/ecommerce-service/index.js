@@ -11,7 +11,7 @@ import orderRoutes from "./src/modules/orders/order.routes.js";
 import reviewRoutes from "./src/modules/reviews/review.routes.js";
 import customerRoutes from "./src/modules/customers/customer.routes.js";
 import dashboardRoutes from "./src/modules/dashboard/dashboard.routes.js";
-import PaymentRoutes from "../ecommerce-service/src/modules/payment/payment.routes.js"
+import PaymentRoutes from "./src/modules/payment/payment.routes.js"
 
 const app = express();
 
