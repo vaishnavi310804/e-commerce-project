@@ -82,7 +82,6 @@ export default function VerifyOtpScreen() {
     );
   };
 
-  // Branch resend API logic based on flowType
   const resendOtpByFlow = async (): Promise<ApiResponse<ForgotPasswordData>> => {
     if (!emailValue) throw new Error("Missing email address.");
 
@@ -95,7 +94,6 @@ export default function VerifyOtpScreen() {
     }
   };
 
-  // Branch verify API logic based on flowType
   const verifyOtpByFlow = async () => {
     if (!emailValue) throw new Error("Missing email address.");
 
@@ -114,7 +112,6 @@ export default function VerifyOtpScreen() {
     }
   };
 
-  // Branch success navigation logic based on flowType
   const handleSuccessNavigation = (response: any) => {
     if (flowType === "change-email") {
       Alert.alert(
@@ -134,7 +131,6 @@ export default function VerifyOtpScreen() {
         ]
       );
     } else {
-      // forgot-password flow
       const resetToken = response?.data?.resetToken;
 
       if (!resetToken) {

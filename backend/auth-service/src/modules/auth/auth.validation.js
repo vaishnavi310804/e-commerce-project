@@ -90,22 +90,29 @@ export const adminLoginValidation = [
 ];
 
 export const sendEmailChangeOtpValidation = [
-  body("newEmail")
+  body("email")
+    .optional()
     .trim()
-    .notEmpty()
-    .withMessage("New email is required.")
+    .isEmail()
+    .withMessage("Please enter a valid email."),
+  body("newEmail")
+    .optional()
+    .trim()
     .isEmail()
     .withMessage("Please enter a valid email."),
 ];
 
 export const verifyEmailChangeOtpValidation = [
-  body("newEmail")
+  body("email")
+    .optional()
     .trim()
-    .notEmpty()
-    .withMessage("New email is required.")
     .isEmail()
     .withMessage("Please enter a valid email."),
-
+  body("newEmail")
+    .optional()
+    .trim()
+    .isEmail()
+    .withMessage("Please enter a valid email."),
   body("otp")
     .trim()
     .isLength({ min: 6, max: 6 })

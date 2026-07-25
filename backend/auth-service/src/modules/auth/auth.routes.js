@@ -9,6 +9,8 @@ import {
   resetPassword,
   updateProfile,
   adminLogin,
+  sendEmailChangeOtp,
+  verifyEmailChangeOtp,
 } from "./auth.controller.js";
 import {
   registerValidation,
@@ -18,6 +20,8 @@ import {
   resetPasswordValidation,
   updateProfileValidation,
   adminLoginValidation,
+  sendEmailChangeOtpValidation,
+  verifyEmailChangeOtpValidation,
 } from "./auth.validation.js";
 import validate from "../../middleware/validate.js";
 import { protect } from "../../middleware/auth.middleware.js";
@@ -60,16 +64,15 @@ router.post(
   "/send-email-change-otp",
   protect,
   sendEmailChangeOtpValidation,
-  validateRequest,
-  sendEmailChangeOtp
+  validate,
+  sendEmailChangeOtp,
 );
-
 router.post(
   "/verify-email-change-otp",
   protect,
   verifyEmailChangeOtpValidation,
-  validateRequest,
-  verifyEmailChangeOtp
+  validate,
+  verifyEmailChangeOtp,
 );
 
 export default router;

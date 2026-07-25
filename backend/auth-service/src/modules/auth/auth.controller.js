@@ -7,8 +7,8 @@ import {
   resetPasswordService,
   updateProfileService,
   adminLoginService,
-  verifyEmailChangeOtpService,
-  sendEmailChangeOtpService,
+  sendEmailChangeOTPService,
+  verifyEmailChangeOTPService,
 } from "./auth.service.js";
 
 export const registerUser = async (req, res, next) => {
@@ -164,21 +164,48 @@ export const adminLogin = async (req, res, next) => {
   }
 };
 
-export const sendEmailChangeOtp = asyncHandler(async (req, res) => {
-  const response = await sendEmailChangeOtpService(
-    req.user.id,
-    req.body.newEmail,
-  );
+export const sendEmailChangeOtp = async (req, res, next) => {
+  try {
+    const userId = req.user._id || req.user.id;
+    const newEmail = req.body.newEmail || req.body.email;
 
-  res.status(200).json(response);
-});
+    const result = await sendEmailChangeOTPService(userId, newEmail);
 
-export const verifyEmailChangeOtp = asyncHandler(async (req, res) => {
-  const response = await verifyEmailChangeOtpService(
-    req.user.id,
-    req.body.newEmail,
-    req.body.otp,
-  );
+    return res.status(200).json({
+      success: true,
+      message: result?.emailSent
+        ? "OTP sent successfully."
+        : "OTP generated successfully. Email sending is not configured.",
+      data:
+        result?.emailSent || process.env.NODE_ENV === "production"
+          ? undefined
+          : {
+              otp: result?.otp,
+            },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
-  res.status(200).json(response);
-});
+export const verifyEmailChangeOtp = async (req, res, next) => {
+  try {
+    const userId = req.user._id || req.user.id;
+    const newEmail = req.body.newEmail || req.body.email;
+    const otp = req.body.otp;
+
+    const result = await verifyEmailChangeOTPService({
+      userId,
+      newEmail,
+      otp,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: result?.message || "Email updated successfully.",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
