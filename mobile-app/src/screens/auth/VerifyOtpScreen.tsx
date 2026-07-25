@@ -2,13 +2,32 @@ import React, { useEffect, useState } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { AxiosError } from "axios";
 import { router, useLocalSearchParams } from "expo-router";
-import { CodeField, Cursor, useBlurOnFulfill, useClearByFocusCell} from "react-native-confirmation-code-field";
+import {
+  CodeField,
+  Cursor,
+  useBlurOnFulfill,
+  useClearByFocusCell,
+} from "react-native-confirmation-code-field";
 import ScreenWrapper from "@/src/components/common/ScreenWrapper";
 import PrimaryButton from "@/src/components/common/PrimaryButton";
 import BackButton from "@/src/components/common/BackButton";
-import { forgotPassword, verifyResetOtp } from "@/src/api/auth.api";
+import {
+  forgotPassword,
+  verifyResetOtp,
+  sendEmailChangeOtp,
+  verifyEmailChangeOtp,
+  ApiResponse,
+  ForgotPasswordData,
+} from "@/src/api/auth.api";
 import Colors from "@/src/constants/colors";
 import Fonts from "@/src/constants/fonts";
+
+export type OtpFlowType = "forgot-password" | "change-email";
+
+export type VerifyOtpSearchParams = {
+  email?: string;
+  type?: OtpFlowType;
+};
 
 type ApiErrorResponse = {
   message?: string;
@@ -19,9 +38,18 @@ type ApiErrorResponse = {
 
 const CELL_COUNT = 6;
 
+const FLOW_TITLES: Record<OtpFlowType, string> = {
+  "forgot-password": "Verify Code",
+  "change-email": "Verify Email",
+};
+
 export default function VerifyOtpScreen() {
-  const { email } = useLocalSearchParams<{ email?: string }>();
+  const { email, type } = useLocalSearchParams<VerifyOtpSearchParams>();
+
   const emailValue = Array.isArray(email) ? email[0] : email;
+  const rawType = Array.isArray(type) ? type[0] : type;
+  const flowType: OtpFlowType = rawType === "change-email" ? "change-email" : "forgot-password";
+
   const [value, setValue] = useState("");
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
@@ -54,6 +82,74 @@ export default function VerifyOtpScreen() {
     );
   };
 
+  // Branch resend API logic based on flowType
+  const resendOtpByFlow = async (): Promise<ApiResponse<ForgotPasswordData>> => {
+    if (!emailValue) throw new Error("Missing email address.");
+
+    switch (flowType) {
+      case "change-email":
+        return await sendEmailChangeOtp({ email: emailValue });
+      case "forgot-password":
+      default:
+        return await forgotPassword({ email: emailValue });
+    }
+  };
+
+  // Branch verify API logic based on flowType
+  const verifyOtpByFlow = async () => {
+    if (!emailValue) throw new Error("Missing email address.");
+
+    switch (flowType) {
+      case "change-email":
+        return await verifyEmailChangeOtp({
+          email: emailValue,
+          otp: value,
+        });
+      case "forgot-password":
+      default:
+        return await verifyResetOtp({
+          email: emailValue,
+          otp: value,
+        });
+    }
+  };
+
+  // Branch success navigation logic based on flowType
+  const handleSuccessNavigation = (response: any) => {
+    if (flowType === "change-email") {
+      Alert.alert(
+        "Email Verified",
+        response?.message || "Your email address has been updated successfully.",
+        [
+          {
+            text: "OK",
+            onPress: () => {
+              if (router.canGoBack()) {
+                router.back();
+              } else {
+                router.replace("/complete-profile");
+              }
+            },
+          },
+        ]
+      );
+    } else {
+      // forgot-password flow
+      const resetToken = response?.data?.resetToken;
+
+      if (!resetToken) {
+        throw new Error(response?.message || "OTP verification failed.");
+      }
+
+      router.push({
+        pathname: "/(auth)/reset-password",
+        params: {
+          resetToken,
+        },
+      });
+    }
+  };
+
   const handleVerifyOtp = async () => {
     if (!emailValue) {
       const message = "Please request an OTP again.";
@@ -73,23 +169,8 @@ export default function VerifyOtpScreen() {
       setError("");
       setLoading(true);
 
-      const response = await verifyResetOtp({
-        email: emailValue,
-        otp: value,
-      });
-
-      const resetToken = response.data?.resetToken;
-
-      if (!resetToken) {
-        throw new Error(response.message || "OTP verification failed.");
-      }
-
-      router.push({
-        pathname: "/(auth)/reset-password",
-        params: {
-          resetToken,
-        },
-      });
+      const response = await verifyOtpByFlow();
+      handleSuccessNavigation(response);
     } catch (err) {
       const message = getErrorMessage(err);
       setError(message);
@@ -106,12 +187,17 @@ export default function VerifyOtpScreen() {
       setError("");
       setResending(true);
 
-      const response = await forgotPassword({ email: emailValue });
+      const response = await resendOtpByFlow();
 
-      if (response.data?.otp) {
+      if (response?.data?.otp) {
         Alert.alert(
           "Development OTP",
           `Email could not be sent from the local backend. Use OTP ${response.data.otp}.`
+        );
+      } else {
+        Alert.alert(
+          "OTP Sent",
+          "A new verification code has been sent to your email address."
         );
       }
 
@@ -137,13 +223,15 @@ export default function VerifyOtpScreen() {
     setValue,
   });
 
+  const screenTitle = FLOW_TITLES[flowType] || "Verify Code";
+
   return (
     <ScreenWrapper backgroundColor="#FFFFFF">
       <View style={styles.container}>
         <BackButton />
 
         <View style={styles.content}>
-          <Text style={styles.heading}>Verify Code</Text>
+          <Text style={styles.heading}>{screenTitle}</Text>
 
           <Text style={styles.subHeading}>
             Enter the verification code we sent to

@@ -40,12 +40,12 @@ const styles = StyleSheet.create({
   },
 
   logo: {
-    width: 110,
-    height: 150,
+    width: 150,
+    height: 200,
   },
 
   title: {
-    marginTop: 18,
+    marginTop: 1,
     fontSize: 28,
     fontFamily: Fonts.bold,
     color: Colors.text,

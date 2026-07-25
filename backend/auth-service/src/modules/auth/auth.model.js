@@ -72,10 +72,27 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    pendingEmail: {
+      type: String,
+      lowercase: true,
+      trim: true,
+      default: "",
+      select: false,
+    },
+
+    emailChangeOTP: {
+      type: String,
+      select: false,
+    },
+
+    emailChangeOTPExpires: {
+      type: Date,
+      select: false,
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export default mongoose.model("User", userSchema);

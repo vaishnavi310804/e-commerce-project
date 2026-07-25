@@ -88,3 +88,26 @@ export const adminLoginValidation = [
     .notEmpty()
     .withMessage("Password is required."),
 ];
+
+export const sendEmailChangeOtpValidation = [
+  body("newEmail")
+    .trim()
+    .notEmpty()
+    .withMessage("New email is required.")
+    .isEmail()
+    .withMessage("Please enter a valid email."),
+];
+
+export const verifyEmailChangeOtpValidation = [
+  body("newEmail")
+    .trim()
+    .notEmpty()
+    .withMessage("New email is required.")
+    .isEmail()
+    .withMessage("Please enter a valid email."),
+
+  body("otp")
+    .trim()
+    .isLength({ min: 6, max: 6 })
+    .withMessage("OTP must be 6 digits."),
+];

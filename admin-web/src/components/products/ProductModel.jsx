@@ -55,7 +55,7 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
         price: product.price ?? "",
         discountPrice: product.discountPrice ?? "",
         stock: product.stock ?? "",
-        featured: !!product.featured,
+        featured: !!(product.isFeatured ?? product.featured),
         trending: !!product.trending,
         image: null,
         images: [],
@@ -156,15 +156,36 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
     if (!validate()) return;
 
     const payload = new FormData();
-    Object.entries(formData).forEach(([key, value]) => {
-      if (key === "images") {
-        value.forEach((file) => payload.append("images", file));
-      } else if (key === "image") {
-        if (value) payload.append("productImage", value);
-      } else {
-        payload.append(key, value);
-      }
-    });
+    payload.append("name", formData.name.trim());
+    payload.append("description", formData.description.trim());
+    payload.append("category", formData.category);
+    payload.append("price", String(formData.price));
+    payload.append("stock", String(formData.stock));
+    payload.append("isFeatured", formData.featured ? "true" : "false");
+
+    if (formData.brand && formData.brand.trim() !== "") {
+      payload.append("brand", formData.brand.trim());
+    }
+
+    if (
+      formData.discountPrice !== "" &&
+      formData.discountPrice !== null &&
+      formData.discountPrice !== undefined
+    ) {
+      payload.append("discountPrice", String(formData.discountPrice));
+    }
+
+    if (formData.image instanceof File) {
+      payload.append("productImage", formData.image);
+    }
+
+    if (Array.isArray(formData.images) && formData.images.length > 0) {
+      formData.images.forEach((file) => {
+        if (file instanceof File) {
+          payload.append("images", file);
+        }
+      });
+    }
 
     try {
       setSubmitting(true);
@@ -176,8 +197,18 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
       onSuccess();
       handleClose();
     } catch (error) {
-      console.error(error);
-      alert(error.response?.data?.message || "Something went wrong.");
+      console.error("Product submit error:", error);
+      const backendErrors = error.response?.data?.errors;
+      const backendMsg = error.response?.data?.message;
+
+      if (Array.isArray(backendErrors) && backendErrors.length > 0) {
+        const errorText = backendErrors.map((err) => err.msg).join("\n");
+        alert(`Validation Error:\n${errorText}`);
+      } else if (backendMsg) {
+        alert(backendMsg);
+      } else {
+        alert(error.message || "Failed to save product.");
+      }
     } finally {
       setSubmitting(false);
     }

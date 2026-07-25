@@ -7,7 +7,7 @@ import {
   verifyPasswordResetToken,
 } from "./auth.utils.js";
 import { generateOTP, hashOTP } from "./auth.utils.js";
-import { sendForgotPasswordOTP } from "../../services/email.service.js";
+import { sendForgotPasswordOTP, sendEmailChangeOTP } from "../../services/email.service.js";
 
 export const registerUserService = async (userData) => {
   const { fullName, email, password, profileImage } = userData;
@@ -218,5 +218,102 @@ export const adminLoginService = async ({ email, password }) => {
   return {
     user: userObject,
     accessToken,
+  };
+};
+
+export const sendEmailChangeOTPService = async (userId, newEmail) => {
+  const user = await User.findById(userId).select(
+    "+pendingEmail +emailChangeOTP +emailChangeOTPExpires"
+  );
+
+  if (!user) {
+    throw new Error("User not found.");
+  }
+
+  if (user.email === newEmail) {
+    throw new Error("New email cannot be the same as your current email.");
+  }
+
+  const existingUser = await User.findOne({ email: newEmail });
+
+  if (existingUser) {
+    throw new Error("Email is already registered.");
+  }
+
+  const otp = generateOTP();
+
+  user.pendingEmail = newEmail;
+  user.emailChangeOTP = hashOTP(otp);
+  user.emailChangeOTPExpires = new Date(Date.now() + 10 * 60 * 1000);
+
+  await user.save();
+
+  try {
+    await sendEmailChangeOTP(newEmail, otp);
+
+    return {
+      emailSent: true,
+      message: "OTP sent successfully.",
+    };
+  } catch (error) {
+    if (process.env.NODE_ENV === "production") {
+      throw error;
+    }
+
+    console.error("Failed to send email change OTP:", error.message);
+
+    return {
+      emailSent: false,
+      otp,
+    };
+  }
+};
+
+export const verifyEmailChangeOTPService = async ({
+  userId,
+  newEmail,
+  otp,
+}) => {
+  const user = await User.findById(userId).select(
+    "+pendingEmail +emailChangeOTP +emailChangeOTPExpires"
+  );
+
+  if (!user) {
+    throw new Error("User not found.");
+  }
+
+  if (!user.pendingEmail) {
+    throw new Error("No pending email change request found.");
+  }
+
+  if (user.pendingEmail !== newEmail) {
+    throw new Error("Email does not match.");
+  }
+
+  if (!user.emailChangeOTP || !user.emailChangeOTPExpires) {
+    throw new Error("No OTP found. Please request a new one.");
+  }
+
+  if (user.emailChangeOTPExpires < new Date()) {
+    throw new Error("OTP has expired.");
+  }
+
+  const hashedOTP = hashOTP(otp);
+
+  if (hashedOTP !== user.emailChangeOTP) {
+    throw new Error("Invalid OTP.");
+  }
+
+  user.email = user.pendingEmail;
+
+  user.pendingEmail = "";
+  user.emailChangeOTP = null;
+  user.emailChangeOTPExpires = null;
+
+  await user.save();
+
+  return {
+    message: "Email updated successfully.",
+    email: user.email,
   };
 };

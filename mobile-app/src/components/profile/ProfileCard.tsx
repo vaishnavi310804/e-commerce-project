@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Image,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View} from "react-native";
+  View,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/src/constants/colors";
 import Fonts from "@/src/constants/fonts";
@@ -22,11 +23,17 @@ const ProfileCard = ({
   image,
   onEditPress,
 }: ProfileCardProps) => {
+  const [imageError, setImageError] = useState(false);
+
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>
-        {image ? (
-          <Image source={{ uri: image }} style={styles.image} />
+        {image && !imageError ? (
+          <Image
+            source={{ uri: image }}
+            style={styles.image}
+            onError={() => setImageError(true)}
+          />
         ) : (
           <View style={styles.placeholder}>
             <Ionicons

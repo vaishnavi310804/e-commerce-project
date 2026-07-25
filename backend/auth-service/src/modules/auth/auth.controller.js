@@ -6,7 +6,9 @@ import {
   verifyResetOTPService,
   resetPasswordService,
   updateProfileService,
-  adminLoginService
+  adminLoginService,
+  verifyEmailChangeOtpService,
+  sendEmailChangeOtpService,
 } from "./auth.service.js";
 
 export const registerUser = async (req, res, next) => {
@@ -131,11 +133,7 @@ export const resetPassword = async (req, res, next) => {
 
 export const updateProfile = async (req, res, next) => {
   try {
-    const user = await updateProfileService(
-      req.user._id,
-      req.body,
-      req.file
-    );
+    const user = await updateProfileService(req.user._id, req.body, req.file);
 
     res.status(200).json({
       success: true,
@@ -165,3 +163,22 @@ export const adminLogin = async (req, res, next) => {
     });
   }
 };
+
+export const sendEmailChangeOtp = asyncHandler(async (req, res) => {
+  const response = await sendEmailChangeOtpService(
+    req.user.id,
+    req.body.newEmail,
+  );
+
+  res.status(200).json(response);
+});
+
+export const verifyEmailChangeOtp = asyncHandler(async (req, res) => {
+  const response = await verifyEmailChangeOtpService(
+    req.user.id,
+    req.body.newEmail,
+    req.body.otp,
+  );
+
+  res.status(200).json(response);
+});

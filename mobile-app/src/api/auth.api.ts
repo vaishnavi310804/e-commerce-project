@@ -51,6 +51,15 @@ export type ResetPasswordPayload = {
   newPassword: string;
 };
 
+export type SendEmailChangeOtpPayload = {
+  email: string;
+};
+
+export type VerifyEmailChangeOtpPayload = {
+  email: string;
+  otp: string;
+};
+
 export type AuthTokens = {
   accessToken: string;
 };
@@ -151,6 +160,26 @@ export const resetPassword = async (payload: ResetPasswordPayload) => {
   return data;
 };
 
+export const sendEmailChangeOtp = async (payload: SendEmailChangeOtpPayload) => {
+  const { data } = await client.post<ApiResponse<ForgotPasswordData>>(
+    "/send-email-change-otp",
+    payload
+  );
+
+  return data;
+};
+
+export const verifyEmailChangeOtp = async (
+  payload: VerifyEmailChangeOtpPayload
+) => {
+  const { data } = await client.post<ApiResponse<undefined>>(
+    "/verify-email-change-otp",
+    payload
+  );
+
+  return data;
+};
+
 export const updateProfile = async (formData: FormData) => {
   const response = await client.patch("/profile", formData, {
     headers: {
@@ -169,6 +198,8 @@ const authApi = {
   forgotPassword,
   verifyResetOtp,
   resetPassword,
+  sendEmailChangeOtp,
+  verifyEmailChangeOtp,
   setAuthToken,
   updateProfile,
 };

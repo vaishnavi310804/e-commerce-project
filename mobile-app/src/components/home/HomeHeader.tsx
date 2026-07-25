@@ -1,5 +1,12 @@
 import React from "react";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  ImageBackground,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/src/constants/colors";
 import Fonts from "@/src/constants/fonts";
@@ -33,7 +40,7 @@ const HomeHeader = ({
           />
 
           <View>
-            <Text style={styles.greeting}>Hello 👋</Text>
+            <Text style={styles.greeting}>Hello,</Text>
             <Text style={styles.name}>{name || "Guest"}</Text>
           </View>
         </View>
@@ -100,6 +107,17 @@ const styles = StyleSheet.create({
     marginRight: 14,
     backgroundColor: "#fff",
   },
+
+   header: {
+    height: 320,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    overflow: "hidden",
+  },
+
+  headerImage: {
+    resizeMode: "cover",
+  }, 
 
   greeting: {
     color: "#E8DFFF",

@@ -4,7 +4,7 @@ import {
   Text,
   TextInput,
   View,
-  Pressable,
+  Pressable, KeyboardTypeOptions, TextInputProps
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
@@ -13,11 +13,13 @@ import Fonts from "@/src/constants/fonts";
 
 type Props = {
   label: string;
-  placeholder: string;
+  placeholder?: string;
   value: string;
-  onChangeText: (text: string) => void;
+  onChangeText?: (text: string) => void;
   secureTextEntry?: boolean;
   keyboardType?: "default" | "email-address";
+  editable?: boolean;
+  autoCapitalize?: TextInputProps["autoCapitalize"];
 };
 
 export default function Input({
@@ -27,6 +29,8 @@ export default function Input({
   onChangeText,
   secureTextEntry = false,
   keyboardType = "default",
+   editable = true,
+  autoCapitalize = "sentences",
 }: Props) {
   const [hidePassword, setHidePassword] = useState(secureTextEntry);
 

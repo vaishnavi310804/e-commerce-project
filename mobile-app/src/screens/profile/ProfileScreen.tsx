@@ -1,8 +1,8 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
-import React, { useState, useEffect } from "react";
+import { ScrollView, StyleSheet } from "react-native";
+import React, { useState, useCallback } from "react";
 import { Ionicons, MaterialIcons, Feather } from "@expo/vector-icons";
 import Colors from "@/src/constants/colors";
-import { router, Href } from "expo-router";
+import { router, Href, useFocusEffect } from "expo-router";
 import ProfileMenu from "@/src/components/profile/ProfileMenu";
 import { getCurrentUser, AuthUser } from "@/src/api/auth.api";
 import ProfileCard from "@/src/components/profile/ProfileCard";
@@ -16,9 +16,9 @@ type MenuItem = {
 
 const menuItems: MenuItem[] = [
   {
-    title: "Your Profile",
+    title: "Edit Profile",
     icon: <Ionicons name="person-outline" size={22} color={Colors.primary} />,
-    route: "/profile",
+    route: "/edit-profile",
   },
   {
     title: "Manage Address",
@@ -67,9 +67,11 @@ const ProfileScreen = () => {
     }
   };
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchProfile();
+    }, [])
+  );
 
   return (
     <ScreenWrapper>

@@ -27,7 +27,7 @@ export default function HeroSection() {
 
 const styles = StyleSheet.create({
   container: {
-    height: 450,
+    height: 490,
     position: "relative",
     justifyContent: "center",
     alignItems: "center",
