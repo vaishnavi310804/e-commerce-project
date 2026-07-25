@@ -167,7 +167,7 @@ const Dashboard = () => {
           onApplyCustom={fetchDashboardData}
         />
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
           <StatCard
             title="Total Revenue"
             value={`$${Number(stats.totalRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
@@ -205,7 +205,7 @@ const Dashboard = () => {
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
           <StatCard
             title="Pending Orders"
             value={stats.pendingOrders || 0}
@@ -243,7 +243,7 @@ const Dashboard = () => {
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
           <StatCard
             title="Total Products"
             value={stats.totalProducts || 0}

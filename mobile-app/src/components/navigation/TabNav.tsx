@@ -35,9 +35,8 @@ const TabNav = ({ state, navigation }: BottomTabBarProps) => {
 
   return (
     <View style={styles.container}>
-      {tabs.map((tab, index) => {
-        const focused = state.index === index;
-
+      {tabs.map((tab) => {
+        const focused = state.routes[state.index].name === tab.route;
         return (
           <TouchableOpacity
             key={tab.route}

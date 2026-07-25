@@ -23,7 +23,6 @@ const HomeScreen = () => {
   const fetchData = async () => {
   try {
     const userRes = await getCurrentUser();
-
     const addressRes = await getDefaultAddress();
 
     setUser(userRes.data ?? null);

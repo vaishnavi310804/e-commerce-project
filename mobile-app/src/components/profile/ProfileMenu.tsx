@@ -49,13 +49,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-
     paddingHorizontal: 16,
     paddingVertical: 14,
-
     borderRadius: 16,
-    marginBottom: 12,
-
+    marginBottom: 8,
     borderWidth: 1,
     borderColor: "#F1F1F1",
   },
@@ -70,10 +67,8 @@ const styles = StyleSheet.create({
     height: 42,
     borderRadius: 21,
     backgroundColor: "#F7F4FF",
-
     justifyContent: "center",
     alignItems: "center",
-
     marginRight: 14,
   },
 

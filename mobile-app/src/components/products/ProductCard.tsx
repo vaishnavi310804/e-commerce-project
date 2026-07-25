@@ -6,56 +6,74 @@ import Colors from "@/src/constants/colors";
 
 type Props = {
   product: Product;
+  isWishlisted?: boolean;
   onPress: () => void;
   onWishlist?: () => void;
   onAddToCart?: () => void;
 };
 
-const ProductCard = ({ product, onPress, onWishlist, onAddToCart }: Props) => {
-  const discountAmount =
-    product.discountPrice > 0 && product.discountPrice < product.price;
+const ProductCard = ({
+  product,
+  isWishlisted = false,
+  onPress,
+  onWishlist,
+  onAddToCart,
+}: Props) => {
+  const price = product?.price ?? 0;
+  const discountPrice = product?.discountPrice ?? 0;
 
-  const finalPrice = discountAmount ? product.discountPrice : product.price;
+  const discountAmount = Boolean(discountPrice > 0 && discountPrice < price);
+
+  const finalPrice = discountAmount ? discountPrice : price;
   const discountPercentage = discountAmount
-    ? Math.round(
-        ((product.price - product.discountPrice) / product.price) * 100,
-      )
+    ? Math.round(((price - discountPrice) / price) * 100)
     : 0;
+
+  const rating = product?.averageRating ?? 0;
+  const reviewsCount = product?.numReviews ?? 0;
+  const imageUrl = product?.productImage?.url || "https://via.placeholder.com/150";
 
   return (
     <Pressable style={styles.card} onPress={onPress}>
       <Pressable style={styles.wishlist} onPress={onWishlist}>
-        <Ionicons name="heart-outline" size={20} color={Colors.primary} />
+        <Ionicons
+          name={isWishlisted ? "heart" : "heart-outline"}
+          size={20}
+          color={Colors.primary}
+        />
       </Pressable>
 
-      {discountAmount && (
+      {discountAmount ? (
         <View style={styles.discountBadge}>
           <Text style={styles.discountText}>-{discountPercentage}%</Text>
         </View>
-      )}
+      ) : null}
 
       <Image
         source={{
-          uri: product.productImage.url,
+          uri: imageUrl,
         }}
         style={styles.image}
         resizeMode="contain"
       />
 
       <Text numberOfLines={2} style={styles.title}>
-        {product.name}
+        {product?.name || "Product"}
       </Text>
-      <Text numberOfLines={1} style={styles.brand}>
-        {product.brand}
-      </Text>
+
+      {product?.brand ? (
+        <Text numberOfLines={1} style={styles.brand}>
+          {product.brand}
+        </Text>
+      ) : null}
 
       <View style={styles.ratingRow}>
         <View style={styles.ratingContainer}>
           <Ionicons name="star" size={14} color="#FDBA12" />
 
-          <Text style={styles.rating}>{product.averageRating.toFixed(1)}</Text>
+          <Text style={styles.rating}>{rating.toFixed(1)}</Text>
 
-          <Text style={styles.review}>({product.numReviews})</Text>
+          <Text style={styles.review}>({reviewsCount})</Text>
         </View>
 
         <Pressable style={styles.cartButton} onPress={onAddToCart}>
@@ -66,9 +84,9 @@ const ProductCard = ({ product, onPress, onWishlist, onAddToCart }: Props) => {
       <View style={styles.priceContainer}>
         <Text style={styles.price}>₹{finalPrice}</Text>
 
-        {discountAmount && (
-          <Text style={styles.oldPrice}>₹{product.price}</Text>
-        )}
+        {discountAmount ? (
+          <Text style={styles.oldPrice}>₹{price}</Text>
+        ) : null}
       </View>
     </Pressable>
   );
@@ -133,10 +151,10 @@ const styles = StyleSheet.create({
   },
 
   brand: {
-  fontSize: 13,
-  color: "#757575",
-  fontWeight: "500",
-},
+    fontSize: 13,
+    color: "#757575",
+    fontWeight: "500",
+  },
   ratingRow: {
     flexDirection: "row",
     justifyContent: "space-between",

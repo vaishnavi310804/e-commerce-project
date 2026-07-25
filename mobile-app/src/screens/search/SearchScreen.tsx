@@ -1,11 +1,14 @@
 import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import React, {useState} from 'react'
+import SearchBar from '@/src/components/home/SearchBar'
+import ScreenWrapper from '@/src/components/common/ScreenWrapper'
 
 const SearchScreen = () => {
+    const [search, setSearch] = useState("");
   return (
-    <View>
-      <Text>SearchScreen</Text>
-    </View>
+    <ScreenWrapper>
+       <SearchBar value={search} onChangeText={setSearch} />
+    </ScreenWrapper>
   )
 }
 

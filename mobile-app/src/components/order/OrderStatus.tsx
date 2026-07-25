@@ -16,7 +16,7 @@ const OrderStatus = ({ status }: Props) => {
           backgroundColor: "#FFF7E8",
           borderColor: "#FDBA2D",
           color: "#F59E0B",
-          label: "Active Order",
+          label: "Active",
         };
 
       case "Delivered":
@@ -75,12 +75,11 @@ export default OrderStatus;
 
 const styles = StyleSheet.create({
   container: {
+    alignSelf: "center",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
     borderWidth: 1,
-    paddingHorizontal: 12,
-    height: 30,
-    borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
   },
 
   text: {

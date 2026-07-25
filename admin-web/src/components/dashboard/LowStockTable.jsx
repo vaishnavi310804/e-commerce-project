@@ -31,7 +31,7 @@ const LowStockTable = ({ products = [] }) => {
             {products.length === 0 ? (
               <tr>
                 <td colSpan={4} className="py-6 text-center text-emerald-600 font-medium">
-                  All inventory levels are healthy!
+                  All Stocks in Control!
                 </td>
               </tr>
             ) : (

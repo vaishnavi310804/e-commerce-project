@@ -1,21 +1,56 @@
 import React, { useEffect, useState } from "react";
-import { View, FlatList, StyleSheet, } from "react-native";
+import { View, FlatList, StyleSheet, Alert } from "react-native";
 import SectionHeader from "./SectionHeader";
 import ProductCard from "../products/ProductCard";
-import { Product, getProducts, getProductById } from "@/src/api/product.api";
-import { router } from "expo-router";
+import { Product, getProducts } from "@/src/api/product.api";
+import { router, useNavigation } from "expo-router";
+import { getWishlist, toggleWishlist } from "@/src/api/wishlist.api";
 
 const BestSellerSection = () => {
+  const navigation = useNavigation();
   const [products, setProducts] = useState<Product[]>([]);
+  const [wishlist, setwishlist] = useState<string[]>([]);
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
+    fetchData();
 
-  const fetchProducts = async () => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      fetchData();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
+  const fetchData = async () => {
     try {
-      const response = await getProducts();
-      setProducts(response.data ?? []);
+      const [productResponse, wishlistResponse] = await Promise.all([
+        getProducts(),
+        getWishlist(),
+      ]);
+      setProducts(productResponse.data ?? []);
+      if (wishlistResponse.data) {
+        setwishlist(
+          wishlistResponse.data
+            .map((item: any) => item.product?._id)
+            .filter(Boolean)
+        );
+      }
+    } catch (error) {
+      console.log("Error fetching home best seller data:", error);
+    }
+  };
+
+  const handleWishlist = async (productId: string) => {
+    try {
+      const response = await toggleWishlist(productId);
+      setwishlist((prev) =>
+        prev.includes(productId)
+          ? prev.filter((id) => id !== productId)
+          : [...prev, productId]
+      );
+      if (response.message) {
+        Alert.alert("Wishlist", response.message);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -23,10 +58,8 @@ const BestSellerSection = () => {
 
   return (
     <View style={styles.container}>
-      <SectionHeader
-        title="Best Seller"
-        onSeeAll={() => {}}
-      />
+      <SectionHeader title="Best Seller" onSeeAll={() => {}} />
+
       <FlatList
         horizontal
         data={products}
@@ -36,8 +69,9 @@ const BestSellerSection = () => {
         renderItem={({ item }) => (
           <ProductCard
             product={item}
+            isWishlisted={wishlist.includes(item._id)}
             onPress={() => router.push(`/product/${item._id}`)}
-            onWishlist={() => {}}
+            onWishlist={() => handleWishlist(item._id)}
             onAddToCart={() => {}}
           />
         )}

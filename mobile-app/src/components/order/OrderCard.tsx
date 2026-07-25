@@ -50,16 +50,15 @@ const OrderCard = ({
   const buttons = getButtons();
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.9}
-      style={styles.card}
-      onPress={onPress}
-    >
-      {/* Header */}
+    <TouchableOpacity activeOpacity={0.9} style={styles.card} onPress={onPress}>
       <View style={styles.header}>
-        <Text style={styles.orderId}>
-          Order ID : #{order.orderNumber}
-        </Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.label}>Order ID</Text>
+
+          <Text style={styles.orderId} numberOfLines={1}>
+            #{order.orderNumber}
+          </Text>
+        </View>
 
         <OrderStatus status={order.orderStatus} />
       </View>
@@ -67,10 +66,7 @@ const OrderCard = ({
       <View style={styles.divider} />
 
       {order.products.map((item: any) => (
-        <OrderProduct
-          key={item.product._id}
-          item={item}
-        />
+        <OrderProduct key={item.product._id} item={item} />
       ))}
 
       <View style={styles.divider} />
@@ -89,21 +85,16 @@ const OrderCard = ({
             style={styles.secondaryButton}
             onPress={onSecondaryAction}
           >
-            <Text style={styles.secondaryText}>
-              {buttons.left}
-            </Text>
+            <Text style={styles.secondaryText}>{buttons.left}</Text>
           </TouchableOpacity>
         ) : (
           <View style={{ flex: 1 }} />
         )}
-
         <TouchableOpacity
           style={styles.primaryButton}
           onPress={onPrimaryAction}
         >
-          <Text style={styles.primaryText}>
-            {buttons.right}
-          </Text>
+          <Text style={styles.primaryText}>{buttons.right}</Text>
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
@@ -124,10 +115,14 @@ const styles = StyleSheet.create({
 
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
   },
-
+  label: {
+    fontSize: 16,
+    fontFamily: Fonts.medium,
+    color: Colors.gray,
+    marginBottom: 4,
+  },
   orderId: {
     fontSize: 15,
     fontFamily: Fonts.semibold,

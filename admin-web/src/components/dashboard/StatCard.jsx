@@ -50,7 +50,6 @@ const StatCard = ({ title, value, growth, icon: Icon, color = "indigo", subText 
           </div>
         )}
       </div>
-
       <div className="mt-3">
         <h3 className="text-2xl font-bold text-gray-900">{value}</h3>
       </div>

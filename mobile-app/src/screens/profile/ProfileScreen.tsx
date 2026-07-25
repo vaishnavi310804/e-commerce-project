@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import React, { useState, useEffect } from "react";
 import { Ionicons, MaterialIcons, Feather } from "@expo/vector-icons";
 import Colors from "@/src/constants/colors";
@@ -6,6 +6,7 @@ import { router, Href } from "expo-router";
 import ProfileMenu from "@/src/components/profile/ProfileMenu";
 import { getCurrentUser, AuthUser } from "@/src/api/auth.api";
 import ProfileCard from "@/src/components/profile/ProfileCard";
+import ScreenWrapper from "@/src/components/common/ScreenWrapper";
 
 type MenuItem = {
   title: string;
@@ -71,25 +72,36 @@ const ProfileScreen = () => {
   }, []);
 
   return (
-    <View>
-      <ProfileCard
-        name={user?.fullName ?? ""}
-        email={user?.email ?? ""}
-        image={user?.profileImage}
-        onEditPress={() => router.push("/edit-profile")}
-      />
-      {menuItems.map((item) => (
-        <ProfileMenu
-          key={item.title}
-          title={item.title}
-          icon={item.icon}
-          onPress={() => router.push(item.route)}
+    <ScreenWrapper>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
+        <ProfileCard
+          name={user?.fullName ?? ""}
+          email={user?.email ?? ""}
+          image={user?.profileImage}
+          onEditPress={() => router.push("/edit-profile")}
         />
-      ))}
-    </View>
+        {menuItems.map((item) => (
+          <ProfileMenu
+            key={item.title}
+            title={item.title}
+            icon={item.icon}
+            onPress={() => router.push(item.route)}
+          />
+        ))}
+      </ScrollView>
+    </ScreenWrapper>
   );
 };
 
 export default ProfileScreen;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 20,
+    paddingBottom: 120,
+    flexGrow: 1,
+  },
+});

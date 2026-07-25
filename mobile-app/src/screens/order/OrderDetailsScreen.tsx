@@ -7,21 +7,20 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-
 import ScreenWrapper from "@/src/components/common/ScreenWrapper";
 import OrderProduct from "@/src/components/order/OrderProduct";
 import OrderStatus from "@/src/components/order/OrderStatus";
 import Colors from "@/src/constants/colors";
 import Fonts from "@/src/constants/fonts";
-
 import { getMyOrderDetails, OrderData } from "@/src/api/order.api";
+import ShippingDetailsCard from "@/src/components/order/ShippingDetailsCard";
+import PaymentDetailsCard from "@/src/components/payment/PaymentDetailsCard";
+import PriceSummaryCard from "@/src/components/payment/PriceSummaryCard";
 
 const OrderDetailsScreen = () => {
   const { orderId } = useLocalSearchParams();
-
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState<OrderData | null>(null);
 
@@ -58,14 +57,48 @@ const OrderDetailsScreen = () => {
     );
   }
 
+  const getActionButton = () => {
+    switch (order.orderStatus) {
+      case "Placed":
+        return {
+          title: "Cancel Order",
+          onPress: () => {
+            console.log("Cancel Order");
+          },
+        };
+      case "Shipped":
+        return {
+          title: "Track Order",
+          onPress: () => {
+            console.log("Track Order");
+          },
+        };
+      case "Delivered":
+        return {
+          title: "Buy Again",
+          onPress: () => {
+            console.log("Buy Again");
+          },
+        };
+      case "Cancelled":
+        return {
+          title: "Reorder",
+          onPress: () => {
+            console.log("Reorder");
+          },
+        };
+      default:
+        return null;
+    }
+  };
+  const action = getActionButton();
+
   return (
     <ScreenWrapper>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.container}
       >
-        {/* Header */}
-
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
             <Ionicons name="chevron-back" size={24} color={Colors.text} />
@@ -76,8 +109,6 @@ const OrderDetailsScreen = () => {
           <View style={{ width: 24 }} />
         </View>
 
-        {/* Status */}
-
         <View style={styles.statusContainer}>
           <OrderStatus status={order.orderStatus} />
 
@@ -85,9 +116,6 @@ const OrderDetailsScreen = () => {
             Placed on {new Date(order.createdAt).toLocaleDateString()}
           </Text>
         </View>
-
-        {/* Products */}
-
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Products</Text>
 
@@ -96,13 +124,28 @@ const OrderDetailsScreen = () => {
           ))}
         </View>
 
-        {/* Shipping Card */}
+        <ShippingDetailsCard address={order.shippingAddress} />
+        <PaymentDetailsCard
+          paymentMethod={order.paymentMethod}
+          paymentStatus={order.paymentStatus}
+        />
 
-        {/* Payment Card */}
+        <PriceSummaryCard
+          subtotal={order.subtotal}
+          shippingCharge={order.shippingCharge}
+          tax={order.tax}
+          discount={order.discount}
+          totalAmount={order.totalAmount}
+        />
 
-        {/* Price Summary */}
-
-        {/* Bottom Button */}
+        {action && (
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={action.onPress}
+          >
+            <Text style={styles.actionText}>{action.title}</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </ScreenWrapper>
   );
@@ -152,5 +195,20 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.bold,
     marginBottom: 10,
     color: Colors.text,
+  },
+  actionButton: {
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: Colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 8,
+    marginBottom: 20,
+  },
+
+  actionText: {
+    color: Colors.white,
+    fontSize: 16,
+    fontFamily: Fonts.bold,
   },
 });
