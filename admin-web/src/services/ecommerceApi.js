@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const ecommerceApi = axios.create({
-  baseURL: "http://localhost:5001/api/v1",
+  baseURL: "https://shopease-ecommerce-service.onrender.com/api/v1",
 });
 
 ecommerceApi.interceptors.request.use((config) => {
