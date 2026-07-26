@@ -1,13 +1,16 @@
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: Number(process.env.EMAIL_PORT),
-  secure: false,
+  host: process.env.EMAIL_HOST || "smtp.gmail.com",
+  port: Number(process.env.EMAIL_PORT) || 587,
+  secure: Number(process.env.EMAIL_PORT) === 465,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  connectionTimeout: 20000,
+  greetingTimeout: 20000,
+  socketTimeout: 20000,
 });
 
 transporter.verify((err, success) => {
@@ -20,22 +23,30 @@ transporter.verify((err, success) => {
 
 export const sendEmail = async ({ to, subject, html }) => {
   if (!process.env.EMAIL_HOST || !process.env.EMAIL_USER) {
-    throw new Error("Email service is not configured.");
+    throw new Error("Email service credentials not configured in environment.");
   }
 
-  const timeoutPromise = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error("Email connection timed out")), 5000)
-  );
+  const info = await transporter.sendMail({
+    from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+    to,
+    subject,
+    html,
+  });
 
-  await Promise.race([
-    transporter.sendMail({
-      from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
-      to,
-      subject,
-      html,
-    }),
-    timeoutPromise,
-  ]);
+  console.log("NODEMAILER SENDMAIL RESPONSE INFO:", {
+    messageId: info?.messageId,
+    accepted: info?.accepted,
+    rejected: info?.rejected,
+    response: info?.response,
+  });
+
+  if (!info.accepted || !info.accepted.includes(to)) {
+    throw new Error(
+      `Email was not accepted by SMTP server. Response: ${info.response}`
+    );
+  }
+
+  return info;
 };
 
 export const sendForgotPasswordOTP = async (email, otp) => {
@@ -61,7 +72,7 @@ export const sendForgotPasswordOTP = async (email, otp) => {
     </div>
   `;
 
-  await sendEmail({
+  return await sendEmail({
     to: email,
     subject: "ShopEase Password Reset OTP",
     html,
@@ -91,7 +102,7 @@ export const sendEmailChangeOTP = async (email, otp) => {
     </div>
   `;
 
-  await sendEmail({
+  return await sendEmail({
     to: email,
     subject: "Verify Your New Email Address",
     html,

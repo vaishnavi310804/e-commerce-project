@@ -9,14 +9,25 @@ import {
   bulkHideReviews,
   bulkDeleteReviews,
   getReviewStats,
+  getProductReviews,
+  createReview,
+  updateReview,
+  deleteMyReview
 } from "./review.controller.js";
+import { createReviewValidation, updateReviewValidation } from "./review.validate.js";
+import validate from "../../middleware/validate.js";
 
 const router = express.Router();
+
+router.get("/product/:productId", getProductReviews);
+router.post("/product/:productId", protect, createReviewValidation, validate ,createReview);
+router.put("/product/:productId", protect, updateReviewValidation, validate ,updateReview);
+router.delete("/product/:productId", protect, deleteMyReview);
+
 
 router.get("/stats", protect, authorize("ADMIN"), getReviewStats);
 router.post("/bulk-hide", protect, authorize("ADMIN"), bulkHideReviews);
 router.post("/bulk-delete", protect, authorize("ADMIN"), bulkDeleteReviews);
-
 router.get("/", protect, authorize("ADMIN"), getAllReviews);
 router.get("/:id", protect, authorize("ADMIN"), getReviewById);
 router.patch("/hide/:id", protect, authorize("ADMIN"), toggleHideReview);

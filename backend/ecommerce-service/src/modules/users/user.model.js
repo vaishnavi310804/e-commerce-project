@@ -43,10 +43,55 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+
+    resetPasswordOTP: {
+      type: String,
+      select: false,
+    },
+    isResetOTPVerified: {
+      type: Boolean,
+      default: false,
+      select: false,
+    },
+    resetPasswordOTPExpires: {
+      type: Date,
+      select: false,
+    },
+    phoneNumber: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    gender: {
+      type: String,
+      enum: ["Male", "Female", "Other", "Prefer not to say"],
+      default: undefined,
+    },
+    isProfileCompleted: {
+      type: Boolean,
+      default: false,
+    },
+    pendingEmail: {
+      type: String,
+      lowercase: true,
+      trim: true,
+      default: "",
+      select: false,
+    },
+
+    emailChangeOTP: {
+      type: String,
+      select: false,
+    },
+
+    emailChangeOTPExpires: {
+      type: Date,
+      select: false,
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
-
 export default mongoose.model("User", userSchema);

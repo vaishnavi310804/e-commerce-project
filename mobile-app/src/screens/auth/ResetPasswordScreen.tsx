@@ -1,34 +1,51 @@
-import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
   View,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
+  ScrollView, Alert
 } from "react-native";
-import { router } from "expo-router";
+import React, { useState, useEffect } from "react";
+import Fonts from "@/src/constants/fonts";
+import Colors from "@/src/constants/colors";
 import ScreenWrapper from "@/src/components/common/ScreenWrapper";
 import BackButton from "@/src/components/common/BackButton";
 import Input from "@/src/components/common/Input";
+import { resetPassword } from "@/src/api/auth.api";
+import { router, useLocalSearchParams } from "expo-router";
 import PrimaryButton from "@/src/components/common/PrimaryButton";
-import Fonts from "@/src/constants/fonts";
 
-export default function ResetPasswordScreen() {
+const ResetPasswordScreen = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
+  const { resetToken } = useLocalSearchParams<{
+    resetToken: string;
+  }>();
   const isDisabled =
     password.length < 6 ||
     confirmPassword.length < 6 ||
     password !== confirmPassword;
 
-  const handleResetPassword = () => {
-    // TODO:
-    // Call Reset Password API
-
+  const handleResetPassword = async () => {
+  try {
+    if (!resetToken) {
+      Alert.alert("Error", "Reset token not found.");
+      return;
+    }
+    await resetPassword({
+      resetToken,
+      newPassword: password,
+    });
+    Alert.alert("Success", "Password reset successfully.");
     router.replace("/(auth)/login");
-  };
+  } catch (error: any) {
+    Alert.alert(
+      "Error",
+      error?.response?.data?.message || "Failed to reset password."
+    );
+  }
+};
 
   return (
     <ScreenWrapper backgroundColor="#FFFFFF">
@@ -81,7 +98,9 @@ export default function ResetPasswordScreen() {
       </KeyboardAvoidingView>
     </ScreenWrapper>
   );
-}
+};
+
+export default ResetPasswordScreen;
 
 const styles = StyleSheet.create({
   container: {

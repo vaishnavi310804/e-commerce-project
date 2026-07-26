@@ -1,4 +1,37 @@
 import Review from "./review.model.js";
+import productModel from "../products/product.model.js";
+
+const updateProductRating = async (productId) => {
+  const stats = await Review.aggregate([
+    {
+      $match: {
+        product: productId,
+        isHidden: false,
+      },
+    },
+    {
+      $group: {
+        _id: "$product",
+        averageRating: { $avg: "$rating" },
+        numReviews: { $sum: 1 },
+      },
+    },
+  ]);
+
+  if (stats.length === 0) {
+    await Product.findByIdAndUpdate(productId, {
+      averageRating: 0,
+      numReviews: 0,
+    });
+
+    return;
+  }
+
+  await Product.findByIdAndUpdate(productId, {
+    averageRating: Number(stats[0].averageRating.toFixed(1)),
+    numReviews: stats[0].numReviews,
+  });
+};
 
 export const getAllReviewsService = async (query = {}) => {
   const { search, rating, status, sort } = query;
@@ -97,7 +130,8 @@ export const getReviewStatsService = async () => {
   const hiddenReviews = reviews.filter((r) => r.isHidden).length;
 
   const totalRatingSum = reviews.reduce((sum, r) => sum + (r.rating || 0), 0);
-  const averageRating = totalReviews > 0 ? (totalRatingSum / totalReviews).toFixed(1) : "0.0";
+  const averageRating =
+    totalReviews > 0 ? (totalRatingSum / totalReviews).toFixed(1) : "0.0";
 
   const fiveStarReviews = reviews.filter((r) => r.rating === 5).length;
   const oneStarReviews = reviews.filter((r) => r.rating === 1).length;
@@ -110,4 +144,111 @@ export const getReviewStatsService = async () => {
     fiveStarReviews,
     oneStarReviews,
   };
+};
+
+export const getProductReviewsService = async (productId) => {
+  const reviews = await Review.find({
+    product: productId,
+    isHidden: false,
+  })
+    .populate("user", "fullName profileImage")
+    .sort({ createdAt: -1 });
+
+  const totalReviews = reviews.length;
+
+  let averageRating = 0;
+
+  const ratingDistribution = {
+    5: 0,
+    4: 0,
+    3: 0,
+    2: 0,
+    1: 0,
+  };
+
+  reviews.forEach((review) => {
+    averageRating += review.rating;
+    ratingDistribution[review.rating]++;
+  });
+
+  averageRating =
+    totalReviews > 0 ? Number((averageRating / totalReviews).toFixed(1)) : 0;
+
+  return {
+    averageRating,
+    totalReviews,
+    ratingDistribution,
+    reviews,
+  };
+};
+
+export const createReviewService = async ({
+  userId,
+  productId,
+  rating,
+  comment,
+}) => {
+  const product = await Product.findById(productId);
+
+  if (!product) {
+    throw new Error("Product not found.");
+  }
+
+  const existingReview = await Review.findOne({
+    user: userId,
+    product: productId,
+  });
+
+  if (existingReview) {
+    throw new Error("You have already reviewed this product.");
+  }
+
+  const review = await Review.create({
+    user: userId,
+    product: productId,
+    rating,
+    comment,
+  });
+
+  await updateProductRating(productId);
+
+  return review;
+};
+
+export const updateReviewService = async ({
+  userId,
+  productId,
+  rating,
+  comment,
+}) => {
+  const review = await Review.findOne({
+    user: userId,
+    product: productId,
+  });
+
+  if (!review) {
+    throw new Error("Review not found.");
+  }
+
+  review.rating = rating;
+  review.comment = comment;
+
+  await review.save();
+
+  await updateProductRating(productId);
+
+  return review;
+};
+
+export const deleteMyReviewService = async (userId, productId) => {
+  const review = await Review.findOneAndDelete({
+    user: userId,
+    product: productId,
+  });
+
+  if (!review) {
+    throw new Error("Review not found.");
+  }
+
+  await updateProductRating(productId);
 };

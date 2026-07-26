@@ -3,6 +3,7 @@ import * as SecureStore from "expo-secure-store";
 
 const ecommerceClient = axios.create({
   baseURL: "https://shopease-ecommerce-service.onrender.com/api/v1",
+  // baseURL: "http://192.168.29.120:5001/api/v1",
   timeout: 30000,
   headers: {
     "Content-Type": "application/json",

@@ -23,10 +23,6 @@ const reviewSchema = new mongoose.Schema(
       trim: true,
       maxlength: 500,
     },
-    review: {
-      type: String,
-      trim: true,
-    },
     isHidden: {
       type: Boolean,
       default: false,

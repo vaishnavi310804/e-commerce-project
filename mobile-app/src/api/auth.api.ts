@@ -86,7 +86,6 @@ export const setAuthToken = (accessToken?: string) => {
     ecommerceClient.defaults.headers.common.Authorization = `Bearer ${cleanToken}`;
     return;
   }
-
   delete client.defaults.headers.common.Authorization;
   delete ecommerceClient.defaults.headers.common.Authorization;
 };
@@ -114,7 +113,6 @@ export const getCurrentUser = async (accessToken?: string) => {
         }
       : undefined,
   });
-
   return data;
 };
 
@@ -152,14 +150,16 @@ export const verifyResetOtp = async (payload: VerifyResetOtpPayload) => {
   return data;
 };
 
-export const resetPassword = async (payload: ResetPasswordPayload) => {
+export const resetPassword = async (
+  payload: ResetPasswordPayload
+) => {
   const { data } = await client.post<ApiResponse<undefined>>(
     "/reset-password",
     payload
   );
-
   return data;
 };
+
 
 export const sendEmailChangeOtp = async (payload: SendEmailChangeOtpPayload) => {
   const { data } = await client.post<ApiResponse<ForgotPasswordData>>(

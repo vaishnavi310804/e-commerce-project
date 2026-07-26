@@ -178,7 +178,6 @@ export default function VerifyOtpScreen() {
 
   const handleResend = async () => {
     if (!canResend || !emailValue) return;
-
     try {
       setError("");
       setResending(true);

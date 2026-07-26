@@ -70,6 +70,8 @@ export const logoutUser = async (req, res, next) => {
 };
 
 export const forgotPassword = async (req, res, next) => {
+   console.log("Forgot Password API Hit");
+  console.log(req.body);
   try {
     const { email } = req.body;
 

@@ -1,7 +1,10 @@
 import Product from "./product.model.js";
 import Category from "../categories/category.model.js";
 import slugify from "../../utils/slug.js";
-import {uploadToCloudinary, deleteFromCloudinary} from "../../utils/cloudinaryUpload.js";
+import {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+} from "../../utils/cloudinaryUpload.js";
 
 export const createProductService = async (productData, file) => {
   const {
@@ -37,10 +40,7 @@ export const createProductService = async (productData, file) => {
       : 0;
   const parsedPrice = Number(price);
 
-  if (
-    parsedDiscountPrice > 0 &&
-    parsedDiscountPrice >= parsedPrice
-  ) {
+  if (parsedDiscountPrice > 0 && parsedDiscountPrice >= parsedPrice) {
     throw new Error("Discount price must be less than the original price.");
   }
 
@@ -74,7 +74,9 @@ export const createProductService = async (productData, file) => {
 };
 
 export const getAllProductsService = async () => {
-    return await Product.find({isActive : true}).populate("category", "name slug").sort({ createdAt: -1 });
+  return await Product.find({ isActive: true })
+    .populate("category", "name slug")
+    .sort({ createdAt: -1 });
 };
 
 export const getAllProductsAdminService = async () => {
@@ -84,13 +86,17 @@ export const getAllProductsAdminService = async () => {
 };
 
 export const getProductByIdService = async (productId) => {
-    const product = await Product.findById(productId).populate("category", "name slug");
+  const product = await Product.findById(productId).populate(
+    "category",
+    "name slug",
+  );
 
-    if (!product) {
-        throw new Error("Product not found.");
-    }
-    return product;
+  if (!product) {
+    throw new Error("Product not found.");
+  }
+  return product;
 };
+
 
 export const productStatusService = async (productId) => {
   const product = await Product.findById(productId);
@@ -98,32 +104,22 @@ export const productStatusService = async (productId) => {
   if (!product) {
     throw new Error("Product not found.");
   }
-
   product.isActive = !product.isActive;
-
   await product.save();
-
   return product;
 };
 
 export const updateProductService = async (productId, productData, file) => {
   const updateData = { ...productData };
-
   const existingProduct = await Product.findById(productId);
-
   if (!existingProduct) {
     throw new Error("Product not found.");
   }
-
   if (productData.name) {
     updateData.slug = slugify(productData.name);
-
     const duplicateProduct = await Product.findOne({
       _id: { $ne: productId },
-      $or: [
-        { name: updateData.name },
-        { slug: updateData.slug },
-      ],
+      $or: [{ name: updateData.name }, { slug: updateData.slug }],
     });
 
     if (duplicateProduct) {
@@ -158,8 +154,10 @@ export const updateProductService = async (productId, productData, file) => {
   }
 
   if (updateData.price !== undefined) updateData.price = price;
-  if (updateData.discountPrice !== undefined) updateData.discountPrice = discountPrice;
-  if (updateData.stock !== undefined) updateData.stock = Number(updateData.stock);
+  if (updateData.discountPrice !== undefined)
+    updateData.discountPrice = discountPrice;
+  if (updateData.stock !== undefined)
+    updateData.stock = Number(updateData.stock);
 
   if (file) {
     // Delete previous image
@@ -181,7 +179,7 @@ export const updateProductService = async (productId, productData, file) => {
     {
       new: true,
       runValidators: true,
-    }
+    },
   ).populate("category", "name slug");
 
   return updatedProduct;

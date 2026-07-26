@@ -93,17 +93,26 @@ export const forgotPasswordService = async (email) => {
   await user.save();
 
   try {
-    await sendForgotPasswordOTP(user.email, otp);
+    const info = await sendForgotPasswordOTP(user.email, otp);
+
+    console.log("FORGOT PASSWORD OTP EMAIL DELIVERED TO GMAIL:", {
+      recipient: user.email,
+      messageId: info?.messageId,
+      accepted: info?.accepted,
+      response: info?.response,
+    });
 
     return {
       emailSent: true,
+      info,
     };
   } catch (error) {
-    console.error("Failed to send password reset OTP email:", error.message);
+    console.error("Failed to send password reset OTP email:", error);
 
     return {
       emailSent: false,
       otp,
+      error: error.message,
     };
   }
 };
@@ -151,15 +160,12 @@ export const resetPasswordService = async ({
   if (decoded.purpose !== "password-reset") {
     throw new Error("Invalid reset token.");
   }
-
   const user = await User.findById(decoded.id).select(
     "+resetPasswordOTP +resetPasswordOTPExpires"
   );
-
   if (!user) {
     throw new Error("User not found.");
   }
-
   user.password = await hashPassword(newPassword);
   user.resetPasswordOTP = null;
   user.resetPasswordOTPExpires = null;
@@ -245,11 +251,19 @@ export const sendEmailChangeOTPService = async (userId, newEmail) => {
   await user.save();
 
   try {
-    await sendEmailChangeOTP(newEmail, otp);
+    const info = await sendEmailChangeOTP(newEmail, otp);
+
+    console.log("EMAIL CHANGE OTP DELIVERED TO GMAIL:", {
+      recipient: newEmail,
+      messageId: info?.messageId,
+      accepted: info?.accepted,
+      response: info?.response,
+    });
 
     return {
       emailSent: true,
       message: "OTP sent successfully.",
+      info,
     };
   } catch (error) {
     console.error("Failed to send email change OTP:", error.message);
@@ -258,6 +272,7 @@ export const sendEmailChangeOTPService = async (userId, newEmail) => {
       emailSent: false,
       message: "OTP generated successfully.",
       otp,
+      error: error.message,
     };
   }
 };
