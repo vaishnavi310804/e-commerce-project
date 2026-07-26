@@ -5,8 +5,12 @@ import {
   Text,
   TouchableOpacity,
   Image,
-  ImageBackground,ScrollView,
-  Alert, KeyboardAvoidingView, Platform} from "react-native";
+  ImageBackground,
+  ScrollView,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -83,104 +87,107 @@ export default function LoginScreen() {
       backgroundColor="#F8F7FF"
     >
       <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={20} // adjust if needed
-        >
-          <ScrollView>
-      <View style={styles.container}>
-        <ImageBackground
-          source={require("../../../assets/images/bgimage.png")}
-          style={styles.header}
-          imageStyle={styles.headerImage}
-        >
-          <LinearGradient
-            colors={["rgba(108,78,255,0.88)", "rgba(124,92,255,0.92)"]}
-            style={StyleSheet.absoluteFill}
-          />
-
-          <View style={styles.headerContent}>
-            <Image
-              source={require("../../../assets/images/logo2.png")}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-
-            <Text style={styles.heading}>Welcome Back!</Text>
-
-            <Text style={styles.subHeading}>Sign in to continue shopping</Text>
-          </View>
-        </ImageBackground>
-
-        <View style={styles.card}>
-          <View style={styles.socialContainer}>
-            <TouchableOpacity style={styles.socialButton}>
-              <Image
-                source={require("../../../assets/images/google.logo.png")}
-                style={styles.googleIcon}
-                resizeMode="contain"
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={20}
+      >
+        <ScrollView>
+          <View style={styles.container}>
+            <ImageBackground
+              source={require("../../../assets/images/bgimage.png")}
+              style={styles.header}
+              imageStyle={styles.headerImage}
+            >
+              <LinearGradient
+                colors={["rgba(108,78,255,0.88)", "rgba(124,92,255,0.92)"]}
+                style={StyleSheet.absoluteFill}
               />
-            </TouchableOpacity>
+              <View style={styles.headerContent}>
+                <Image
+                  source={require("../../../assets/images/logo2.png")}
+                  style={styles.logo}
+                  resizeMode="contain"
+                />
 
-            <TouchableOpacity style={styles.socialButton}>
-              <Ionicons name="logo-apple" size={26} color="#000" />
-            </TouchableOpacity>
+                <Text style={styles.heading}>Welcome Back!</Text>
+
+                <Text style={styles.subHeading}>
+                  Sign in to continue shopping
+                </Text>
+              </View>
+            </ImageBackground>
+
+            <View style={styles.card}>
+              <View style={styles.socialContainer}>
+                <TouchableOpacity style={styles.socialButton}>
+                  <Image
+                    source={require("../../../assets/images/google.logo.png")}
+                    style={styles.googleIcon}
+                    resizeMode="contain"
+                  />
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.socialButton}>
+                  <Ionicons name="logo-apple" size={26} color="#000" />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.dividerContainer}>
+                <View style={styles.line} />
+                <Text style={styles.orText}>OR CONTINUE WITH</Text>
+                <View style={styles.line} />
+              </View>
+
+              <Input
+                label="Email"
+                placeholder="example@gmail.com"
+                value={email}
+                onChangeText={(text) => {
+                  setEmail(text);
+                  setError("");
+                }}
+                keyboardType="email-address"
+              />
+
+              <Input
+                label="Password"
+                placeholder="Password"
+                value={password}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  setError("");
+                }}
+                secureTextEntry
+              />
+
+              <TouchableOpacity
+                style={styles.forgotContainer}
+                onPress={() => router.push("/(auth)/forgot_password")}
+              >
+                <Text style={styles.forgotText}>Forgot Password?</Text>
+              </TouchableOpacity>
+
+              {!!error && <Text style={styles.errorText}>{error}</Text>}
+
+              <PrimaryButton
+                title="Sign In"
+                loading={loading}
+                disabled={isDisabled}
+                onPress={handleLogin}
+              />
+
+              <View style={styles.footer}>
+                <Text style={styles.footerText}>Do not have an account?</Text>
+
+                <TouchableOpacity
+                  onPress={() => router.push("/(auth)/register")}
+                >
+                  <Text style={styles.signupText}> Sign Up</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
-
-          <View style={styles.dividerContainer}>
-            <View style={styles.line} />
-            <Text style={styles.orText}>OR CONTINUE WITH</Text>
-            <View style={styles.line} />
-          </View>
-
-          <Input
-            label="Email"
-            placeholder="example@gmail.com"
-            value={email}
-            onChangeText={(text) => {
-              setEmail(text);
-              setError("");
-            }}
-            keyboardType="email-address"
-          />
-
-          <Input
-            label="Password"
-            placeholder="Password"
-            value={password}
-            onChangeText={(text) => {
-              setPassword(text);
-              setError("");
-            }}
-            secureTextEntry
-          />
-
-          <TouchableOpacity
-            style={styles.forgotContainer}
-            onPress={() => router.push("/(auth)/forgot_password")}
-          >
-            <Text style={styles.forgotText}>Forgot Password?</Text>
-          </TouchableOpacity>
-
-          {!!error && <Text style={styles.errorText}>{error}</Text>}
-
-          <PrimaryButton
-            title="Sign In"
-            loading={loading}
-            disabled={isDisabled}
-            onPress={handleLogin}
-          />
-
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Do not have an account?</Text>
-
-            <TouchableOpacity onPress={() => router.push("/(auth)/register")}>
-              <Text style={styles.signupText}> Sign Up</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-      </ScrollView>
+        </ScrollView>
       </KeyboardAvoidingView>
     </ScreenWrapper>
   );
@@ -190,8 +197,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F8F7FF",
-    flexGrow:1,
-    paddingBottom:20
+    flexGrow: 1,
+    paddingBottom: 20,
   },
 
   header: {

@@ -2,9 +2,9 @@ const Colors = {
   primary: "#6C63FF",
   secondary: "#8B5CF6",
 
-background: "#F8F7FF",
-surface: "#FFFFFF",
-card: "#FFFFFF",
+  background: "#F8F7FF",
+  surface: "#FFFFFF",
+  card: "#FFFFFF",
 
   text: "#1E293B",
   textSecondary: "#64748B",
@@ -17,7 +17,7 @@ card: "#FFFFFF",
 
   white: "#FFFFFF",
   black: "#000000",
-  gray: "#808080"
+  gray: "#808080",
 };
 
 export default Colors;

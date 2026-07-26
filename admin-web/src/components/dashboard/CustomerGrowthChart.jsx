@@ -1,13 +1,5 @@
 import React from "react";
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-} from "recharts";
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 import ChartCard from "./ChartCard";
 
 const CustomerGrowthChart = ({ data = [] }) => {

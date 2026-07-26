@@ -48,10 +48,8 @@ const Dashboard = () => {
   const [lowStock, setLowStock] = useState([]);
   const [recentReviews, setRecentReviews] = useState([]);
   const [customerGrowth, setCustomerGrowth] = useState([]);
-
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(null);
-
   const [activeFilter, setActiveFilter] = useState("30days");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -132,7 +130,6 @@ const Dashboard = () => {
         ["Pending Orders", stats.pendingOrders || 0],
         ["Total Customers", stats.totalCustomers || 0],
         ["Total Products", stats.totalProducts || 0],
-        ["Average Order Value", `$${(stats.avgOrderValue || 0).toFixed(2)}`],
       ]
         .map((e) => e.join(","))
         .join("\n");
@@ -156,7 +153,6 @@ const Dashboard = () => {
           onExportPDF={handleExportPDF}
           onExportExcel={handleExportExcel}
         />
-
         <DashboardFilters
           activeFilter={activeFilter}
           onFilterChange={setActiveFilter}
@@ -166,8 +162,8 @@ const Dashboard = () => {
           onEndDateChange={setEndDate}
           onApplyCustom={fetchDashboardData}
         />
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+        
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
             title="Total Revenue"
             value={`$${Number(stats.totalRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
@@ -195,23 +191,6 @@ const Dashboard = () => {
             growth={stats.ordersGrowth}
             icon={FaShoppingBag}
             color="sky"
-          />
-          <StatCard
-            title="Avg Order Value"
-            value={`$${Number(stats.avgOrderValue || 0).toFixed(2)}`}
-            icon={FaDollarSign}
-            color="amber"
-            subText="Per completed order"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-          <StatCard
-            title="Pending Orders"
-            value={stats.pendingOrders || 0}
-            icon={FaClock}
-            color="amber"
-            subText="Awaiting fulfillment"
           />
           <StatCard
             title="Completed Orders"
@@ -243,7 +222,7 @@ const Dashboard = () => {
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
             title="Total Products"
             value={stats.totalProducts || 0}
@@ -269,13 +248,6 @@ const Dashboard = () => {
             icon={FaBan}
             color="rose"
             subText="Stock <= 0"
-          />
-          <StatCard
-            title="Avg Store Rating"
-            value={`${stats.averageRating || "5.0"} ★`}
-            icon={FaStar}
-            color="amber"
-            subText="Based on customer reviews"
           />
         </div>
 

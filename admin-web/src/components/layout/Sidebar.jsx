@@ -53,28 +53,21 @@ const Sidebar = () => {
     user?.image ||
     null;
 
-  const initialLetter = (
-    user?.fullName ||
-    user?.name ||
-    "U"
-  )
+  const initialLetter = (user?.fullName || user?.name || "U")
     .charAt(0)
     .toUpperCase();
 
   return (
     <>
-      <aside className="w-64 h-screen shrink-0 bg-white border-r border-slate-200 p-5 flex flex-col justify-between overflow-y-auto">
+      <aside className="w-60 h-screen shrink-0 bg-white border-r border-slate-200 p-4 flex flex-col justify-between overflow-y-auto">
         <div>
-          <div className="flex justify-center mb-4">
-            <img
-              src={logo}
-              alt="ShopEase Logo"
-              className="h-10 object-contain"
-            />
+          <div className="flex justify-center mb-5">
+            <h1 className="text-3xl font-extrabold tracking-tight text-[#6C63FF]">
+              ShopEase
+            </h1>
           </div>
-
-          <div className="flex flex-col items-center text-center my-3">
-            <div className="rounded-full border-2 border-[#8B5CF6] mb-1.5 shadow-sm">
+          <div className="flex flex-col items-center text-center my-5">
+            <div className="rounded-full border-2 border-[#8B5CF6] mb-2 shadow-sm">
               {profileImage && !imgError ? (
                 <img
                   src={profileImage}
@@ -93,17 +86,13 @@ const Sidebar = () => {
               Welcome, {user?.fullName || user?.name || "User"}
             </h3>
 
-            <p className="text-xs font-medium text-[#8B5CF6]">
+            <p className="text-xs font-medium text-[#6C63FF]">
               {user?.email || ""}
             </p>
           </div>
 
-          <nav className="space-y-2">
-            <SidebarItem
-              icon={FaHome}
-              title="Dashboard"
-              path="/dashboard"
-            />
+          <nav className="space-y-1 ">
+            <SidebarItem icon={FaHome} title="Dashboard" path="/dashboard" />
 
             <SidebarItem
               icon={FaLayerGroup}
@@ -111,44 +100,24 @@ const Sidebar = () => {
               path="/categories"
             />
 
-            <SidebarItem
-              icon={FaBoxOpen}
-              title="Products"
-              path="/products"
-            />
+            <SidebarItem icon={FaBoxOpen} title="Products" path="/products" />
 
-            <SidebarItem
-              icon={FaShoppingCart}
-              title="Orders"
-              path="/orders"
-            />
+            <SidebarItem icon={FaShoppingCart} title="Orders" path="/orders" />
 
-            <SidebarItem
-              icon={FaUsers}
-              title="Customers"
-              path="/customers"
-            />
+            <SidebarItem icon={FaUsers} title="Customers" path="/customers" />
 
-            <SidebarItem
-              icon={FaStar}
-              title="Reviews"
-              path="/reviews"
-            />
+            <SidebarItem icon={FaStar} title="Reviews" path="/reviews" />
 
-            <SidebarItem
-              icon={FaCog}
-              title="Settings"
-              path="/settings"
-            />
+            <SidebarItem icon={FaCog} title="Settings" path="/settings" />
           </nav>
         </div>
 
-        <div className="pt-6 border-t border-slate-100 mt-6">
+        <div className="pt-2 border-t border-slate-100">
           <button
             onClick={() => setOpenLogout(true)}
-            className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-xl font-medium transition-colors cursor-pointer shadow-sm"
+            className="w-full px-3 py-1.5 rounded-lg flex items-center gap-2.5 text-red-600 hover:bg-red-50 text-sm font-medium transition-colors cursor-pointer"
           >
-            <FaSignOutAlt />
+            <FaSignOutAlt className="text-base shrink-0" />
             Logout
           </button>
         </div>

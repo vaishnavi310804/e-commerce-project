@@ -6,7 +6,6 @@ const CustomerTable = ({
   loading,
   onViewCustomer,
   onToggleStatus,
-  onCopyEmail,
 }) => {
   if (loading) {
     return (
@@ -83,13 +82,6 @@ const CustomerTable = ({
               <td className="px-6 py-4 whitespace-nowrap text-gray-600">
                 <div className="flex items-center gap-2">
                   <span>{cust.email}</span>
-                  <button
-                    onClick={() => onCopyEmail(cust.email)}
-                    className="text-gray-400 hover:text-gray-600"
-                    title="Copy email"
-                  >
-                    <FaCopy size={13} />
-                  </button>
                 </div>
               </td>
 

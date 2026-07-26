@@ -20,7 +20,7 @@ const ReviewStatsCards = ({ stats }) => {
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-      <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow border-l-4 border-indigo-500">
+      <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow">
         <div className="rounded-lg bg-indigo-50 p-3 text-indigo-600">
           <FaComments size={20} />
         </div>
@@ -30,7 +30,7 @@ const ReviewStatsCards = ({ stats }) => {
         </div>
       </div>
 
-      <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow border-l-4 border-emerald-500">
+      <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow">
         <div className="rounded-lg bg-emerald-50 p-3 text-emerald-600">
           <FaEye size={20} />
         </div>
@@ -40,7 +40,7 @@ const ReviewStatsCards = ({ stats }) => {
         </div>
       </div>
 
-      <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow border-l-4 border-rose-500">
+      <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow">
         <div className="rounded-lg bg-rose-50 p-3 text-rose-600">
           <FaEyeSlash size={20} />
         </div>
@@ -50,7 +50,7 @@ const ReviewStatsCards = ({ stats }) => {
         </div>
       </div>
 
-      <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow border-l-4 border-amber-500">
+      <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow">
         <div className="rounded-lg bg-amber-50 p-3 text-amber-600">
           <FaStar size={20} />
         </div>
@@ -60,7 +60,7 @@ const ReviewStatsCards = ({ stats }) => {
         </div>
       </div>
 
-      <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow border-l-4 border-purple-500">
+      <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow">
         <div className="rounded-lg bg-purple-50 p-3 text-purple-600">
           <FaSmile size={20} />
         </div>
@@ -70,7 +70,7 @@ const ReviewStatsCards = ({ stats }) => {
         </div>
       </div>
 
-      <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow border-l-4 border-gray-500">
+      <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow">
         <div className="rounded-lg bg-gray-100 p-3 text-gray-600">
           <FaFrown size={20} />
         </div>

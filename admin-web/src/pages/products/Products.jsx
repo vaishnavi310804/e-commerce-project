@@ -13,10 +13,8 @@ const Products = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-
   const [isOpen, setIsOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
-
   const [statusFilter, setStatusFilter] = useState("active");
 
   const fetchProducts = async () => {
@@ -81,8 +79,7 @@ const Products = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">Products</h1>
-            <p className="mt-1 text-gray-500">Manage all products</p>
+            <h1 className="text-3xl font-bold text-gray-900">Products Dashboard</h1>
           </div>
 
           <button

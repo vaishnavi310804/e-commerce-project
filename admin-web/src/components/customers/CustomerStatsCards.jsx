@@ -20,7 +20,7 @@ const CustomerStatsCards = ({ stats }) => {
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-      <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow border-l-4 border-indigo-500">
+      <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow">
         <div className="rounded-lg bg-indigo-50 p-3 text-indigo-600">
           <FaUsers size={20} />
         </div>
@@ -30,7 +30,7 @@ const CustomerStatsCards = ({ stats }) => {
         </div>
       </div>
 
-      <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow border-l-4 border-emerald-500">
+      <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow">
         <div className="rounded-lg bg-emerald-50 p-3 text-emerald-600">
           <FaUserCheck size={20} />
         </div>
@@ -40,7 +40,7 @@ const CustomerStatsCards = ({ stats }) => {
         </div>
       </div>
 
-      <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow border-l-4 border-rose-500">
+      <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow">
         <div className="rounded-lg bg-rose-50 p-3 text-rose-600">
           <FaUserSlash size={20} />
         </div>
@@ -50,7 +50,7 @@ const CustomerStatsCards = ({ stats }) => {
         </div>
       </div>
 
-      <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow border-l-4 border-amber-500">
+      <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow">
         <div className="rounded-lg bg-amber-50 p-3 text-amber-600">
           <FaUserPlus size={20} />
         </div>
@@ -60,7 +60,7 @@ const CustomerStatsCards = ({ stats }) => {
         </div>
       </div>
 
-      <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow border-l-4 border-sky-500">
+      <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow">
         <div className="rounded-lg bg-sky-50 p-3 text-sky-600">
           <FaShoppingBag size={20} />
         </div>
@@ -70,7 +70,7 @@ const CustomerStatsCards = ({ stats }) => {
         </div>
       </div>
 
-      <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow border-l-4 border-purple-500">
+      <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow">
         <div className="rounded-lg bg-purple-50 p-3 text-purple-600">
           <FaDollarSign size={20} />
         </div>

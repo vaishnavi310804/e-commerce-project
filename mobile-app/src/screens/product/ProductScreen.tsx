@@ -1,6 +1,14 @@
 import react, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, ActivityIndicator, ScrollView, TouchableOpacity, Image, Alert } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import {
+  StyleSheet,
+  Text,
+  View,
+  ActivityIndicator,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  Alert,
+} from "react-native";
 import ScreenWrapper from "@/src/components/common/ScreenWrapper";
 import Colors from "@/src/constants/colors";
 import { router } from "expo-router";
@@ -8,6 +16,10 @@ import { Ionicons, Feather } from "@expo/vector-icons";
 import Fonts from "@/src/constants/fonts";
 import { getProductById, Product } from "@/src/api/product.api";
 import { addToCart, getCart } from "../../api/cart.api";
+import { useLocalSearchParams } from "expo-router";
+import ProductReview from "@/src/components/products/ProductReview";
+import { getProductReviews } from "@/src/api/review.api";
+import WriteReview from "@/src/components/review/WriteReview";
 
 export default function ProductScreen() {
   const params = useLocalSearchParams();
@@ -17,6 +29,9 @@ export default function ProductScreen() {
   const [product, setProduct] = useState<Product | null>(null);
   const [isInCart, setIsInCart] = useState(false);
   const [cartLoading, setCartLoading] = useState(true);
+  const [reviewData, setReviewData] = useState<any>(null);
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [showReview, setShowReview] = useState(false);
 
   const fetchProduct = async () => {
     try {
@@ -29,11 +44,23 @@ export default function ProductScreen() {
     }
   };
 
+  const fetchReviews = async () => {
+    try {
+      setReviewLoading(true);
+      const response = await getProductReviews(id);
+      setReviewData(response.data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setReviewLoading(false);
+    }
+  };
+
   const checkProductInCart = async () => {
     try {
       const response = await getCart();
       const exists = response.data.items.some(
-        (item: any) => item.product._id === product?._id
+        (item: any) => item.product._id === product?._id,
       );
       setIsInCart(exists);
     } catch (error) {
@@ -57,6 +84,7 @@ export default function ProductScreen() {
   useEffect(() => {
     if (id) {
       fetchProduct();
+      fetchReviews();
     }
   }, [id]);
 
@@ -75,7 +103,6 @@ export default function ProductScreen() {
       </ScreenWrapper>
     );
   }
-
   if (!product) {
     return (
       <ScreenWrapper>
@@ -83,7 +110,6 @@ export default function ProductScreen() {
       </ScreenWrapper>
     );
   }
-
   return (
     <ScreenWrapper>
       <View style={styles.container}>
@@ -124,7 +150,6 @@ export default function ProductScreen() {
             ) : null}
 
             <Text style={styles.productName}>{product.name}</Text>
-
             <View style={styles.ratingContainer}>
               <Ionicons name="star" size={18} color="#F4B400" />
 
@@ -142,7 +167,9 @@ export default function ProductScreen() {
                 ₹{product.discountPrice ?? product.price}
               </Text>
 
-              {Boolean(product.discountPrice && product.discountPrice < product.price) ? (
+              {Boolean(
+                product.discountPrice && product.discountPrice < product.price,
+              ) ? (
                 <Text style={styles.originalPrice}>₹{product.price}</Text>
               ) : null}
             </View>
@@ -152,6 +179,27 @@ export default function ProductScreen() {
 
               <Text style={styles.description}>{product.description}</Text>
             </View>
+            <ProductReview
+              loading={reviewLoading}
+              reviewData={reviewData}
+              productId={product._id}
+            />
+          </View>
+          <View style={styles.addReviewContainer}>
+            <TouchableOpacity
+              style={styles.button}
+              activeOpacity={0.8}
+              onPress={() =>
+                router.push({
+                  pathname: "/product/review",
+                  params: {
+                    productId: product._id,
+                  },
+                })
+              }
+            >
+              <Text style={styles.buttonText}>Write Review</Text>
+            </TouchableOpacity>
           </View>
         </ScrollView>
 
@@ -172,14 +220,9 @@ export default function ProductScreen() {
               size={22}
               color={Colors.primary}
             />
-
             <Text style={styles.cartButtonText}>
               {isInCart ? "Go to Cart" : "Add to Cart"}
             </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.buyButton} activeOpacity={0.8}>
-            <Text style={styles.buyButtonText}>Buy Now</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -232,6 +275,7 @@ const styles = StyleSheet.create({
   },
 
   infoContainer: {
+    marginTop: 10,
     paddingHorizontal: 20,
   },
 
@@ -239,7 +283,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: Fonts.medium,
     color: Colors.primary,
-    marginBottom: 3,
+    marginBottom: 5,
   },
 
   productName: {
@@ -342,19 +386,21 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     fontSize: 16,
   },
-
-  buyButton: {
-    flex: 1,
-    height: 54,
-    borderRadius: 14,
+  button: {
+    height: 56,
+    borderRadius: 28,
     backgroundColor: Colors.primary,
     justifyContent: "center",
     alignItems: "center",
   },
 
-  buyButtonText: {
+  buttonText: {
     color: "#FFF",
     fontSize: 16,
     fontFamily: Fonts.bold,
+  },
+  addReviewContainer: {
+    marginTop: 50,
+    padding: 20,
   },
 });

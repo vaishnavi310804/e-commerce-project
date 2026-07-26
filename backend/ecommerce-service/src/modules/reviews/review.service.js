@@ -1,5 +1,5 @@
 import Review from "./review.model.js";
-import productModel from "../products/product.model.js";
+import Product from "../products/product.model.js";
 
 const updateProductRating = async (productId) => {
   const stats = await Review.aggregate([

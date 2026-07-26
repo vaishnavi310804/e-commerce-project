@@ -17,17 +17,11 @@ const ITEMS_PER_PAGE = 10;
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // Filters state
   const [searchTerm, setSearchTerm] = useState("");
   const [orderStatus, setOrderStatus] = useState("All");
   const [paymentStatus, setPaymentStatus] = useState("All");
   const [dateFilter, setDateFilter] = useState("");
-
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-
-  // Modal state
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -47,22 +41,23 @@ const Orders = () => {
     fetchOrdersData();
   }, []);
 
-  // Stats calculation
   const totalOrders = orders.length;
   const pendingOrders = orders.filter(
-    (o) => o.orderStatus === "Pending" || o.orderStatus === "Placed"
+    (o) => o.orderStatus === "Pending" || o.orderStatus === "Placed",
   ).length;
+
   const deliveredOrders = orders.filter(
-    (o) => o.orderStatus === "Delivered"
+    (o) => o.orderStatus === "Delivered",
   ).length;
+
   const cancelledOrders = orders.filter(
-    (o) => o.orderStatus === "Cancelled"
+    (o) => o.orderStatus === "Cancelled",
   ).length;
+  
   const totalRevenue = orders
     .filter((o) => o.paymentStatus === "Paid")
     .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
 
-  // Filtering logic
   const filteredOrders = orders.filter((order) => {
     const customerName =
       order.user?.fullName ||
@@ -86,23 +81,20 @@ const Orders = () => {
       new Date(order.createdAt).toISOString().split("T")[0] === dateFilter;
 
     return (
-      matchesSearch &&
-      matchesOrderStatus &&
-      matchesPaymentStatus &&
-      matchesDate
+      matchesSearch && matchesOrderStatus && matchesPaymentStatus && matchesDate
     );
   });
 
-  // Reset page when filters change
+
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, orderStatus, paymentStatus, dateFilter]);
 
-  // Pagination calculation
+
   const totalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE) || 1;
   const paginatedOrders = filteredOrders.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
+    currentPage * ITEMS_PER_PAGE,
   );
 
   const handleResetFilters = () => {
@@ -130,69 +122,82 @@ const Orders = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">Orders</h1>
-            <p className="mt-1 text-gray-500">
-              Manage and track customer orders
-            </p>
+            <h1 className="text-3xl font-bold text-gray-800">Orders Dashboard</h1>
           </div>
         </div>
 
-        {/* Top Summary Cards */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-          {/* Total Orders */}
-          <div className="flex items-center gap-4 rounded-xl bg-white p-5 shadow border-l-4 border-indigo-500">
+
+          <div className="flex items-center gap-4 rounded-xl bg-white p-5 shadow">
             <div className="rounded-xl bg-indigo-50 p-3 text-indigo-600">
               <FaShoppingBag size={22} />
             </div>
             <div>
-              <p className="text-xs font-semibold text-gray-500">Total Orders</p>
-              <h3 className="text-2xl font-bold text-gray-800">{totalOrders}</h3>
+              <p className="text-xs font-semibold text-gray-500">
+                Total Orders
+              </p>
+              <h3 className="text-2xl font-bold text-gray-800">
+                {totalOrders}
+              </h3>
             </div>
           </div>
 
           {/* Pending Orders */}
-          <div className="flex items-center gap-4 rounded-xl bg-white p-5 shadow border-l-4 border-amber-500">
+          <div className="flex items-center gap-4 rounded-xl bg-white p-5 shadow">
             <div className="rounded-xl bg-amber-50 p-3 text-amber-600">
               <FaClock size={22} />
             </div>
             <div>
-              <p className="text-xs font-semibold text-gray-500">Pending Orders</p>
-              <h3 className="text-2xl font-bold text-gray-800">{pendingOrders}</h3>
+              <p className="text-xs font-semibold text-gray-500">
+                Pending Orders
+              </p>
+              <h3 className="text-2xl font-bold text-gray-800">
+                {pendingOrders}
+              </h3>
             </div>
           </div>
 
           {/* Delivered Orders */}
-          <div className="flex items-center gap-4 rounded-xl bg-white p-5 shadow border-l-4 border-emerald-500">
+          <div className="flex items-center gap-4 rounded-xl bg-white p-5 shadow">
             <div className="rounded-xl bg-emerald-50 p-3 text-emerald-600">
               <FaCheckCircle size={22} />
             </div>
             <div>
-              <p className="text-xs font-semibold text-gray-500">Delivered Orders</p>
-              <h3 className="text-2xl font-bold text-gray-800">{deliveredOrders}</h3>
+              <p className="text-xs font-semibold text-gray-500">
+                Delivered Orders
+              </p>
+              <h3 className="text-2xl font-bold text-gray-800">
+                {deliveredOrders}
+              </h3>
             </div>
           </div>
 
           {/* Cancelled Orders */}
-          <div className="flex items-center gap-4 rounded-xl bg-white p-5 shadow border-l-4 border-rose-500">
+          <div className="flex items-center gap-4 rounded-xl bg-white p-5 shadow">
             <div className="rounded-xl bg-rose-50 p-3 text-rose-600">
               <FaBan size={22} />
             </div>
             <div>
-              <p className="text-xs font-semibold text-gray-500">Cancelled Orders</p>
-              <h3 className="text-2xl font-bold text-gray-800">{cancelledOrders}</h3>
+              <p className="text-xs font-semibold text-gray-500">
+                Cancelled Orders
+              </p>
+              <h3 className="text-2xl font-bold text-gray-800">
+                {cancelledOrders}
+              </h3>
             </div>
           </div>
 
           {/* Total Revenue */}
-          <div className="flex items-center gap-4 rounded-xl bg-white p-5 shadow border-l-4 border-purple-500">
+          <div className="flex items-center gap-4 rounded-xl bg-white p-5 shadow">
             <div className="rounded-xl bg-purple-50 p-3 text-purple-600">
               <FaDollarSign size={22} />
             </div>
             <div>
-              <p className="text-xs font-semibold text-gray-500">Total Revenue</p>
+              <p className="text-xs font-semibold text-gray-500">
+                Total Revenue
+              </p>
               <h3 className="text-2xl font-bold text-gray-800">
                 ${totalRevenue.toFixed(2)}
               </h3>
@@ -200,7 +205,6 @@ const Orders = () => {
           </div>
         </div>
 
-        {/* Search & Filters */}
         <OrderFilters
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
@@ -213,7 +217,7 @@ const Orders = () => {
           onReset={handleResetFilters}
         />
 
-        {/* Orders Table */}
+   
         <OrderTable
           orders={paginatedOrders}
           loading={loading}
@@ -221,7 +225,7 @@ const Orders = () => {
           onUpdateStatus={handleUpdateStatus}
         />
 
-        {/* Pagination Footer */}
+
         {!loading && filteredOrders.length > 0 && (
           <div className="flex items-center justify-between rounded-xl bg-white px-6 py-4 shadow">
             <p className="text-sm text-gray-600">
@@ -266,7 +270,6 @@ const Orders = () => {
           </div>
         )}
 
-        {/* Order Details & Status Update Modal */}
         <OrderDetailsModal
           open={isModalOpen}
           onClose={handleCloseModal}

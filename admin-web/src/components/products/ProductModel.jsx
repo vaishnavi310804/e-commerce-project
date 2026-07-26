@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FaTimes } from "react-icons/fa";
-import {
-  createProduct,
-  updateProduct,
-} from "../../services/productApi";
+import { createProduct, updateProduct } from "../../services/productApi";
 import { getAllCategories } from "../../services/categoryApi";
 
 const ProductModel = ({ open, onClose, product, onSuccess }) => {
@@ -28,7 +25,6 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
     images: [],
   });
 
-  // Fetch categories when modal opens
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -38,13 +34,11 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
         console.error("Failed to fetch categories for product modal:", error);
       }
     };
-
     if (open) {
       fetchCategories();
     }
   }, [open]);
 
-  // Populate data when editing or reset when adding
   useEffect(() => {
     if (product) {
       setFormData({
@@ -219,7 +213,6 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl bg-white shadow-xl">
-        {/* Header */}
         <div className="flex items-center justify-between border-b px-6 py-4">
           <h2 className="text-xl font-semibold text-gray-800">
             {product ? "Edit Product" : "Add Product"}
@@ -232,11 +225,8 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
             <FaTimes />
           </button>
         </div>
-
-        {/* Form Container with vertical scroll */}
         <form onSubmit={handleSubmit} className="flex flex-1 flex-col overflow-hidden">
           <div className="flex-1 overflow-y-auto p-6 space-y-5">
-            {/* Product Name */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
                 Product Name
@@ -251,8 +241,6 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
                 required
               />
             </div>
-
-            {/* Description */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
                 Description
@@ -267,8 +255,6 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
                 required
               />
             </div>
-
-            {/* Category Dropdown */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
                 Category
@@ -288,8 +274,6 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
                 ))}
               </select>
             </div>
-
-            {/* Brand */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
                 Brand
@@ -303,8 +287,6 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
                 className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
               />
             </div>
-
-            {/* Price & Discount Price Side by Side */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-700">
@@ -320,7 +302,6 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
                   required
                 />
               </div>
-
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-700">
                   Discount Price
@@ -336,7 +317,6 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
               </div>
             </div>
 
-            {/* Stock */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
                 Stock
@@ -352,7 +332,6 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
               />
             </div>
 
-            {/* Featured & Trending Checkboxes */}
             <div className="flex items-center gap-8 py-1">
               <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-gray-700">
                 <input
@@ -377,7 +356,6 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
               </label>
             </div>
 
-            {/* Primary Image */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
                 Primary Image
@@ -397,7 +375,6 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
               />
             </div>
 
-            {/* Gallery Images */}
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
                 Gallery Images
@@ -424,7 +401,6 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
             </div>
           </div>
 
-          {/* Footer Action Buttons */}
           <div className="flex justify-end gap-3 border-t bg-white px-6 py-4">
             <button
               type="button"
@@ -433,7 +409,6 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
             >
               Cancel
             </button>
-
             <button
               type="submit"
               disabled={submitting}

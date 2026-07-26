@@ -20,23 +20,18 @@ const Reviews = () => {
   const [reviews, setReviews] = useState([]);
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
-
   const [searchTerm, setSearchTerm] = useState("");
   const [ratingFilter, setRatingFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortFilter, setSortFilter] = useState("newest");
-
   const [selectedIds, setSelectedIds] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-
   const [selectedReview, setSelectedReview] = useState(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isBulkDelete, setIsBulkDelete] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-
   const [toastMessage, setToastMessage] = useState("");
 
   const showToast = (msg) => {

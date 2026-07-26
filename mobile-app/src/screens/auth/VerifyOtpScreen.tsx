@@ -38,7 +38,7 @@ type ApiErrorResponse = {
 
 const CELL_COUNT = 6;
 
-const FLOW_TITLES: Record<OtpFlowType, string> = {
+const Page_Types: Record<OtpFlowType, string> = {
   "forgot-password": "Verify Code",
   "change-email": "Verify Email",
 };
@@ -218,7 +218,7 @@ export default function VerifyOtpScreen() {
     setValue,
   });
 
-  const screenTitle = FLOW_TITLES[flowType] || "Verify Code";
+  const screenTitle = Page_Types[flowType] || "Verify Code";
 
   return (
     <ScreenWrapper backgroundColor="#FFFFFF">

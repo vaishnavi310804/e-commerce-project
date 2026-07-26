@@ -17,20 +17,16 @@ const Customers = () => {
   const [customers, setCustomers] = useState([]);
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
-
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortFilter, setSortFilter] = useState("newest");
-
   const [currentPage, setCurrentPage] = useState(1);
-
   const [selectedCustomerId, setSelectedCustomerId] = useState(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-
-  const [selectedCustomerForBlock, setSelectedCustomerForBlock] = useState(null);
+  const [selectedCustomerForBlock, setSelectedCustomerForBlock] =
+    useState(null);
   const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
   const [blockingLoading, setBlockingLoading] = useState(false);
-
   const [toastMessage, setToastMessage] = useState("");
 
   const showToast = (msg) => {
@@ -42,7 +38,11 @@ const Customers = () => {
     try {
       setLoading(true);
       const [customersRes, statsRes] = await Promise.all([
-        getAllCustomers({ search: searchTerm, status: statusFilter, sort: sortFilter }),
+        getAllCustomers({
+          search: searchTerm,
+          status: statusFilter,
+          sort: sortFilter,
+        }),
         getCustomerStats(),
       ]);
       setCustomers(customersRes.data || []);
@@ -65,7 +65,7 @@ const Customers = () => {
   const totalPages = Math.ceil(customers.length / ITEMS_PER_PAGE) || 1;
   const paginatedCustomers = customers.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
+    currentPage * ITEMS_PER_PAGE,
   );
 
   const handleResetFilters = () => {
@@ -95,16 +95,14 @@ const Customers = () => {
       await fetchCustomerData();
     } catch (error) {
       console.error(error);
-      alert(error.response?.data?.message || "Failed to update customer status.");
+      alert(
+        error.response?.data?.message || "Failed to update customer status.",
+      );
     } finally {
       setBlockingLoading(false);
     }
   };
 
-  const handleCopyEmail = (email) => {
-    navigator.clipboard.writeText(email);
-    showToast(`Copied ${email} to clipboard!`);
-  };
 
   const handleExportCSV = () => {
     if (!customers || customers.length === 0) {
@@ -160,10 +158,7 @@ const Customers = () => {
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">Customers</h1>
-            <p className="mt-1 text-gray-500">
-              Manage, monitor, and support store customers
-            </p>
+            <h1 className="text-3xl font-bold text-gray-800">Customers Dashboard</h1>
           </div>
         </div>
 
@@ -185,7 +180,6 @@ const Customers = () => {
           loading={loading}
           onViewCustomer={handleViewCustomer}
           onToggleStatus={handleOpenBlockModal}
-          onCopyEmail={handleCopyEmail}
         />
 
         {!loading && customers.length > 0 && (

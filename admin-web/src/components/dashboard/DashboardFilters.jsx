@@ -19,8 +19,8 @@ const DashboardFilters = ({
   onApplyCustom,
 }) => {
   return (
-    <div className="flex flex-col gap-3 rounded-xl bg-white p-4 shadow sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex flex-wrap items-center gap-1.5 rounded-lg bg-gray-100 p-1">
+    <div className="flex flex-col gap-3 rounded-xl p-4 shadow sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-wrap items-center gap-1.5 rounded-lg p-1">
         {filterOptions.map((opt) => (
           <button
             key={opt.id}
