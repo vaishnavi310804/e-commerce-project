@@ -23,12 +23,10 @@ const ReviewCard = ({ review }: ReviewCardProps) => {
             }}
             style={styles.avatar}
           />
-
           <View>
             <Text style={styles.name}>
               {review.user.fullName}
             </Text>
-
             <Text style={styles.date}>
               {reviewDate}
             </Text>

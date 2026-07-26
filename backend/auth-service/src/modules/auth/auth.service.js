@@ -8,6 +8,7 @@ import {
 } from "./auth.utils.js";
 import { generateOTP, hashOTP } from "./auth.utils.js";
 import { sendForgotPasswordOTP, sendEmailChangeOTP } from "../../services/email.service.js";
+import { uploadToCloudinary } from "../../utils/cloudinaryUpload.js";
 
 export const registerUserService = async (userData) => {
   const { fullName, email, password, profileImage } = userData;
@@ -178,6 +179,10 @@ export const updateProfileService = async (userId, body, file) => {
     isProfileCompleted: true,
   };
 
+  if (body.fullName) {
+    updateData.fullName = body.fullName;
+  }
+
   if (body.phoneNumber) {
     updateData.phoneNumber = body.phoneNumber;
   }
@@ -186,13 +191,20 @@ export const updateProfileService = async (userId, body, file) => {
     updateData.gender = body.gender;
   }
 
-  if (file) {
-    updateData.profileImage = file.path;
+  if (file && file.buffer) {
+    try {
+      const result = await uploadToCloudinary(file.buffer, "profiles");
+      updateData.profileImage = result.secure_url || result.url;
+    } catch (error) {
+      console.error("Failed to upload profile image to Cloudinary:", error);
+    }
+  } else if (body.profileImage) {
+    updateData.profileImage = body.profileImage;
   }
 
   return await User.findByIdAndUpdate(userId, updateData, {
     new: true,
-  });
+  }).select("-password");
 };
 
 export const adminLoginService = async ({ email, password }) => {

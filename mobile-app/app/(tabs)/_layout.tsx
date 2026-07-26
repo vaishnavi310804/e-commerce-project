@@ -10,7 +10,7 @@ export default function TabLayout() {
       }}
     >
        <Tabs.Screen name="index" />
-       <Tabs.Screen name="search" />
+       <Tabs.Screen name="my-order" />
        <Tabs.Screen name="wishlist" />
        <Tabs.Screen name="cart" />
        <Tabs.Screen name="profile" />

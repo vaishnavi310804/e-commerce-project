@@ -26,14 +26,17 @@ const HomeHeader = ({
   onLocationPress,
   onNotificationPress,
 }: HomeHeaderProps) => {
+  const imageUri = typeof image === "string" ? image.trim() : (image as any)?.url;
+  const hasValidImage = Boolean(imageUri && imageUri.length > 0);
+
   return (
     <View style={styles.container}>
       <View style={styles.topRow}>
         <View style={styles.leftSection}>
           <Image
             source={
-              image
-                ? { uri: image }
+              hasValidImage
+                ? { uri: imageUri }
                 : require("@/assets/images/avatar-placeholder.png")
             }
             style={styles.avatar}

@@ -12,9 +12,9 @@ const TabNav = ({ state, navigation }: BottomTabBarProps) => {
       inactiveIcon: "home-outline",
     },
     {
-      route: "search",
-      activeIcon: "search",
-      inactiveIcon: "search",
+      route: "my-order",
+      activeIcon: "bag",
+      inactiveIcon: "bag-outline",
     },
     {
       route: "wishlist",

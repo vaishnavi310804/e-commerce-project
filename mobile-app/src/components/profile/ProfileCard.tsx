@@ -24,13 +24,15 @@ const ProfileCard = ({
   onEditPress,
 }: ProfileCardProps) => {
   const [imageError, setImageError] = useState(false);
+  const imageUri = typeof image === "string" ? image.trim() : (image as any)?.url;
+  const hasValidImage = Boolean(imageUri && imageUri.length > 0);
 
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>
-        {image && !imageError ? (
+        {hasValidImage && !imageError ? (
           <Image
-            source={{ uri: image }}
+            source={{ uri: imageUri }}
             style={styles.image}
             onError={() => setImageError(true)}
           />
