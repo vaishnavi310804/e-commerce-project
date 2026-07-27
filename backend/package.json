@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@getbrevo/brevo": "^6.0.2",
     "crypto": "^1.0.1",
     "razorpay": "^2.9.8"
   }
