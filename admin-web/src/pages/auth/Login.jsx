@@ -27,18 +27,6 @@ const Login = () => {
             Manage your products, orders, customers and business insights from
             one beautiful dashboard.
           </p>
-
-          <div className="mt-12 flex gap-8">
-            <div>
-              <h2 className="text-3xl font-bold">10K+</h2>
-              <p className="text-white/80">Products Managed</p>
-            </div>
-
-            <div>
-              <h2 className="text-3xl font-bold">5K+</h2>
-              <p className="text-white/80">Orders Processed</p>
-            </div>
-          </div>
         </div>
       </div>
 

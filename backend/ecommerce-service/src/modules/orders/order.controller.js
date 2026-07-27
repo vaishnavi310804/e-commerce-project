@@ -7,6 +7,7 @@ import {
   updateOrderStatusService,
   updatePaymentStatusService,
   getOrderStatsService,
+  cancelOrderService,
 } from "./order.service.js";
 
 export const createOrder = async (req, res, next) => {
@@ -77,7 +78,7 @@ export const updateOrderStatus = async (req, res, next) => {
     const { orderStatus } = req.body;
     const updatedOrder = await updateOrderStatusService(
       req.params.id,
-      orderStatus
+      orderStatus,
     );
 
     return res.status(200).json({
@@ -95,7 +96,7 @@ export const updatePaymentStatus = async (req, res, next) => {
     const { paymentStatus } = req.body;
     const updatedOrder = await updatePaymentStatusService(
       req.params.id,
-      paymentStatus
+      paymentStatus,
     );
 
     return res.status(200).json({
@@ -114,6 +115,21 @@ export const getOrderStats = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       data: stats,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const cancelOrder = async (req, res, next) => {
+  try {
+    const userId = req.user._id || req.user.id;
+    const orderId = req.params.id;
+    const canceledOrder = await cancelOrderService(userId, orderId);
+    return res.status(200).json({
+      success: true,
+      message: "Order cancelled successfully.",
+      data: canceledOrder,
     });
   } catch (error) {
     next(error);

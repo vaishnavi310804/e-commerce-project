@@ -164,13 +164,13 @@ const Reviews = () => {
     try {
       await bulkHideReviews(selectedIds, isHidden);
       showToast(
-        `Selected reviews ${isHidden ? "hidden" : "unhidden"} successfully.`
+        `Selected reviews ${isHidden ? "hidden" : "visible"} successfully.`
       );
       setSelectedIds([]);
       await fetchReviewData();
     } catch (error) {
       console.error(error);
-      alert(error.response?.data?.message || "Failed bulk update.");
+      alert(error.response?.data?.message || "Failed to update.");
     }
   };
 
@@ -231,10 +231,7 @@ const Reviews = () => {
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">Reviews</h1>
-            <p className="mt-1 text-gray-500">
-              Moderate and manage customer product ratings and reviews
-            </p>
+            <h1 className="text-3xl font-bold text-gray-800">Reviews Dashboard</h1>
           </div>
         </div>
 

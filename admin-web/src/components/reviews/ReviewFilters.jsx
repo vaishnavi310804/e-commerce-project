@@ -36,11 +36,11 @@ const ReviewFilters = ({
             className="rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-700 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
           >
             <option value="all">All Ratings</option>
-            <option value="5">5 Stars (★★★★★)</option>
-            <option value="4">4 Stars (★★★★☆)</option>
-            <option value="3">3 Stars (★★★☆☆)</option>
-            <option value="2">2 Stars (★★☆☆☆)</option>
-            <option value="1">1 Star (★☆☆☆☆)</option>
+            <option value="5">5 Stars</option>
+            <option value="4">4 Stars</option>
+            <option value="3">3 Stars</option>
+            <option value="2">2 Stars</option>
+            <option value="1">1 Star</option>
           </select>
 
           <select

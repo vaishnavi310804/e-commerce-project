@@ -16,7 +16,6 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
     featured: false,
     trending: false,
     image: null,
-    images: [],
   });
 
   const [submitting, setSubmitting] = useState(false);
@@ -52,11 +51,9 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
         featured: !!(product.isFeatured ?? product.featured),
         trending: !!product.trending,
         image: null,
-        images: [],
       });
       setPreview({
         image: product.productImage?.url || product.image?.url || null,
-        images: product.images?.map((img) => img.url) || [],
       });
     } else {
       setFormData({
@@ -70,9 +67,8 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
         featured: false,
         trending: false,
         image: null,
-        images: [],
       });
-      setPreview({ image: null, images: [] });
+      setPreview({ image: null });
     }
   }, [product, open]);
 
@@ -95,15 +91,6 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
     }
   };
 
-  const handleMultipleImages = (e) => {
-    const files = Array.from(e.target.files);
-    setFormData((prev) => ({ ...prev, images: files }));
-    setPreview((prev) => ({
-      ...prev,
-      images: files.map((f) => URL.createObjectURL(f)),
-    }));
-  };
-
   const resetForm = () => {
     setFormData({
       name: "",
@@ -116,9 +103,8 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
       featured: false,
       trending: false,
       image: null,
-      images: [],
     });
-    setPreview({ image: null, images: [] });
+    setPreview({ image: null });
   };
 
   const handleClose = () => {
@@ -171,14 +157,6 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
 
     if (formData.image instanceof File) {
       payload.append("productImage", formData.image);
-    }
-
-    if (Array.isArray(formData.images) && formData.images.length > 0) {
-      formData.images.forEach((file) => {
-        if (file instanceof File) {
-          payload.append("images", file);
-        }
-      });
     }
 
     try {
@@ -371,31 +349,6 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
-                className="block w-full text-sm text-gray-700 file:mr-4 file:rounded-full file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100"
-              />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
-                Gallery Images
-              </label>
-              {preview.images.length > 0 && (
-                <div className="mb-3 flex flex-wrap gap-2">
-                  {preview.images.map((src, idx) => (
-                    <img
-                      key={idx}
-                      src={src}
-                      alt={`Gallery preview ${idx}`}
-                      className="h-20 w-20 rounded-lg border border-gray-200 object-cover"
-                    />
-                  ))}
-                </div>
-              )}
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleMultipleImages}
                 className="block w-full text-sm text-gray-700 file:mr-4 file:rounded-full file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100"
               />
             </div>

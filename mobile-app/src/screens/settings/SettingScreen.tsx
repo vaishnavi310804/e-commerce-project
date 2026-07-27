@@ -1,50 +1,77 @@
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
 import React from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import SettingItem from "@/src/components/settings/SettingItem";
 import { Ionicons } from "@expo/vector-icons";
 import ScreenWrapper from "@/src/components/common/ScreenWrapper";
 import { router } from "expo-router";
 import Colors from "@/src/constants/colors";
 import Fonts from "@/src/constants/fonts";
-
-
-const settings = [
-  {
-    title: "Notification Settings",
-    icon: "notifications-outline",
-    onPress: () => {},
-  },
-  {
-    title: "Security",
-    icon: "shield-checkmark-outline",
-    onPress: () => {},
-  },
-  {
-    title: "Theme",
-    icon: "sunny-outline",
-    onPress: () => {},
-  },
-  {
-    title: "Delete Account",
-    icon: "trash-outline",
-    onPress: () => {},
-  },
-]as const;
+import { logout, setAuthToken } from "@/src/api/auth.api";
 
 const SettingScreen = () => {
+  const handleLogout = () => {
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await logout();
+          } catch (err) {
+            console.log(err);
+          }
+          await AsyncStorage.multiRemove(["accessToken", "authUser"]);
+          setAuthToken();
+          router.replace("/login");
+        },
+      },
+    ]);
+  };
+
+  const settings = [
+    {
+      title: "Notification Settings",
+      icon: "notifications-outline",
+      onPress: () => {},
+    },
+    {
+      title: "Security",
+      icon: "shield-checkmark-outline",
+      onPress: () => {},
+    },
+    {
+      title: "Theme",
+      icon: "sunny-outline",
+      onPress: () => {},
+    },
+    {
+      title: "Logout",
+      icon: "log-out-outline",
+      onPress: handleLogout,
+    },
+  ] as const;
+
   return (
-     <ScreenWrapper>
+    <ScreenWrapper>
       <View style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => router.back()}
           >
-            <Ionicons
-              name="chevron-back"
-              size={22}
-              color={Colors.text}
-            />
+            <Ionicons name="chevron-back" size={22} color={Colors.text} />
           </TouchableOpacity>
 
           <Text style={styles.title}>Settings</Text>

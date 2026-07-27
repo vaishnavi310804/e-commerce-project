@@ -67,3 +67,10 @@ export const getOrderById = async (orderId: string) => {
   const response = await ecommerceClient.get(`/order/my-orders/${orderId}`);
   return response.data;
 };
+
+export const cancelOrder = async (orderId: string) => {
+  const { data } = await ecommerceClient.patch(
+    `/order/${orderId}/cancel`
+  );
+  return data;
+};

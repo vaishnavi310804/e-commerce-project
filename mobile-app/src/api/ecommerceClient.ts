@@ -1,10 +1,10 @@
 import axios from "axios";
-import * as SecureStore from "expo-secure-store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ecommerceClient = axios.create({
-  baseURL: "https://shopease-ecommerce-service.onrender.com/api/v1",
-  // baseURL: "http://192.168.29.120:5001/api/v1",
-  timeout: 30000,
+  // baseURL: "https://shopease-ecommerce-service.onrender.com/api/v1",
+  baseURL: "http://192.168.29.120:5001/api/v1",
+  timeout: 20000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -12,16 +12,16 @@ const ecommerceClient = axios.create({
 
 ecommerceClient.interceptors.request.use(async (config) => {
   try {
-    const token = await SecureStore.getItemAsync("accessToken");
+    const token = await AsyncStorage.getItem("accessToken");
+
     if (token) {
       const cleanToken = token.replace(/^"|"$/g, "").trim();
-      if (cleanToken) {
-        config.headers.Authorization = `Bearer ${cleanToken}`;
-      }
+      config.headers.Authorization = `Bearer ${cleanToken}`;
     }
   } catch (error) {
-    console.error("Error reading token from SecureStore:", error);
+    console.error("Error reading token from AsyncStorage:", error);
   }
+
   return config;
 });
 

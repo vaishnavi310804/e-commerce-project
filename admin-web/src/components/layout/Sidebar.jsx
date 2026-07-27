@@ -108,7 +108,6 @@ const Sidebar = () => {
 
             <SidebarItem icon={FaStar} title="Reviews" path="/reviews" />
 
-            <SidebarItem icon={FaCog} title="Settings" path="/settings" />
           </nav>
         </div>
 

@@ -44,9 +44,7 @@ const LoginForm = () => {
       setLoading(true);
 
       const response = await loginUser(formData);
-
       const { user, accessToken } = response.data;
-
       login(user, accessToken);
 
       navigate("/dashboard");

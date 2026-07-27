@@ -104,7 +104,7 @@ const ReviewDetailsModal = ({
               <span
                 className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${
                   review.isHidden
-                    ? "bg-rose-50 text-rose-700 border-rose-200"
+                    ? "bg-rose-50 text-red-700 border-rose-200"
                     : "bg-emerald-50 text-emerald-700 border-emerald-200"
                 }`}
               >

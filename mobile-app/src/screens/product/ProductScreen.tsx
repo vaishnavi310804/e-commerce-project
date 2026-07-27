@@ -1,4 +1,4 @@
-import react, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -11,15 +11,14 @@ import {
 } from "react-native";
 import ScreenWrapper from "@/src/components/common/ScreenWrapper";
 import Colors from "@/src/constants/colors";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import Fonts from "@/src/constants/fonts";
 import { getProductById, Product } from "@/src/api/product.api";
 import { addToCart, getCart } from "../../api/cart.api";
-import { useLocalSearchParams } from "expo-router";
+import { getWishlist, toggleWishlist } from "@/src/api/wishlist.api";
 import ProductReview from "@/src/components/products/ProductReview";
 import { getProductReviews } from "@/src/api/review.api";
-import WriteReview from "@/src/components/review/WriteReview";
 
 export default function ProductScreen() {
   const params = useLocalSearchParams();
@@ -29,16 +28,16 @@ export default function ProductScreen() {
   const [product, setProduct] = useState<Product | null>(null);
   const [isInCart, setIsInCart] = useState(false);
   const [cartLoading, setCartLoading] = useState(true);
+  const [isWishlisted, setIsWishlisted] = useState(false);
   const [reviewData, setReviewData] = useState<any>(null);
   const [reviewLoading, setReviewLoading] = useState(false);
-  const [showReview, setShowReview] = useState(false);
 
   const fetchProduct = async () => {
     try {
       const response = await getProductById(id);
       setProduct(response.data);
     } catch (error) {
-      console.log(error);
+      console.log("Fetch Product Error:", error);
     } finally {
       setLoading(false);
     }
@@ -50,7 +49,7 @@ export default function ProductScreen() {
       const response = await getProductReviews(id);
       setReviewData(response.data);
     } catch (error) {
-      console.log(error);
+      console.log("Fetch Reviews Error:", error);
     } finally {
       setReviewLoading(false);
     }
@@ -60,13 +59,46 @@ export default function ProductScreen() {
     try {
       const response = await getCart();
       const exists = response.data.items.some(
-        (item: any) => item.product._id === product?._id,
+        (item: any) => item.product?._id === product?._id
       );
       setIsInCart(exists);
     } catch (error) {
-      console.log(error);
+      console.log("Check Cart Error:", error);
     } finally {
       setCartLoading(false);
+    }
+  };
+
+  const checkWishlistStatus = async () => {
+    try {
+      const response = await getWishlist();
+      if (response.data) {
+        const exists = response.data.some(
+          (item: any) => item.product?._id === id
+        );
+        setIsWishlisted(exists);
+      }
+    } catch (error) {
+      console.log("Check Wishlist Error:", error);
+    }
+  };
+
+  const handleToggleWishlist = async () => {
+    if (!id) return;
+    const previousState = isWishlisted;
+    setIsWishlisted(!previousState);
+    try {
+      const response = await toggleWishlist(id);
+      if (response.message) {
+        Alert.alert("Wishlist", response.message);
+      }
+    } catch (error: any) {
+      console.log("Toggle Wishlist Error:", error);
+      setIsWishlisted(previousState);
+      Alert.alert(
+        "Error",
+        error?.response?.data?.message || "Failed to update wishlist."
+      );
     }
   };
 
@@ -77,7 +109,7 @@ export default function ProductScreen() {
       setIsInCart(true);
       Alert.alert("Success", "Product added to cart.");
     } catch (error) {
-      console.log(error);
+      console.log("Add to Cart Error:", error);
     }
   };
 
@@ -85,6 +117,7 @@ export default function ProductScreen() {
     if (id) {
       fetchProduct();
       fetchReviews();
+      checkWishlistStatus();
     }
   }, [id]);
 
@@ -99,17 +132,21 @@ export default function ProductScreen() {
   if (loading || cartLoading) {
     return (
       <ScreenWrapper>
-        <ActivityIndicator size="large" color={Colors.primary} />
+        <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: 40 }} />
       </ScreenWrapper>
     );
   }
+
   if (!product) {
     return (
       <ScreenWrapper>
-        <Text>Product not found</Text>
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>Product not found</Text>
+        </View>
       </ScreenWrapper>
     );
   }
+
   return (
     <ScreenWrapper>
       <View style={styles.container}>
@@ -126,8 +163,16 @@ export default function ProductScreen() {
             </TouchableOpacity>
 
             <View style={styles.headerActions}>
-              <TouchableOpacity style={styles.iconButton}>
-                <Ionicons name="heart-outline" size={22} color={Colors.text} />
+              <TouchableOpacity
+                style={styles.iconButton}
+                activeOpacity={0.8}
+                onPress={handleToggleWishlist}
+              >
+                <Ionicons
+                  name={isWishlisted ? "heart" : "heart-outline"}
+                  size={22}
+                  color={isWishlisted ? "#FF3B30" : Colors.text}
+                />
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.iconButton}>
@@ -138,7 +183,7 @@ export default function ProductScreen() {
 
           <View style={styles.imageContainer}>
             <Image
-              source={{ uri: product.productImage.url }}
+              source={{ uri: product.productImage?.url || "https://via.placeholder.com/300" }}
               style={styles.image}
               resizeMode="contain"
             />
@@ -150,13 +195,12 @@ export default function ProductScreen() {
             ) : null}
 
             <Text style={styles.productName}>{product.name}</Text>
+
             <View style={styles.ratingContainer}>
               <Ionicons name="star" size={18} color="#F4B400" />
-
               <Text style={styles.rating}>
-                {product.averageRating.toFixed(1)}
+                {(product.averageRating ?? 0).toFixed(1)}
               </Text>
-
               <Text style={styles.reviewCount}>
                 ({product.numReviews || 0} Reviews)
               </Text>
@@ -168,7 +212,7 @@ export default function ProductScreen() {
               </Text>
 
               {Boolean(
-                product.discountPrice && product.discountPrice < product.price,
+                product.discountPrice && product.discountPrice < product.price
               ) ? (
                 <Text style={styles.originalPrice}>₹{product.price}</Text>
               ) : null}
@@ -176,15 +220,16 @@ export default function ProductScreen() {
 
             <View style={styles.descriptionContainer}>
               <Text style={styles.sectionTitle}>Description</Text>
-
               <Text style={styles.description}>{product.description}</Text>
             </View>
+
             <ProductReview
               loading={reviewLoading}
               reviewData={reviewData}
               productId={product._id}
             />
           </View>
+
           <View style={styles.addReviewContainer}>
             <TouchableOpacity
               style={styles.button}
@@ -333,11 +378,6 @@ const styles = StyleSheet.create({
     textDecorationLine: "line-through",
   },
 
-  detailsContainer: {
-    marginTop: 28,
-    paddingHorizontal: 20,
-  },
-
   descriptionContainer: {
     marginTop: 20,
   },
@@ -386,6 +426,7 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     fontSize: 16,
   },
+
   button: {
     height: 56,
     borderRadius: 28,
@@ -399,8 +440,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: Fonts.bold,
   },
+
   addReviewContainer: {
     marginTop: 50,
     padding: 20,
+  },
+
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 80,
+  },
+
+  emptyText: {
+    fontSize: 16,
+    fontFamily: Fonts.medium,
+    color: Colors.gray,
   },
 });

@@ -16,6 +16,7 @@ import {
   updateOrderStatus,
   updatePaymentStatus,
   getOrderStats,
+  cancelOrder
 } from "./order.controller.js";
 
 const router = express.Router();
@@ -23,7 +24,7 @@ const router = express.Router();
 router.post("/", protect, createOrderValidation, validate, createOrder);
 router.get("/my-orders", protect, getMyOrders);
 router.get("/my-orders/:id", protect, getMyOrderDetails);
-
+router.patch("/:id/cancel", protect, cancelOrder)
 router.get("/stats", protect, authorize("ADMIN"), getOrderStats);
 
 router.patch(

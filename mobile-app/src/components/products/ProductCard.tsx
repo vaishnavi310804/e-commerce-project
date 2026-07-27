@@ -9,7 +9,6 @@ type Props = {
   isWishlisted?: boolean;
   onPress: () => void;
   onWishlist?: () => void;
-  onAddToCart?: () => void;
 };
 
 const ProductCard = ({
@@ -17,7 +16,6 @@ const ProductCard = ({
   isWishlisted = false,
   onPress,
   onWishlist,
-  onAddToCart,
 }: Props) => {
   const price = product?.price ?? 0;
   const discountPrice = product?.discountPrice ?? 0;
@@ -31,7 +29,8 @@ const ProductCard = ({
 
   const rating = product?.averageRating ?? 0;
   const reviewsCount = product?.numReviews ?? 0;
-  const imageUrl = product?.productImage?.url || "https://via.placeholder.com/150";
+  const imageUrl =
+    product?.productImage?.url || "https://via.placeholder.com/150";
 
   return (
     <Pressable style={styles.card} onPress={onPress}>
@@ -76,17 +75,12 @@ const ProductCard = ({
           <Text style={styles.review}>({reviewsCount})</Text>
         </View>
 
-        <Pressable style={styles.cartButton} onPress={onAddToCart}>
-          <Ionicons name="cart-outline" size={18} color="#fff" />
-        </Pressable>
       </View>
 
       <View style={styles.priceContainer}>
         <Text style={styles.price}>₹{finalPrice}</Text>
 
-        {discountAmount ? (
-          <Text style={styles.oldPrice}>₹{price}</Text>
-        ) : null}
+        {discountAmount ? <Text style={styles.oldPrice}>₹{price}</Text> : null}
       </View>
     </Pressable>
   );

@@ -14,7 +14,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import * as SecureStore from "expo-secure-store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AxiosError } from "axios";
 import Colors from "@/src/constants/colors";
 import Fonts from "@/src/constants/fonts";
@@ -87,9 +87,8 @@ export default function RegisterScreen() {
       }
 
       const { accessToken, user } = response.data;
-
-      await SecureStore.setItemAsync("accessToken", accessToken);
-      await SecureStore.setItemAsync("authUser", JSON.stringify(user));
+      await AsyncStorage.setItem("accessToken", accessToken);
+      await AsyncStorage.setItem("authUser", JSON.stringify(user));
 
       setAuthToken(accessToken);
       router.replace("/complete-profile");
@@ -101,7 +100,6 @@ export default function RegisterScreen() {
       setLoading(false);
     }
   };
-
   const clearError = () => {
     if (error) setError("");
   };

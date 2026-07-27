@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -14,7 +15,7 @@ import OrderProduct from "@/src/components/order/OrderProduct";
 import OrderStatus from "@/src/components/order/OrderStatus";
 import Colors from "@/src/constants/colors";
 import Fonts from "@/src/constants/fonts";
-import { getMyOrderDetails, OrderData } from "@/src/api/order.api";
+import { getMyOrderDetails, OrderData, cancelOrder } from "@/src/api/order.api";
 import ShippingDetailsCard from "@/src/components/order/ShippingDetailsCard";
 import PaymentDetailsCard from "@/src/components/payment/PaymentDetailsCard";
 import PriceSummaryCard from "@/src/components/payment/PriceSummaryCard";
@@ -23,15 +24,17 @@ const OrderDetailsScreen = () => {
   const { orderId } = useLocalSearchParams();
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState<OrderData | null>(null);
+  const [cancelLoading, setCancelLoading] = useState(false);
 
   const fetchOrder = async () => {
     try {
+      if (!orderId) return;
       const response = await getMyOrderDetails(orderId as string);
       if (response.success) {
         setOrder(response.data);
       }
     } catch (error) {
-      console.log(error);
+      console.log("Fetch Order Error:", error);
     } finally {
       setLoading(false);
     }
@@ -39,32 +42,50 @@ const OrderDetailsScreen = () => {
 
   useEffect(() => {
     fetchOrder();
-  }, []);
+  }, [orderId]);
 
-  if (loading) {
-    return (
-      <ScreenWrapper>
-        <ActivityIndicator size="large" color={Colors.primary} />
-      </ScreenWrapper>
-    );
-  }
-
-  if (!order) {
-    return (
-      <ScreenWrapper>
-        <Text>Order not found.</Text>
-      </ScreenWrapper>
-    );
-  }
+  const handleCancel = () => {
+    Alert.alert("Cancel Order",
+       "Are you sure you want to cancel this order?", [
+      { text: "No", 
+        style: "cancel" },
+      {
+        text: "Yes",
+        style: "destructive",
+        onPress: async () => {
+          if (!order?._id) return;
+          setCancelLoading(true);
+          try {
+            const response = await cancelOrder(order._id);
+            if (response.success) {
+              Alert.alert("Success", "Order cancelled successfully.");
+              await fetchOrder();
+            } else {
+              Alert.alert("Error", response.message || "Failed to cancel order.");
+            }
+          } catch (error: any) {
+            console.log("Cancel Order Error:", error?.response?.data || error?.message);
+            Alert.alert(
+              "Error",
+              error?.response?.data?.message ||
+                error?.message ||
+                "Failed to cancel order."
+            );
+          } finally {
+            setCancelLoading(false);
+          }
+        },
+      },
+    ]);
+  };
 
   const getActionButton = () => {
+    if (!order) return null;
     switch (order.orderStatus) {
       case "Placed":
         return {
           title: "Cancel Order",
-          onPress: () => {
-            console.log("Cancel Order");
-          },
+          onPress: handleCancel,
         };
       case "Shipped":
         return {
@@ -91,7 +112,35 @@ const OrderDetailsScreen = () => {
         return null;
     }
   };
+
   const action = getActionButton();
+
+  if (loading) {
+    return (
+      <ScreenWrapper>
+        <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: 40 }} />
+      </ScreenWrapper>
+    );
+  }
+
+  if (!order) {
+    return (
+      <ScreenWrapper>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="chevron-back" size={24} color={Colors.text} />
+          </TouchableOpacity>
+          <Text style={styles.title}>Order Details</Text>
+          <View style={{ width: 24 }} />
+        </View>
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>Order not found.</Text>
+        </View>
+      </ScreenWrapper>
+    );
+  }
+
+  const productsList = order.products || order.items || [];
 
   return (
     <ScreenWrapper>
@@ -113,14 +162,20 @@ const OrderDetailsScreen = () => {
           <OrderStatus status={order.orderStatus} />
 
           <Text style={styles.date}>
-            Placed on {new Date(order.createdAt).toLocaleDateString()}
+            Placed on{" "}
+            {new Date(order.createdAt).toLocaleDateString("en-US", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })}
           </Text>
         </View>
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Products</Text>
 
-          {order.products.map((item) => (
-            <OrderProduct key={item.product._id} item={item} />
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Products ({productsList.length})</Text>
+
+          {productsList.map((item, index) => (
+            <OrderProduct key={item.product?._id || index.toString()} item={item} />
           ))}
         </View>
 
@@ -140,10 +195,18 @@ const OrderDetailsScreen = () => {
 
         {action && (
           <TouchableOpacity
-            style={styles.actionButton}
+            disabled={cancelLoading}
+            style={[
+              styles.actionButton,
+              cancelLoading && styles.disabledButton,
+            ]}
             onPress={action.onPress}
           >
-            <Text style={styles.actionText}>{action.title}</Text>
+            {cancelLoading ? (
+              <ActivityIndicator color={Colors.white} />
+            ) : (
+              <Text style={styles.actionText}>{action.title}</Text>
+            )}
           </TouchableOpacity>
         )}
       </ScrollView>
@@ -196,6 +259,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: Colors.text,
   },
+
   actionButton: {
     height: 56,
     borderRadius: 28,
@@ -206,9 +270,25 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
+  disabledButton: {
+    opacity: 0.7,
+  },
+
   actionText: {
     color: Colors.white,
     fontSize: 16,
     fontFamily: Fonts.bold,
+  },
+
+  emptyContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 80,
+  },
+
+  emptyText: {
+    fontSize: 16,
+    fontFamily: Fonts.medium,
+    color: Colors.gray,
   },
 });

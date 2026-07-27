@@ -82,14 +82,14 @@ export const createOrderService = async (userId, payload) => {
   });
 
   await Cart.findOneAndUpdate(
-  { user: userId },
-  {
-    $set: {
-      items: [],
+    { user: userId },
+    {
+      $set: {
+        items: [],
+      },
     },
-  },
-  { new: true }
-);
+    { new: true },
+  );
 
   return await Order.findById(order._id)
     .populate("user", "fullName email phoneNumber")
@@ -194,10 +194,14 @@ export const getOrderStatsService = async () => {
 
   const totalOrders = orders.length;
   const pendingOrders = orders.filter(
-    (o) => o.orderStatus === "Pending" || o.orderStatus === "Placed"
+    (o) => o.orderStatus === "Pending" || o.orderStatus === "Placed",
   ).length;
-  const deliveredOrders = orders.filter((o) => o.orderStatus === "Delivered").length;
-  const cancelledOrders = orders.filter((o) => o.orderStatus === "Cancelled").length;
+  const deliveredOrders = orders.filter(
+    (o) => o.orderStatus === "Delivered",
+  ).length;
+  const cancelledOrders = orders.filter(
+    (o) => o.orderStatus === "Cancelled",
+  ).length;
   const totalRevenue = orders
     .filter((o) => o.paymentStatus === "Paid")
     .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
@@ -209,4 +213,26 @@ export const getOrderStatsService = async () => {
     cancelledOrders,
     totalRevenue,
   };
+};
+
+export const cancelOrderService = async (userId, orderId) => {
+  const filter = userId ? { _id: orderId, user: userId } : { _id: orderId };
+  const order = await Order.findOne(filter);
+
+  if (!order) {
+    const error = new Error("Order not found.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (order.orderStatus !== "Placed" && order.orderStatus !== "Pending") {
+    const error = new Error("This order cannot be cancelled.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  order.orderStatus = "Cancelled";
+  await order.save();
+
+  return order;
 };
