@@ -59,7 +59,7 @@ const Sidebar = () => {
 
   return (
     <>
-      <aside className="w-60 h-screen shrink-0 bg-white border-r border-slate-200 p-4 flex flex-col justify-between overflow-y-auto">
+      <aside className="w-65 h-screen shrink-0 bg-white border-r border-slate-200 p-4 flex flex-col justify-between overflow-y-auto">
         <div>
           <div className="flex justify-center mb-5">
             <h1 className="text-3xl font-extrabold tracking-tight text-[#6C63FF]">
