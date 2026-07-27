@@ -66,7 +66,7 @@ const Sidebar = () => {
               ShopEase
             </h1>
           </div>
-          <div className="flex flex-col items-center text-center my-5">
+          <div className="flex flex-col items-center text-center my-10">
             <div className="rounded-full border-2 border-[#8B5CF6] mb-2 shadow-sm">
               {profileImage && !imgError ? (
                 <img
