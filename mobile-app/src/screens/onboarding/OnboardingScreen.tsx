@@ -12,7 +12,6 @@ const { width, height } = Dimensions.get("window");
 
 export default function OnboardingScreen() {
   const router = useRouter();
-
   const flatListRef = useRef<FlatList>(null);
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -143,6 +142,7 @@ const styles = StyleSheet.create({
   image: {
     width: width * 0.82,
     height: "100%",
+    elevation:0.5
   },
 
   bottomCard: {

@@ -60,6 +60,7 @@ const OrderDetailsScreen = () => {
             if (response.success) {
               Alert.alert("Success", "Order cancelled successfully.");
               await fetchOrder();
+              router.back()
             } else {
               Alert.alert("Error", response.message || "Failed to cancel order.");
             }
