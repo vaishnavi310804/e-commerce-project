@@ -1,38 +1,30 @@
-import Brevo from "@getbrevo/brevo";
+import { BrevoClient } from "@getbrevo/brevo";
 
-const apiInstance = new Brevo.TransactionalEmailsApi();
-
-apiInstance.setApiKey(
-  Brevo.TransactionalEmailsApiApiKeys.apiKey,
-  process.env.BREVO_API_KEY,
-);
+const brevo = new BrevoClient({
+  apiKey: process.env.BREVO_API_KEY,
+});
 
 export const sendEmail = async ({ to, subject, html }) => {
-  const email = new Brevo.SendSmtpEmail();
-
-  email.sender = {
-    name: process.env.BREVO_SENDER_NAME,
-    email: process.env.BREVO_SENDER_EMAIL,
-  };
-
-  email.to = [
-    {
-      email: to,
-    },
-  ];
-
-  email.subject = subject;
-  email.htmlContent = html;
-
   try {
-    const response = await apiInstance.sendTransacEmail(email);
+    const response = await brevo.transactionalEmails.sendTransacEmail({
+      sender: {
+        name: process.env.BREVO_SENDER_NAME,
+        email: process.env.BREVO_SENDER_EMAIL,
+      },
+      to: [
+        {
+          email: to,
+        },
+      ],
+      subject,
+      htmlContent: html,
+    });
 
-    console.log("BREVO RESPONSE:", response);
+    console.log("Brevo email sent:", response);
 
     return response;
   } catch (error) {
-    console.error("BREVO ERROR:", error.response?.body || error.message);
-
+    console.error("Brevo Error:", error);
     throw error;
   }
 };
@@ -66,7 +58,6 @@ export const sendForgotPasswordOTP = async (email, otp) => {
       <strong>ShopEase Team</strong>
     </div>
   `;
-
   return sendEmail({
     to: email,
     subject: "ShopEase Password Reset OTP",

@@ -81,7 +81,6 @@ export const forgotPasswordService = async (email) => {
   const user = await User.findOne({ email }).select(
     "+resetPasswordOTP +resetPasswordOTPExpires"
   );
-
   if (!user) {
     throw new Error("User not found.");
   }
