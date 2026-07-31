@@ -17,6 +17,15 @@ export type AuthUser = {
   updatedAt?: string;
 };
 
+export type RegisterData = {
+  email: string;
+  otp?: string;
+};
+export type VerifyRegistrationOtpPayload = {
+  email: string;
+  otp: string;
+};
+
 export type RegisterPayload = {
   fullName: string;
   email: string;
@@ -91,11 +100,20 @@ export const setAuthToken = (accessToken?: string) => {
 };
 
 export const register = async (payload: RegisterPayload) => {
-  const { data } = await client.post<ApiResponse<AuthData>>(
+  const { data } = await client.post<ApiResponse<RegisterData>>(
     "/register",
     payload
   );
+  return data;
+};
 
+export const verifyRegistrationOtp = async (
+  payload: VerifyRegistrationOtpPayload
+) => {
+  const { data } = await client.post<ApiResponse<AuthData>>(
+    "/register/verify",
+    payload
+  );
   return data;
 };
 
@@ -200,6 +218,7 @@ export const updateProfile = async (formData: FormData) => {
 
 const authApi = {
   register,
+  verifyRegistrationOtp,
   login,
   getCurrentUser,
   logout,

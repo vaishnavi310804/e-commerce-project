@@ -16,8 +16,9 @@ import { uploadToCloudinary } from "../../utils/cloudinaryUpload.js";
 
 export const registerUserService = async (userData) => {
   const { fullName, email, password, profileImage } = userData;
+  const formattedEmail = email ? String(email).trim().toLowerCase() : "";
 
-  const existingUser = await User.findOne({ email });
+  const existingUser = await User.findOne({ email: formattedEmail });
 
   if (existingUser) {
     if (existingUser.isEmailVerified) {
@@ -28,13 +29,16 @@ export const registerUserService = async (userData) => {
 
     existingUser.fullName = fullName;
     existingUser.password = await hashPassword(password);
-    existingUser.profileImage = profileImage;
+    if (profileImage !== undefined) {
+      existingUser.profileImage = profileImage;
+    }
 
     existingUser.emailVerificationOTP = hashOTP(otp);
     existingUser.emailVerificationOTPExpires = new Date(
       Date.now() + 10 * 60 * 1000
     );
     await existingUser.save();
+
     try {
       await sendRegistrationOTP(existingUser.email, otp);
       return {
@@ -50,14 +54,15 @@ export const registerUserService = async (userData) => {
       };
     }
   }
+
   const hashedPassword = await hashPassword(password);
   const otp = generateOTP();
 
   const user = await User.create({
     fullName,
-    email,
+    email: formattedEmail,
     password: hashedPassword,
-    profileImage,
+    profileImage: profileImage || "",
     isEmailVerified: false,
     emailVerificationOTP: hashOTP(otp),
     emailVerificationOTPExpires: new Date(Date.now() + 10 * 60 * 1000),
@@ -80,9 +85,11 @@ export const registerUserService = async (userData) => {
 };
 
 export const verifyRegistrationOTPService = async ({ email, otp }) => {
-  const user = await User.findOne({ email }).select(
-    "+emailVerificationOTP +emailVerificationOTPExpires",
-  );
+  const formattedEmail = email ? String(email).trim().toLowerCase() : "";
+  const formattedOtp = otp ? String(otp).trim() : "";
+
+  const user = await User.findOne({ email: formattedEmail });
+
   if (!user) {
     throw new Error("User not found.");
   }
@@ -93,22 +100,27 @@ export const verifyRegistrationOTPService = async ({ email, otp }) => {
     throw new Error("No OTP found. Please register again.");
   }
 
-  if (user.emailVerificationOTPExpires < new Date()) {
+  if (new Date(user.emailVerificationOTPExpires).getTime() < Date.now()) {
     throw new Error("OTP has expired.");
   }
-  const hashedOTP = hashOTP(otp);
+
+  const hashedOTP = hashOTP(formattedOtp);
 
   if (hashedOTP !== user.emailVerificationOTP) {
     throw new Error("Invalid OTP.");
   }
+
   user.isEmailVerified = true;
   user.emailVerificationOTP = null;
   user.emailVerificationOTPExpires = null;
 
   await user.save();
+
   const accessToken = generateAccessToken(user);
   const userObject = user.toObject();
   delete userObject.password;
+  delete userObject.emailVerificationOTP;
+  delete userObject.emailVerificationOTPExpires;
 
   return {
     user: userObject,
@@ -117,7 +129,9 @@ export const verifyRegistrationOTPService = async ({ email, otp }) => {
 };
 
 export const loginUserService = async ({ email, password }) => {
-  const user = await User.findOne({ email }).select("+password");
+  const formattedEmail = email ? String(email).trim().toLowerCase() : "";
+  const user = await User.findOne({ email: formattedEmail }).select("+password");
+
   if (!user) {
     throw new Error("Invalid email or password");
   }
@@ -138,6 +152,8 @@ export const loginUserService = async ({ email, password }) => {
 
   const userObject = user.toObject();
   delete userObject.password;
+  delete userObject.emailVerificationOTP;
+  delete userObject.emailVerificationOTPExpires;
 
   return {
     user: userObject,
@@ -156,8 +172,9 @@ export const logoutUserService = async (userId) => {
 };
 
 export const forgotPasswordService = async (email) => {
-  const user = await User.findOne({ email }).select(
-    "+resetPasswordOTP +resetPasswordOTPExpires",
+  const formattedEmail = email ? String(email).trim().toLowerCase() : "";
+  const user = await User.findOne({ email: formattedEmail }).select(
+    "+resetPasswordOTP +resetPasswordOTPExpires"
   );
   if (!user) {
     throw new Error("User not found.");
@@ -196,8 +213,11 @@ export const forgotPasswordService = async (email) => {
 };
 
 export const verifyResetOTPService = async ({ email, otp }) => {
-  const user = await User.findOne({ email }).select(
-    "+resetPasswordOTP +resetPasswordOTPExpires +isResetOTPVerified",
+  const formattedEmail = email ? String(email).trim().toLowerCase() : "";
+  const formattedOtp = otp ? String(otp).trim() : "";
+
+  const user = await User.findOne({ email: formattedEmail }).select(
+    "+resetPasswordOTP +resetPasswordOTPExpires +isResetOTPVerified"
   );
 
   if (!user) {
@@ -208,11 +228,11 @@ export const verifyResetOTPService = async ({ email, otp }) => {
     throw new Error("No OTP found. Please request a new one.");
   }
 
-  if (user.resetPasswordOTPExpires < new Date()) {
+  if (new Date(user.resetPasswordOTPExpires).getTime() < Date.now()) {
     throw new Error("OTP has expired.");
   }
 
-  const hashedOTP = hashOTP(otp);
+  const hashedOTP = hashOTP(formattedOtp);
 
   if (hashedOTP !== user.resetPasswordOTP) {
     throw new Error("Invalid OTP.");
@@ -236,7 +256,7 @@ export const resetPasswordService = async ({ resetToken, newPassword }) => {
     throw new Error("Invalid reset token.");
   }
   const user = await User.findById(decoded.id).select(
-    "+resetPasswordOTP +resetPasswordOTPExpires",
+    "+resetPasswordOTP +resetPasswordOTPExpires"
   );
   if (!user) {
     throw new Error("User not found.");
@@ -282,7 +302,8 @@ export const updateProfileService = async (userId, body, file) => {
 };
 
 export const adminLoginService = async ({ email, password }) => {
-  const user = await User.findOne({ email }).select("+password");
+  const formattedEmail = email ? String(email).trim().toLowerCase() : "";
+  const user = await User.findOne({ email: formattedEmail }).select("+password");
 
   if (!user) {
     throw new Error("Invalid email or password");
@@ -310,19 +331,20 @@ export const adminLoginService = async ({ email, password }) => {
 };
 
 export const sendEmailChangeOTPService = async (userId, newEmail) => {
+  const formattedNewEmail = newEmail ? String(newEmail).trim().toLowerCase() : "";
   const user = await User.findById(userId).select(
-    "+pendingEmail +emailChangeOTP +emailChangeOTPExpires",
+    "+pendingEmail +emailChangeOTP +emailChangeOTPExpires"
   );
 
   if (!user) {
     throw new Error("User not found.");
   }
 
-  if (user.email === newEmail) {
+  if (user.email === formattedNewEmail) {
     throw new Error("New email cannot be the same as your current email.");
   }
 
-  const existingUser = await User.findOne({ email: newEmail });
+  const existingUser = await User.findOne({ email: formattedNewEmail });
 
   if (existingUser) {
     throw new Error("Email is already registered.");
@@ -330,17 +352,17 @@ export const sendEmailChangeOTPService = async (userId, newEmail) => {
 
   const otp = generateOTP();
 
-  user.pendingEmail = newEmail;
+  user.pendingEmail = formattedNewEmail;
   user.emailChangeOTP = hashOTP(otp);
   user.emailChangeOTPExpires = new Date(Date.now() + 10 * 60 * 1000);
 
   await user.save();
 
   try {
-    const info = await sendEmailChangeOTP(newEmail, otp);
+    const info = await sendEmailChangeOTP(formattedNewEmail, otp);
 
     console.log("EMAIL CHANGE OTP DELIVERED TO GMAIL:", {
-      recipient: newEmail,
+      recipient: formattedNewEmail,
       messageId: info?.messageId,
       accepted: info?.accepted,
       response: info?.response,
@@ -368,8 +390,11 @@ export const verifyEmailChangeOTPService = async ({
   newEmail,
   otp,
 }) => {
+  const formattedNewEmail = newEmail ? String(newEmail).trim().toLowerCase() : "";
+  const formattedOtp = otp ? String(otp).trim() : "";
+
   const user = await User.findById(userId).select(
-    "+pendingEmail +emailChangeOTP +emailChangeOTPExpires",
+    "+pendingEmail +emailChangeOTP +emailChangeOTPExpires"
   );
 
   if (!user) {
@@ -380,7 +405,7 @@ export const verifyEmailChangeOTPService = async ({
     throw new Error("No pending email change request found.");
   }
 
-  if (user.pendingEmail !== newEmail) {
+  if (user.pendingEmail !== formattedNewEmail) {
     throw new Error("Email does not match.");
   }
 
@@ -388,18 +413,17 @@ export const verifyEmailChangeOTPService = async ({
     throw new Error("No OTP found. Please request a new one.");
   }
 
-  if (user.emailChangeOTPExpires < new Date()) {
+  if (new Date(user.emailChangeOTPExpires).getTime() < Date.now()) {
     throw new Error("OTP has expired.");
   }
 
-  const hashedOTP = hashOTP(otp);
+  const hashedOTP = hashOTP(formattedOtp);
 
   if (hashedOTP !== user.emailChangeOTP) {
     throw new Error("Invalid OTP.");
   }
 
   user.email = user.pendingEmail;
-
   user.pendingEmail = "";
   user.emailChangeOTP = null;
   user.emailChangeOTPExpires = null;

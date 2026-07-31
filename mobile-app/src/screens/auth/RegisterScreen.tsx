@@ -71,7 +71,6 @@ export default function RegisterScreen() {
       Alert.alert("Check your details", validationMessage);
       return;
     }
-
     try {
       setError("");
       setLoading(true);
@@ -86,12 +85,13 @@ export default function RegisterScreen() {
         throw new Error(response.message || "Registration failed.");
       }
 
-      const { accessToken, user } = response.data;
-      await AsyncStorage.setItem("accessToken", accessToken);
-      await AsyncStorage.setItem("authUser", JSON.stringify(user));
-
-      setAuthToken(accessToken);
-      router.replace("/complete-profile");
+      router.push({
+        pathname: "/(auth)/verify-otp",
+        params: {
+          email: response.data.email,
+          type: "register",
+        },
+      });
     } catch (err) {
       const message = getErrorMessage(err);
       setError(message);
@@ -139,9 +139,7 @@ export default function RegisterScreen() {
 
                 <Text style={styles.heading}>Create Account</Text>
 
-                <Text style={styles.subHeading}>
-                  Sign up to start shopping
-                </Text>
+                <Text style={styles.subHeading}>Sign up to start shopping</Text>
               </View>
             </ImageBackground>
 

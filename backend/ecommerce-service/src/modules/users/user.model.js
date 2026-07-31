@@ -62,6 +62,19 @@ const userSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
+    isPhoneVerified: {
+      type: Boolean,
+      default: false,
+    },
+    emailVerificationOTP: {
+      type: String,
+      default: null,
+    },
+
+    emailVerificationOTPExpires: {
+      type: Date,
+      default: null,
+    },
 
     gender: {
       type: String,
@@ -94,4 +107,5 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
+
 export default mongoose.model("User", userSchema);

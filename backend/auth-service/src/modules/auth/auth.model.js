@@ -62,14 +62,18 @@ const userSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
+    isPhoneVerified: {
+      type: Boolean,
+      default: false,
+    },
     emailVerificationOTP: {
       type: String,
-      select: false,
+      default: null,
     },
 
     emailVerificationOTPExpires: {
       type: Date,
-      select: false,
+      default: null,
     },
     gender: {
       type: String,

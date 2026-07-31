@@ -16,13 +16,17 @@ import {
   verifyResetOtp,
   sendEmailChangeOtp,
   verifyEmailChangeOtp,
+  verifyRegistrationOtp,
+  register,
+  setAuthToken,
   ApiResponse,
   ForgotPasswordData,
 } from "@/src/api/auth.api";
 import Colors from "@/src/constants/colors";
 import Fonts from "@/src/constants/fonts";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export type OtpFlowType = "forgot-password" | "change-email";
+export type OtpFlowType = "forgot-password" | "change-email" | "register";
 
 export type VerifyOtpSearchParams = {
   email?: string;
@@ -41,6 +45,7 @@ const CELL_COUNT = 6;
 const Page_Types: Record<OtpFlowType, string> = {
   "forgot-password": "Verify Code",
   "change-email": "Verify Email",
+  register: "Verify Your Email",
 };
 
 export default function VerifyOtpScreen() {
@@ -48,7 +53,12 @@ export default function VerifyOtpScreen() {
 
   const emailValue = Array.isArray(email) ? email[0] : email;
   const rawType = Array.isArray(type) ? type[0] : type;
-  const flowType: OtpFlowType = rawType === "change-email" ? "change-email" : "forgot-password";
+  const flowType: OtpFlowType =
+    rawType === "register"
+      ? "register"
+      : rawType === "change-email"
+        ? "change-email"
+        : "forgot-password";
 
   const [value, setValue] = useState("");
   const [timer, setTimer] = useState(60);
@@ -82,15 +92,27 @@ export default function VerifyOtpScreen() {
     );
   };
 
-  const resendOtpByFlow = async (): Promise<ApiResponse<ForgotPasswordData>> => {
+  const resendOtpByFlow = async (): Promise<
+    ApiResponse<ForgotPasswordData>
+  > => {
     if (!emailValue) throw new Error("Missing email address.");
 
     switch (flowType) {
+      case "register":
+        throw new Error(
+          "Please register again to receive a new verification code.",
+        );
+
       case "change-email":
-        return await sendEmailChangeOtp({ email: emailValue });
+        return await sendEmailChangeOtp({
+          email: emailValue,
+        });
+
       case "forgot-password":
       default:
-        return await forgotPassword({ email: emailValue });
+        return await forgotPassword({
+          email: emailValue,
+        });
     }
   };
 
@@ -98,11 +120,18 @@ export default function VerifyOtpScreen() {
     if (!emailValue) throw new Error("Missing email address.");
 
     switch (flowType) {
+      case "register":
+        return await verifyRegistrationOtp({
+          email: emailValue,
+          otp: value,
+        });
+
       case "change-email":
         return await verifyEmailChangeOtp({
           email: emailValue,
           otp: value,
         });
+
       case "forgot-password":
       default:
         return await verifyResetOtp({
@@ -112,11 +141,24 @@ export default function VerifyOtpScreen() {
     }
   };
 
-  const handleSuccessNavigation = (response: any) => {
+  const handleSuccessNavigation = async (response: any) => {
+    if (flowType === "register") {
+      const { accessToken, user } = response.data;
+
+      await AsyncStorage.setItem("accessToken", accessToken);
+      await AsyncStorage.setItem("authUser", JSON.stringify(user));
+
+      setAuthToken(accessToken);
+
+      router.replace("/complete-profile");
+
+      return;
+    }
     if (flowType === "change-email") {
       Alert.alert(
         "Email Verified",
-        response?.message || "Your email address has been updated successfully.",
+        response?.message ||
+          "Your email address has been updated successfully.",
         [
           {
             text: "OK",
@@ -128,7 +170,7 @@ export default function VerifyOtpScreen() {
               }
             },
           },
-        ]
+        ],
       );
     } else {
       const resetToken = response?.data?.resetToken;
@@ -166,7 +208,7 @@ export default function VerifyOtpScreen() {
       setLoading(true);
 
       const response = await verifyOtpByFlow();
-      handleSuccessNavigation(response);
+      await handleSuccessNavigation(response);
     } catch (err) {
       const message = getErrorMessage(err);
       setError(message);
@@ -187,12 +229,12 @@ export default function VerifyOtpScreen() {
       if (response?.data?.otp) {
         Alert.alert(
           "Development OTP",
-          `Email could not be sent from the local backend. Use OTP ${response.data.otp}.`
+          `Email could not be sent from the local backend. Use OTP ${response.data.otp}.`,
         );
       } else {
         Alert.alert(
           "OTP Sent",
-          "A new verification code has been sent to your email address."
+          "A new verification code has been sent to your email address.",
         );
       }
 

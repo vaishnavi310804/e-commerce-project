@@ -2,7 +2,8 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ecommerceClient = axios.create({
-  baseURL: "https://shopease-ecommerce-service.onrender.com/api/v1",
+  // baseURL: "https://shopease-ecommerce-service.onrender.com/api/v1",
+  baseURL: "http://192.168.29.120:5001/api/v1",
   timeout: 20000,
   headers: {
     "Content-Type": "application/json",
