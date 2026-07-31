@@ -1,4 +1,4 @@
-import Order from "../order/order.model.js";
+import Order from "../orders/order.model.js";
 import {
   createRazorpayOrderService,
   verifyPaymentService,
