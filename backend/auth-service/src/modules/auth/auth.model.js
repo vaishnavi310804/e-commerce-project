@@ -62,7 +62,15 @@ const userSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
+    emailVerificationOTP: {
+      type: String,
+      select: false,
+    },
 
+    emailVerificationOTPExpires: {
+      type: Date,
+      select: false,
+    },
     gender: {
       type: String,
       enum: ["Male", "Female", "Other", "Prefer not to say"],

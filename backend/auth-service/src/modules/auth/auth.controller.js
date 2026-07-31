@@ -9,15 +9,44 @@ import {
   adminLoginService,
   sendEmailChangeOTPService,
   verifyEmailChangeOTPService,
+  verifyRegistrationOTPService
 } from "./auth.service.js";
 
 export const registerUser = async (req, res, next) => {
   try {
-    const { user, accessToken } = await registerUserService(req.body);
+    const result = await registerUserService(req.body);
 
     return res.status(201).json({
       success: true,
-      message: "User registered successfully.",
+      message: result?.emailSent
+        ? "Registration successful. Please verify your email."
+        : "Registration successful. OTP generated successfully.",
+      data:
+        result?.emailSent || process.env.NODE_ENV === "production"
+          ? {
+              email: result.email,
+            }
+          : {
+              email: result.email,
+              otp: result.otp,
+            },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyRegistrationOtp = async (req, res, next) => {
+  try {
+    const { email, otp } = req.body;
+    const { user, accessToken } =
+      await verifyRegistrationOTPService({
+        email,
+        otp,
+      });
+    return res.status(200).json({
+      success: true,
+      message: "Email verified successfully.",
       data: {
         user,
         accessToken,

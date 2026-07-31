@@ -97,3 +97,35 @@ export const sendEmailChangeOTP = async (email, otp) => {
     html,
   });
 };
+
+export const sendRegistrationOTP = async (email, otp) => {
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin:auto;">
+      <h2>Welcome to ShopEase 🎉</h2>
+      <p>Hello,</p>
+      <p>Thank you for creating your ShopEase account.</p>
+
+      <p>Please verify your email address using the OTP below:</p>
+
+      <h1 style="
+        text-align:center;
+        background:#f5f5f5;
+        padding:15px;
+        letter-spacing:8px;
+      ">
+        ${otp}
+      </h1>
+      <p>This OTP is valid for <strong>10 minutes</strong>.</p>
+
+      <p>If you did not create this account, you can safely ignore this email.</p>
+      <br/>
+      <strong>ShopEase Team</strong>
+    </div>
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: "Verify Your ShopEase Account",
+    html,
+  });
+};

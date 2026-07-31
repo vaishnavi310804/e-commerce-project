@@ -11,6 +11,7 @@ import {
   adminLogin,
   sendEmailChangeOtp,
   verifyEmailChangeOtp,
+  verifyRegistrationOtp
 } from "./auth.controller.js";
 import {
   registerValidation,
@@ -22,6 +23,7 @@ import {
   adminLoginValidation,
   sendEmailChangeOtpValidation,
   verifyEmailChangeOtpValidation,
+  verifyRegistrationOtpValidation
 } from "./auth.validation.js";
 import validate from "../../middleware/validate.js";
 import { protect } from "../../middleware/auth.middleware.js";
@@ -73,6 +75,13 @@ router.post(
   verifyEmailChangeOtpValidation,
   validate,
   verifyEmailChangeOtp,
+);
+
+router.post(
+  "/register/verify",
+  verifyRegistrationOtpValidation,
+  validate,
+  verifyRegistrationOtp
 );
 
 export default router;

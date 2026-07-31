@@ -7,7 +7,11 @@ import {
   verifyPasswordResetToken,
 } from "./auth.utils.js";
 import { generateOTP, hashOTP } from "./auth.utils.js";
-import { sendForgotPasswordOTP, sendEmailChangeOTP } from "../../services/email.service.js";
+import {
+  sendForgotPasswordOTP,
+  sendEmailChangeOTP,
+  sendRegistrationOTP,
+} from "../../services/email.service.js";
 import { uploadToCloudinary } from "../../utils/cloudinaryUpload.js";
 
 export const registerUserService = async (userData) => {
@@ -16,20 +20,93 @@ export const registerUserService = async (userData) => {
   const existingUser = await User.findOne({ email });
 
   if (existingUser) {
-    throw new Error("User already exists");
-  }
+    if (existingUser.isEmailVerified) {
+      throw new Error("User already exists.");
+    }
 
+    const otp = generateOTP();
+
+    existingUser.fullName = fullName;
+    existingUser.password = await hashPassword(password);
+    existingUser.profileImage = profileImage;
+
+    existingUser.emailVerificationOTP = hashOTP(otp);
+    existingUser.emailVerificationOTPExpires = new Date(
+      Date.now() + 10 * 60 * 1000
+    );
+    await existingUser.save();
+    try {
+      await sendRegistrationOTP(existingUser.email, otp);
+      return {
+        emailSent: true,
+        email: existingUser.email,
+      };
+    } catch (error) {
+      return {
+        emailSent: false,
+        email: existingUser.email,
+        otp,
+        error: error.message,
+      };
+    }
+  }
   const hashedPassword = await hashPassword(password);
+  const otp = generateOTP();
 
   const user = await User.create({
     fullName,
     email,
     password: hashedPassword,
     profileImage,
+    isEmailVerified: false,
+    emailVerificationOTP: hashOTP(otp),
+    emailVerificationOTPExpires: new Date(Date.now() + 10 * 60 * 1000),
   });
 
-  const accessToken = generateAccessToken(user);
+  try {
+    await sendRegistrationOTP(user.email, otp);
+    return {
+      emailSent: true,
+      email: user.email,
+    };
+  } catch (error) {
+    return {
+      emailSent: false,
+      email: user.email,
+      otp,
+      error: error.message,
+    };
+  }
+};
 
+export const verifyRegistrationOTPService = async ({ email, otp }) => {
+  const user = await User.findOne({ email }).select(
+    "+emailVerificationOTP +emailVerificationOTPExpires",
+  );
+  if (!user) {
+    throw new Error("User not found.");
+  }
+  if (user.isEmailVerified) {
+    throw new Error("Email is already verified.");
+  }
+  if (!user.emailVerificationOTP || !user.emailVerificationOTPExpires) {
+    throw new Error("No OTP found. Please register again.");
+  }
+
+  if (user.emailVerificationOTPExpires < new Date()) {
+    throw new Error("OTP has expired.");
+  }
+  const hashedOTP = hashOTP(otp);
+
+  if (hashedOTP !== user.emailVerificationOTP) {
+    throw new Error("Invalid OTP.");
+  }
+  user.isEmailVerified = true;
+  user.emailVerificationOTP = null;
+  user.emailVerificationOTPExpires = null;
+
+  await user.save();
+  const accessToken = generateAccessToken(user);
   const userObject = user.toObject();
   delete userObject.password;
 
@@ -41,11 +118,12 @@ export const registerUserService = async (userData) => {
 
 export const loginUserService = async ({ email, password }) => {
   const user = await User.findOne({ email }).select("+password");
-
   if (!user) {
     throw new Error("Invalid email or password");
   }
-
+  if (!user.isEmailVerified) {
+    throw new Error("Please verify your email before logging in.");
+  }
   if (!user.isActive) {
     throw new Error("User has been logged out");
   }
@@ -79,7 +157,7 @@ export const logoutUserService = async (userId) => {
 
 export const forgotPasswordService = async (email) => {
   const user = await User.findOne({ email }).select(
-    "+resetPasswordOTP +resetPasswordOTPExpires"
+    "+resetPasswordOTP +resetPasswordOTPExpires",
   );
   if (!user) {
     throw new Error("User not found.");
@@ -119,7 +197,7 @@ export const forgotPasswordService = async (email) => {
 
 export const verifyResetOTPService = async ({ email, otp }) => {
   const user = await User.findOne({ email }).select(
-    "+resetPasswordOTP +resetPasswordOTPExpires +isResetOTPVerified"
+    "+resetPasswordOTP +resetPasswordOTPExpires +isResetOTPVerified",
   );
 
   if (!user) {
@@ -151,17 +229,14 @@ export const verifyResetOTPService = async ({ email, otp }) => {
   };
 };
 
-export const resetPasswordService = async ({
-  resetToken,
-  newPassword,
-}) => {
+export const resetPasswordService = async ({ resetToken, newPassword }) => {
   const decoded = verifyPasswordResetToken(resetToken);
 
   if (decoded.purpose !== "password-reset") {
     throw new Error("Invalid reset token.");
   }
   const user = await User.findById(decoded.id).select(
-    "+resetPasswordOTP +resetPasswordOTPExpires"
+    "+resetPasswordOTP +resetPasswordOTPExpires",
   );
   if (!user) {
     throw new Error("User not found.");
@@ -236,7 +311,7 @@ export const adminLoginService = async ({ email, password }) => {
 
 export const sendEmailChangeOTPService = async (userId, newEmail) => {
   const user = await User.findById(userId).select(
-    "+pendingEmail +emailChangeOTP +emailChangeOTPExpires"
+    "+pendingEmail +emailChangeOTP +emailChangeOTPExpires",
   );
 
   if (!user) {
@@ -294,7 +369,7 @@ export const verifyEmailChangeOTPService = async ({
   otp,
 }) => {
   const user = await User.findById(userId).select(
-    "+pendingEmail +emailChangeOTP +emailChangeOTPExpires"
+    "+pendingEmail +emailChangeOTP +emailChangeOTPExpires",
   );
 
   if (!user) {

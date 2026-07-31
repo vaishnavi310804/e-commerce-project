@@ -55,6 +55,21 @@ export const verifyResetOTPValidation = [
     .withMessage("OTP must contain only numbers."),
 ];
 
+export const verifyRegistrationOtpValidation = [
+  body("email")
+    .trim()
+    .isEmail()
+    .withMessage("Please provide a valid email."),
+
+  body("otp")
+    .trim()
+    .isLength({ min: 6, max: 6 })
+    .withMessage("OTP must be 6 digits.")
+    .isNumeric()
+    .withMessage("OTP must contain only numbers."),
+];
+
+
 export const resetPasswordValidation = [
   body("resetToken")
     .notEmpty()
