@@ -1,6 +1,5 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-
 import PaymentOption from "./PaymentOption";
 import Colors from "@/src/constants/colors";
 import Fonts from "@/src/constants/fonts";

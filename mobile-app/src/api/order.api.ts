@@ -2,7 +2,7 @@ import ecommerceClient from "./ecommerceClient";
 
 export interface CreateOrderPayload {
   addressId: string;
-  paymentMethod: "COD" | "ONLINE" | "Card" | "UPI";
+  paymentMethod: "COD" | "RAZORPAY";
 }
 
 export interface OrderItem {

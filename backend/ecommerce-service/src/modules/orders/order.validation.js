@@ -10,7 +10,7 @@ export const createOrderValidation = [
   body("paymentMethod")
     .notEmpty()
     .withMessage("Payment method is required.")
-    .isIn(["COD", "ONLINE", "Card", "UPI"])
+    .isIn(["COD", "RAZORPAY"])
     .withMessage("Invalid payment method."),
 ];
 

@@ -35,8 +35,6 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
     products: [orderItemSchema],
-    items: [orderItemSchema],
-
     subtotal: {
       type: Number,
       default: 0,
@@ -60,7 +58,7 @@ const orderSchema = new mongoose.Schema(
 
     paymentMethod: {
       type: String,
-      enum: ["COD", "ONLINE", "Card", "UPI"],
+      enum: ["COD", "RAZORPAY"],
       default: "COD",
     },
     paymentStatus: {
@@ -118,13 +116,6 @@ const orderSchema = new mongoose.Schema(
 orderSchema.pre("save", function () {
   if (!this.orderNumber) {
     this.orderNumber = `ORD-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
-  }
-  if (
-    (!this.products || this.products.length === 0) &&
-    this.items &&
-    this.items.length > 0
-  ) {
-    this.products = this.items;
   }
 });
 
