@@ -79,6 +79,15 @@ export const getAllProductsService = async () => {
     .sort({ createdAt: -1 });
 };
 
+export const getProductsByCategoryService = async (categoryId) => {
+  return await Product.find({
+    category: categoryId,
+    isActive: true,
+  })
+    .populate("category", "name slug")
+    .sort({ createdAt: -1 });
+};
+
 export const getAllProductsAdminService = async () => {
   return await Product.find()
     .populate("category", "name slug")

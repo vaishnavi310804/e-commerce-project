@@ -1,26 +1,63 @@
 import mongoose from "mongoose";
 
-const orderItemSchema = new mongoose.Schema(
-  {
-    product: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Product",
-      required: true,
-    },
-    quantity: {
-      type: Number,
-      required: true,
-      min: 1,
-    },
-    price: {
-      type: Number,
-      required: true,
-    },
+const orderItemSchema = new mongoose.Schema({
+  itemNumber: {
+    type: String,
+    unique: true,
+    trim: true,
   },
-  {
-    _id: false,
+
+  product: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Product",
+    required: true,
   },
-);
+
+  quantity: {
+    type: Number,
+    required: true,
+    min: 1,
+  },
+
+  price: {
+    type: Number,
+    required: true,
+  },
+
+  itemStatus: {
+    type: String,
+    enum: [
+      "Placed",
+      "Confirmed",
+      "Packed",
+      "Shipped",
+      "Delivered",
+      "Cancelled",
+    ],
+    default: "Placed",
+  },
+
+  returnStatus: {
+    type: String,
+    enum: [
+      "Not Requested",
+      "Requested",
+      "Approved",
+      "Rejected",
+      "Picked Up",
+      "Refunded",
+    ],
+    default: "Not Requested",
+  },
+});
+
+orderItemSchema.pre("validate", function () {
+  if (!this.itemNumber) {
+    this.itemNumber =
+      `SE-ITM-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
+  }
+});
+
 
 const orderSchema = new mongoose.Schema(
   {

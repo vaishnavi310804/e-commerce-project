@@ -6,14 +6,15 @@ export const createOrderService = async (userId, payload) => {
   const { addressId, paymentMethod = "COD" } = payload;
 
   const cart = await Cart.findOne({ user: userId }).populate("items.product");
-
   if (!cart || !cart.items || cart.items.length === 0) {
     const error = new Error("Cart is empty.");
     error.statusCode = 400;
     throw error;
   }
-
-  const addressDoc = await Address.findOne({ _id: addressId, user: userId });
+  const addressDoc = await Address.findOne({
+    _id: addressId,
+    user: userId,
+  });
   if (!addressDoc) {
     const error = new Error("Shipping address not found.");
     error.statusCode = 404;
@@ -24,28 +25,33 @@ export const createOrderService = async (userId, payload) => {
   let rawDiscount = 0;
 
   const orderProducts = cart.items.map((item) => {
-    const product = item.product;
-    if (!product) {
-      throw new Error("One or more products in your cart are unavailable.");
-    }
+  const product = item.product;
 
-    const price = product.price || 0;
-    const unitPrice =
-      product.discountPrice > 0 && product.discountPrice < price
-        ? product.discountPrice
-        : price;
+  if (!product) {
+    throw new Error("One or more products in your cart are unavailable.");
+  }
 
-    rawSubtotal += price * item.quantity;
-    if (product.discountPrice > 0 && product.discountPrice < price) {
-      rawDiscount += (price - product.discountPrice) * item.quantity;
-    }
+  const price = product.price || 0;
 
-    return {
-      product: product._id,
-      quantity: item.quantity,
-      price: unitPrice,
-    };
-  });
+  const unitPrice =
+    product.discountPrice > 0 && product.discountPrice < price
+      ? product.discountPrice
+      : price;
+
+  rawSubtotal += price * item.quantity;
+
+  if (product.discountPrice > 0 && product.discountPrice < price) {
+    rawDiscount += (price - product.discountPrice) * item.quantity;
+  }
+
+  return {
+    product: product._id,
+    quantity: item.quantity,
+    price: unitPrice,
+    itemStatus: "Placed",
+    returnStatus: "Not Requested",
+  };
+});
 
   const shippingCharge = 0;
   const tax = 0;
@@ -64,11 +70,9 @@ export const createOrderService = async (userId, payload) => {
     postalCode: addressDoc.postalCode,
     country: addressDoc.country,
   };
-
   const order = await Order.create({
     user: userId,
     products: orderProducts,
-    items: orderProducts,
     subtotal,
     shippingCharge,
     tax,
@@ -80,7 +84,6 @@ export const createOrderService = async (userId, payload) => {
     shippingAddress: shippingAddressSnapshot,
     address: addressDoc._id,
   });
-
   await Cart.findOneAndUpdate(
     { user: userId },
     {
@@ -90,19 +93,16 @@ export const createOrderService = async (userId, payload) => {
     },
     { new: true },
   );
-
   return await Order.findById(order._id)
     .populate("user", "fullName email phoneNumber")
     .populate("address")
-    .populate("products.product", "name price productImage image brand")
-    .populate("items.product", "name price productImage image brand");
+    .populate("products.product", "name price productImage image brand");
 };
 
 export const getMyOrdersService = async (userId) => {
   return await Order.find({ user: userId })
     .populate("address")
     .populate("products.product", "name price productImage image brand")
-    .populate("items.product", "name price productImage image brand")
     .sort({ createdAt: -1 });
 };
 
@@ -110,8 +110,7 @@ export const getMyOrderDetailsService = async (userId, orderId) => {
   const order = await Order.findOne({ _id: orderId, user: userId })
     .populate("user", "fullName email phoneNumber")
     .populate("address")
-    .populate("products.product", "name price productImage image brand")
-    .populate("items.product", "name price productImage image brand");
+    .populate("products.product", "name price productImage image brand");
 
   if (!order) {
     const error = new Error("Order not found.");
@@ -136,7 +135,6 @@ export const getAllOrdersService = async (query = {}) => {
     .populate("user", "fullName email name")
     .populate("address")
     .populate("products.product", "name price productImage image brand")
-    .populate("items.product", "name price productImage image brand")
     .sort({ createdAt: -1 });
 };
 
@@ -144,8 +142,7 @@ export const getOrderDetailsService = async (orderId) => {
   const order = await Order.findById(orderId)
     .populate("user", "fullName email name phoneNumber")
     .populate("address")
-    .populate("products.product", "name price productImage image brand")
-    .populate("items.product", "name price productImage image brand");
+    .populate("products.product", "name price productImage image brand");
 
   if (!order) {
     const error = new Error("Order not found.");

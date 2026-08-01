@@ -9,41 +9,43 @@ type Props = {
 
 const OrderStatus = ({ status }: Props) => {
   const getStatusStyle = () => {
-    switch (status) {
-      case "Placed":
-      case "Shipped":
-        return {
-          backgroundColor: "#FFF7E8",
-          borderColor: "#FDBA2D",
-          color: "#F59E0B",
-          label: "Active",
-        };
+  switch (status) {
+    case "Placed":
+      return {
+        backgroundColor: "#FFF7E8",
+        borderColor: "#FDBA2D",
+        color: "#F59E0B",
+      };
 
-      case "Delivered":
-        return {
-          backgroundColor: "#ECFDF5",
-          borderColor: "#34D399",
-          color: "#10B981",
-          label: "Completed",
-        };
+    case "Shipped":
+      return {
+        backgroundColor: "#E0F2FE",
+        borderColor: "#38BDF8",
+        color: "#0284C7",
+      };
 
-      case "Cancelled":
-        return {
-          backgroundColor: "#FEF2F2",
-          borderColor: "#F87171",
-          color: "#EF4444",
-          label: "Cancelled",
-        };
+    case "Delivered":
+      return {
+        backgroundColor: "#ECFDF5",
+        borderColor: "#34D399",
+        color: "#10B981",
+      };
 
-      default:
-        return {
-          backgroundColor: "#F5F5F5",
-          borderColor: "#DDD",
-          color: Colors.text,
-          label: status,
-        };
-    }
-  };
+    case "Cancelled":
+      return {
+        backgroundColor: "#FEF2F2",
+        borderColor: "#F87171",
+        color: "#EF4444",
+      };
+
+    default:
+      return {
+        backgroundColor: "#F5F5F5",
+        borderColor: "#DDD",
+        color: Colors.text,
+      };
+  }
+};
 
   const badge = getStatusStyle();
 
@@ -65,7 +67,7 @@ const OrderStatus = ({ status }: Props) => {
           },
         ]}
       >
-        {badge.label}
+        {status}
       </Text>
     </View>
   );

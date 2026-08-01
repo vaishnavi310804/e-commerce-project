@@ -17,12 +17,11 @@ type Props = {
   isWishlisted?: boolean;
   onPress: () => void;
   onWishlist?: () => void;
-  onAddToCart?: () => void;
 };
 
-const WishlistCard = ({
+const ProductGridCard = ({
   product,
-  isWishlisted = true,
+  isWishlisted = false,
   onPress,
   onWishlist,
 }: Props) => {
@@ -38,13 +37,12 @@ const WishlistCard = ({
 
   const rating = product?.averageRating ?? 4.9;
   const categoryOrBrand =
-    (product as any)?.category?.name || product?.brand || "Electronics";
+  product.category?.name || product.brand || "";
   const imageUrl =
     product?.productImage?.url || "https://via.placeholder.com/150";
 
   return (
     <Pressable style={styles.card} onPress={onPress}>
-      {/* Top Image Container */}
       <View style={styles.imageBox}>
         {hasDiscount && (
           <View style={styles.discountBadge}>
@@ -55,7 +53,10 @@ const WishlistCard = ({
         <TouchableOpacity
           style={styles.heartButton}
           activeOpacity={0.8}
-          onPress={onWishlist}
+          onPress={(e) => {
+            e.stopPropagation();
+            onWishlist?.();
+          }}
         >
           <Ionicons
             name={isWishlisted ? "heart" : "heart-outline"}
@@ -71,7 +72,6 @@ const WishlistCard = ({
         />
       </View>
 
-      {/* Details Container */}
       <View style={styles.details}>
         <View style={styles.titleRow}>
           <Text numberOfLines={1} style={styles.title}>
@@ -91,16 +91,14 @@ const WishlistCard = ({
         <View style={styles.priceRow}>
           <Text style={styles.price}>₹{finalPrice}</Text>
 
-          {hasDiscount && (
-            <Text style={styles.oldPrice}>₹{price}</Text>
-          )}
+          {hasDiscount && <Text style={styles.oldPrice}>₹{price}</Text>}
         </View>
       </View>
     </Pressable>
   );
 };
 
-export default WishlistCard;
+export default ProductGridCard;
 
 const styles = StyleSheet.create({
   card: {

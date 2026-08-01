@@ -17,6 +17,11 @@ export type Product = {
     url: string;
     public_id: string;
   };
+  category?: {
+  _id: string;
+  name: string;
+  slug: string;
+};
 };
 
 type ApiResponse<T> = {
@@ -36,6 +41,14 @@ export const getProducts = async () => {
 export const getProductById = async (id: string) => {
   const { data } = await ecommerceClient.get<ApiResponse<Product>>(
     `/product/${id}`
+  );
+
+  return data;
+};
+
+export const getProductsByCategory = async (categoryId: string) => {
+  const { data } = await ecommerceClient.get(
+    `/product/category/${categoryId}`
   );
 
   return data;

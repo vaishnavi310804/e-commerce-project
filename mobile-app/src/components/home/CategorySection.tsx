@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
-import {Category,getCategories} from "@/src/api/category.api";
+import { Category, getCategories } from "@/src/api/category.api";
 import CategoryItem from "./CategoryItem";
 import SectionHeader from "./SectionHeader";
+import { router } from "expo-router";
 
 const CategorySection = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -25,10 +26,7 @@ const CategorySection = () => {
 
   return (
     <View style={styles.container}>
-      <SectionHeader
-        title="Categories"
-        onSeeAll={() => {}}
-      />
+      <SectionHeader title="Categories" onSeeAll={() => {}} />
 
       <FlatList
         horizontal
@@ -39,7 +37,16 @@ const CategorySection = () => {
         renderItem={({ item }) => (
           <CategoryItem
             item={item}
-            onPress={() => {}}
+            onPress={() =>
+              router.push({
+                pathname: "/category/[categoryId]",
+                params: {
+                  categoryId: item._id,
+                  categoryName: item.name,
+                  slug: item.slug,
+                },
+              })
+            }
           />
         )}
       />

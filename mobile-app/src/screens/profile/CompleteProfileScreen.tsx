@@ -6,6 +6,7 @@ import {
   View,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import ScreenWrapper from "@/src/components/common/ScreenWrapper";
@@ -13,7 +14,6 @@ import BackButton from "@/src/components/common/BackButton";
 import Avatar from "@/src/components/profile/Avatar";
 import PhoneInput from "@/src/components/profile/PhoneInput";
 import GenderDropdown from "@/src/components/profile/GenderDropdown";
-import Input from "@/src/components/common/Input";
 import PrimaryButton from "@/src/components/common/PrimaryButton";
 import Colors from "@/src/constants/colors";
 import Fonts from "@/src/constants/fonts";
@@ -26,29 +26,53 @@ export default function CompleteProfileScreen() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [gender, setGender] = useState("");
+  const [loading, setLoading] = useState(false);
 
-const handleCompleteProfile = async () => {
-  try {
-    const formData = new FormData();
+  const handleCompleteProfile = async () => {
+    try {
+      setLoading(true);
+      const formData = new FormData();
 
-    formData.append("phoneNumber", phone);
-    formData.append("gender", gender);
+      if (name.trim()) {
+        formData.append("fullName", name.trim());
+      }
+      if (phone.trim()) {
+        formData.append("phoneNumber", phone.trim());
+      }
+      if (gender) {
+        formData.append("gender", gender);
+      }
 
-    if (image) {
-      formData.append("profileImage", {
-        uri: image,
-        name: "profile.jpg",
-        type: "image/jpeg",
-      } as any);
+      if (image) {
+        if (
+          image.startsWith("file://") ||
+          image.startsWith("content://") ||
+          image.startsWith("ph://")
+        ) {
+          formData.append("profileImage", {
+            uri: image,
+            name: "profile.jpg",
+            type: "image/jpeg",
+          } as any);
+        } else {
+          formData.append("profileImage", image);
+        }
+      }
+
+      await updateProfile(formData);
+      router.replace("/location-permission");
+      
+    } catch (error: any) {
+      console.error("Profile update failed:", error?.response?.data || error);
+      const errorMessage =
+        error?.response?.data?.errors?.[0]?.msg ||
+        error?.response?.data?.message ||
+        "Failed to complete profile. Please check your inputs.";
+      Alert.alert("Update Failed", errorMessage);
+    } finally {
+      setLoading(false);
     }
-
-    await updateProfile(formData);
-
-    router.replace("/(tabs)");
-  } catch (error) {
-    console.error("Profile update failed:", error);
-  }
-};
+  };
 
   return (
     <ScreenWrapper backgroundColor="#FFFFFF">
@@ -62,10 +86,7 @@ const handleCompleteProfile = async () => {
           showsVerticalScrollIndicator={false}
         >
           <BackButton />
-
-          <Text style={styles.title}>
-            Complete Your Profile
-          </Text>
+          <Text style={styles.title}>Complete Your Profile</Text>
 
           <Text style={styles.subtitle}>
             Don't worry, only you can see your
@@ -73,32 +94,17 @@ const handleCompleteProfile = async () => {
             personal information.
           </Text>
 
-          <Avatar
-            image={image}
-            onChange={setImage}
-          />
+          <Avatar image={image} onChange={setImage} />
 
-          {/* <Input
-            label="Name"
-            placeholder="Enter Your Name"
-            value={name}
-            onChangeText={setName}
-          /> */}
+          <PhoneInput value={phone} onChangeText={setPhone} />
 
-          <PhoneInput
-            value={phone}
-            onChangeText={setPhone}
-          />
-
-          <GenderDropdown
-            value={gender}
-            onSelect={setGender}
-          />
+          <GenderDropdown value={gender} onSelect={setGender} />
 
           <View style={styles.buttonContainer}>
             <PrimaryButton
-              title="Complete Profile"
+              title={loading ? "Updating..." : "Complete Profile"}
               onPress={handleCompleteProfile}
+              disabled={loading}
             />
           </View>
         </ScrollView>

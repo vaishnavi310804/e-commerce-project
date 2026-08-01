@@ -5,6 +5,7 @@ import {
   getProductByIdService,
   productStatusService,
   updateProductService,
+  getProductsByCategoryService
 } from "./product.service.js";
 
 export const createProduct = async (req, res, next) => {
@@ -39,6 +40,22 @@ export const getAllProductsAdmin = async (req, res, next) => {
     const products = await getAllProductsAdminService();
     return res.status(200).json({
       success: true,
+      data: products,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getProductsByCategory = async (req, res, next) => {
+  try {
+    const { categoryId } = req.params;
+
+    const products = await getProductsByCategoryService(categoryId);
+
+    res.status(200).json({
+      success: true,
+      count: products.length,
       data: products,
     });
   } catch (error) {
