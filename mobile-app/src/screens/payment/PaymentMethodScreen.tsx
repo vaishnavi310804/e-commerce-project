@@ -5,9 +5,7 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  Alert,
-  ActivityIndicator,
-} from "react-native";
+  Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import ScreenWrapper from "@/src/components/common/ScreenWrapper";
@@ -18,7 +16,8 @@ import Fonts from "@/src/constants/fonts";
 import { createOrder } from "@/src/api/order.api";
 import { getDefaultAddress } from "@/src/api/address.api";
 import { createRazorpayOrder, verifyPayment } from "@/src/api/payment.api";
-import RazorpayCheckout from "react-native-razorpay"
+import RazorpayCheckout from "react-native-razorpay";
+
 
 const PaymentMethodScreen = () => {
   const params = useLocalSearchParams();
@@ -72,19 +71,30 @@ const PaymentMethodScreen = () => {
           email: "",
           contact: "",
         },
-
         theme: {
-          color: "#4F46E5",
+          color: Colors.primary,
+        },
+        retry: {
+          enabled: true,
+        },
+        modal: {
+          confirm_close: true,
         },
       };
 
       try {
         const payment = await RazorpayCheckout.open(options);
-        await verifyPayment({
+        const verifyResponse = await verifyPayment({
           razorpay_order_id: payment.razorpay_order_id,
           razorpay_payment_id: payment.razorpay_payment_id,
           razorpay_signature: payment.razorpay_signature,
         });
+
+        if (!verifyResponse.success) {
+          Alert.alert("Payment Verification Failed");
+          return;
+        }
+
         router.replace({
           pathname: "/order-success",
           params: {
@@ -92,13 +102,19 @@ const PaymentMethodScreen = () => {
           },
         });
       } catch (err: any) {
-        Alert.alert(
-          "Payment Failed",
-          err?.description || "Payment was cancelled.",
-        );
+        console.log("Razorpay Error:", err);
+
+        if (err?.code === 0) {
+          Alert.alert("Payment Cancelled", "You cancelled the payment.");
+        } else {
+          Alert.alert(
+            "Payment Failed",
+            err?.description || "Unable to complete the payment.",
+          );
+        }
       }
     } catch (error: any) {
-      console.log(error);
+      console.log("Payment Error:", error?.response?.data || error);
       Alert.alert(
         "Order Failed",
         error?.response?.data?.message ||
