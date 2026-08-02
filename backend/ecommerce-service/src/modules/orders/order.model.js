@@ -53,11 +53,9 @@ const orderItemSchema = new mongoose.Schema({
 
 orderItemSchema.pre("validate", function () {
   if (!this.itemNumber) {
-    this.itemNumber =
-      `SE-ITM-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    this.itemNumber = `SE-ITM-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
   }
 });
-
 
 const orderSchema = new mongoose.Schema(
   {
@@ -144,6 +142,11 @@ const orderSchema = new mongoose.Schema(
     paymentDate: {
       type: Date,
     },
+    invoiceNumber: {
+      type: String,
+      unique: true,
+      trim: true,
+    },
   },
   {
     timestamps: true,
@@ -151,8 +154,18 @@ const orderSchema = new mongoose.Schema(
 );
 
 orderSchema.pre("save", function () {
+  if (!this.invoiceNumber) {
+    this.invoiceNumber = `SE-INV-${Date.now()}-${Math.floor(
+      1000 + Math.random() * 9000,
+    )}`;
+  }
+});
+
+orderSchema.pre("save", function () {
   if (!this.orderNumber) {
-    this.orderNumber = `ORD-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    this.orderNumber = `SE-ORD-${Date.now()}-${Math.floor(
+      1000 + Math.random() * 9000,
+    )}`;
   }
 });
 

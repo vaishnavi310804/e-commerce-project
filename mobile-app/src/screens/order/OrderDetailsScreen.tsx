@@ -45,10 +45,8 @@ const OrderDetailsScreen = () => {
   }, [orderId]);
 
   const handleCancel = () => {
-    Alert.alert("Cancel Order",
-       "Are you sure you want to cancel this order?", [
-      { text: "No", 
-        style: "cancel" },
+    Alert.alert("Cancel Order", "Are you sure you want to cancel this order?", [
+      { text: "No", style: "cancel" },
       {
         text: "Yes",
         style: "destructive",
@@ -60,17 +58,23 @@ const OrderDetailsScreen = () => {
             if (response.success) {
               Alert.alert("Success", "Order cancelled successfully.");
               await fetchOrder();
-              router.back()
+              router.back();
             } else {
-              Alert.alert("Error", response.message || "Failed to cancel order.");
+              Alert.alert(
+                "Error",
+                response.message || "Failed to cancel order.",
+              );
             }
           } catch (error: any) {
-            console.log("Cancel Order Error:", error?.response?.data || error?.message);
+            console.log(
+              "Cancel Order Error:",
+              error?.response?.data || error?.message,
+            );
             Alert.alert(
               "Error",
               error?.response?.data?.message ||
                 error?.message ||
-                "Failed to cancel order."
+                "Failed to cancel order.",
             );
           } finally {
             setCancelLoading(false);
@@ -119,7 +123,11 @@ const OrderDetailsScreen = () => {
   if (loading) {
     return (
       <ScreenWrapper>
-        <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: 40 }} />
+        <ActivityIndicator
+          size="large"
+          color={Colors.primary}
+          style={{ marginTop: 40 }}
+        />
       </ScreenWrapper>
     );
   }
@@ -141,7 +149,7 @@ const OrderDetailsScreen = () => {
     );
   }
 
-  const productsList = order.products || order.items || [];
+  const productsList = order.products || [];
 
   return (
     <ScreenWrapper>
@@ -173,10 +181,15 @@ const OrderDetailsScreen = () => {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Products ({productsList.length})</Text>
+          <Text style={styles.sectionTitle}>
+            Products ({productsList.length})
+          </Text>
 
           {productsList.map((item, index) => (
-            <OrderProduct key={item.product?._id || index.toString()} item={item} />
+            <OrderProduct
+              key={item.product?._id || index.toString()}
+              item={item}
+            />
           ))}
         </View>
 
@@ -193,6 +206,16 @@ const OrderDetailsScreen = () => {
           discount={order.discount}
           totalAmount={order.totalAmount}
         />
+
+        <TouchableOpacity
+          style={styles.receiptButton}
+          activeOpacity={0.8}
+          onPress={() => router.push(`/receipt/${order._id}`)}
+        >
+          <Ionicons name="receipt-outline" size={20} color={Colors.primary} />
+
+          <Text style={styles.receiptText}>View E-Receipt</Text>
+        </TouchableOpacity>
 
         {action && (
           <TouchableOpacity
@@ -291,5 +314,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: Fonts.medium,
     color: Colors.gray,
+  },
+
+  receiptButton: {
+    height: 52,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+    backgroundColor: "#F7F5FF",
+    marginBottom: 20,
+
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  receiptText: {
+    marginLeft: 8,
+    fontSize: 15,
+    color: Colors.primary,
+    fontFamily: Fonts.semibold,
   },
 });

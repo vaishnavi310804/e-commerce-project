@@ -4,19 +4,31 @@ import Colors from "@/src/constants/colors";
 import Fonts from "@/src/constants/fonts";
 
 type Props = {
+  orderId: string;
   onViewOrder: () => void;
-  onReceipt: () => void;
+  onReceipt: (orderId: string) => void;
 };
 
-const SuccessActions = ({ onViewOrder, onReceipt }: Props) => {
+const SuccessActions = ({
+  orderId,
+  onViewOrder,
+  onReceipt,
+}: Props) => {
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.button} onPress={onViewOrder}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={onViewOrder}
+      >
         <Text style={styles.buttonText}>View Order</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={onReceipt}>
-        <Text style={styles.receipt}>View E-Receipt</Text>
+      <TouchableOpacity
+        onPress={() => onReceipt(orderId)}
+      >
+        <Text style={styles.receipt}>
+          View E-Receipt
+        </Text>
       </TouchableOpacity>
     </View>
   );

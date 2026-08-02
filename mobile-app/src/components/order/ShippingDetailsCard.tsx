@@ -3,18 +3,10 @@ import { StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/src/constants/colors";
 import Fonts from "@/src/constants/fonts";
+import { ShippingAddress } from "@/src/api/order.api";
 
 type Props = {
-  address: {
-    fullName: string;
-    phoneNumber: string;
-    addressLine1: string;
-    addressLine2?: string;
-    city: string;
-    state: string;
-    postalCode: string;
-    addressType?: string;
-  };
+  address: ShippingAddress;
 };
 
 const ShippingDetailsCard = ({ address }: Props) => {
@@ -31,12 +23,6 @@ const ShippingDetailsCard = ({ address }: Props) => {
 
         <View>
           <Text style={styles.title}>Shipping Address</Text>
-
-          {address.addressType && (
-            <Text style={styles.type}>
-              {address.addressType}
-            </Text>
-          )}
         </View>
       </View>
 
@@ -51,15 +37,15 @@ const ShippingDetailsCard = ({ address }: Props) => {
       </Text>
 
       <Text style={styles.address}>
-        {address.addressLine1}
-        {address.addressLine2
-          ? `, ${address.addressLine2}`
-          : ""}
+        {address.streetAddress}
       </Text>
 
       <Text style={styles.address}>
-        {address.city}, {address.state}{" "}
-        {address.postalCode}
+        {address.city}, {address.state} {address.postalCode}
+      </Text>
+
+      <Text style={styles.address}>
+        {address.country}
       </Text>
     </View>
   );
@@ -96,14 +82,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: Fonts.bold,
     color: Colors.text,
-  },
-
-  type: {
-    marginTop: 2,
-    fontSize: 13,
-    fontFamily: Fonts.medium,
-    color: Colors.gray,
-    textTransform: "capitalize",
   },
 
   divider: {

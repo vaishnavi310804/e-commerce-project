@@ -29,14 +29,22 @@ const OrderSuccessScreen = () => {
       </View>
 
       <SuccessActions
+        orderId={orderId as string}
         onViewOrder={() =>
           router.push({
             pathname: "/order-details",
-            params: { orderId },
+            params: {
+              orderId,
+            },
           })
         }
-        onReceipt={() =>
-          Alert.alert("Coming Soon", "Receipt feature will be available soon.")
+        onReceipt={(orderId) =>
+          router.push({
+            pathname: "/receipt/[orderId]" as any,
+            params: {
+              orderId,
+            },
+          })
         }
       />
     </ScreenWrapper>

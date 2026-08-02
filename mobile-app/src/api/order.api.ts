@@ -1,4 +1,5 @@
 import ecommerceClient from "./ecommerceClient";
+import { Product } from "./product.api";
 
 export interface CreateOrderPayload {
   addressId: string;
@@ -6,22 +7,52 @@ export interface CreateOrderPayload {
 }
 
 export interface OrderItem {
-  product: any;
+  itemNumber: string;
+  product: Product;
   quantity: number;
   price: number;
+  itemStatus:
+    | "Placed"
+    | "Confirmed"
+    | "Packed"
+    | "Shipped"
+    | "Delivered"
+    | "Cancelled";
+  returnStatus:
+    | "Not Requested"
+    | "Requested"
+    | "Approved"
+    | "Rejected"
+    | "Picked Up"
+    | "Refunded";
 }
+
 export type OrderStatus =
+  | "Pending"
   | "Placed"
+  | "Confirmed"
+  | "Processing"
+  | "Packed"
   | "Shipped"
   | "Delivered"
   | "Cancelled";
 
+
+  export interface ShippingAddress {
+  fullName: string;
+  phoneNumber: string;
+  streetAddress: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+}
+
 export interface OrderData {
   _id: string;
   orderNumber: string;
-  user: any;
+  invoiceNumber: string;
   products: OrderItem[];
-  items: OrderItem[];
   subtotal: number;
   shippingCharge: number;
   tax: number;
@@ -30,7 +61,7 @@ export interface OrderData {
   paymentMethod: string;
   paymentStatus: string;
   orderStatus: OrderStatus;
-  shippingAddress: any;
+  shippingAddress: ShippingAddress;
   createdAt: string;
 }
 
