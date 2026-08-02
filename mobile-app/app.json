@@ -22,7 +22,6 @@
       "predictiveBackGestureEnabled": false,
       "package": "com.vaishnavi_3108.shopease",
       "googleServicesFile": "./google-services.json",
-      "useNextNotificationsApi": true
     },
     "web": {
       "output": "static",
