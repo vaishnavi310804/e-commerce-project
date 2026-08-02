@@ -1,23 +1,27 @@
-import { getMessaging, getToken, requestPermission } from "@react-native-firebase/messaging";
+import { getMessaging, getToken, AuthorizationStatus } from "@react-native-firebase/messaging";
 
 export const requestNotificationPermission = async () => {
   try {
-    const authStatus = await requestPermission(getMessaging());
+    const messaging = getMessaging();
+
+    const authStatus = await messaging.requestPermission();
 
     const enabled =
-      authStatus === 1 || authStatus === 2;
+      authStatus === AuthorizationStatus.AUTHORIZED ||
+      authStatus === AuthorizationStatus.PROVISIONAL;
 
     if (!enabled) {
+      console.log("Notification permission denied");
       return null;
     }
 
-    const token = await getToken(getMessaging());
+    const token = await getToken(messaging);
 
     console.log("FCM Token:", token);
 
     return token;
   } catch (error) {
-    console.log(error);
+    console.log("FCM Error:", error);
     return null;
   }
 };
