@@ -21,7 +21,8 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.vaishnavi_3108.shopease",
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "useNextNotificationsApi": true
     },
     "web": {
       "output": "static",
@@ -49,13 +50,6 @@
         "expo-location",
         {
           "locationWhenInUsePermission": "ShopEase uses your location to provide better delivery services."
-        }
-      ],
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/images/icon.png",
-          "color": "#4F46E5"
         }
       ]
     ],

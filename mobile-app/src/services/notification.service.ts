@@ -1,34 +1,23 @@
-import * as Notifications from "expo-notifications";
-import { getMessaging, getToken } from "@react-native-firebase/messaging";
-
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
+import { getMessaging, getToken, requestPermission } from "@react-native-firebase/messaging";
 
 export const requestNotificationPermission = async () => {
   try {
-    const { status } = await Notifications.requestPermissionsAsync();
+    const authStatus = await requestPermission(getMessaging());
 
-    console.log("Notification Permission:", status);
+    const enabled =
+      authStatus === 1 || authStatus === 2;
 
-    if (status !== "granted") {
+    if (!enabled) {
       return null;
     }
 
-    const messaging = getMessaging();
-
-    const token = await getToken(messaging);
+    const token = await getToken(getMessaging());
 
     console.log("FCM Token:", token);
 
     return token;
   } catch (error) {
-    console.log("FCM Error:", error);
+    console.log(error);
     return null;
   }
 };
