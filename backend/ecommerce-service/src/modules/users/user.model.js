@@ -75,7 +75,6 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
-
     gender: {
       type: String,
       enum: ["Male", "Female", "Other", "Prefer not to say"],
@@ -101,6 +100,10 @@ const userSchema = new mongoose.Schema(
     emailChangeOTPExpires: {
       type: Date,
       select: false,
+    },
+    fcmToken: {
+      type: String,
+      default: "",
     },
   },
   {

@@ -133,3 +133,10 @@ export const verifyEmailChangeOtpValidation = [
     .isLength({ min: 6, max: 6 })
     .withMessage("OTP must be 6 digits."),
 ];
+
+export const updateFcmTokenValidation = [
+  body("fcmToken")
+    .trim()
+    .notEmpty()
+    .withMessage("FCM token is required"),
+];

@@ -5,7 +5,8 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  Alert } from "react-native";
+  Alert,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import ScreenWrapper from "@/src/components/common/ScreenWrapper";
@@ -17,7 +18,6 @@ import { createOrder } from "@/src/api/order.api";
 import { getDefaultAddress } from "@/src/api/address.api";
 import { createRazorpayOrder, verifyPayment } from "@/src/api/payment.api";
 import RazorpayCheckout from "react-native-razorpay";
-
 
 const PaymentMethodScreen = () => {
   const params = useLocalSearchParams();
@@ -194,7 +194,11 @@ const PaymentMethodScreen = () => {
         />
       </ScrollView>
 
-      <PaymentFooter onPress={handleConfirmPayment} loading={loading} />
+      <PaymentFooter
+        onPress={handleConfirmPayment}
+        loading={loading}
+        paymentMethod={selected}
+      />
     </ScreenWrapper>
   );
 };

@@ -101,7 +101,7 @@ export const setAuthToken = (accessToken?: string) => {
 
 export const register = async (payload: RegisterPayload) => {
   const { data } = await client.post<ApiResponse<RegisterData>>(
-    "/register",
+    "/auth/register",
     payload
   );
   return data;
@@ -111,20 +111,20 @@ export const verifyRegistrationOtp = async (
   payload: VerifyRegistrationOtpPayload
 ) => {
   const { data } = await client.post<ApiResponse<AuthData>>(
-    "/register/verify",
+    "/auth/register/verify",
     payload
   );
   return data;
 };
 
 export const login = async (payload: LoginPayload) => {
-  const { data } = await client.post<ApiResponse<AuthData>>("/login", payload);
+  const { data } = await client.post<ApiResponse<AuthData>>("/auth/login", payload);
 
   return data;
 };
 
 export const getCurrentUser = async (accessToken?: string) => {
-  const { data } = await client.get<ApiResponse<AuthUser>>("/me", {
+  const { data } = await client.get<ApiResponse<AuthUser>>("/auth/me", {
     headers: accessToken
       ? {
           Authorization: `Bearer ${accessToken}`,
@@ -136,7 +136,7 @@ export const getCurrentUser = async (accessToken?: string) => {
 
 export const logout = async (accessToken?: string) => {
   const { data } = await client.post<ApiResponse<undefined>>(
-    "/logout",
+    "/auth/logout",
     undefined,
     {
       headers: accessToken
@@ -152,7 +152,7 @@ export const logout = async (accessToken?: string) => {
 
 export const forgotPassword = async (payload: ForgotPasswordPayload) => {
   const { data } = await client.post<ApiResponse<ForgotPasswordData>>(
-    "/forgot-password",
+    "/auth/forgot-password",
     payload
   );
 
@@ -161,7 +161,7 @@ export const forgotPassword = async (payload: ForgotPasswordPayload) => {
 
 export const verifyResetOtp = async (payload: VerifyResetOtpPayload) => {
   const { data } = await client.post<ApiResponse<VerifyResetOtpData>>(
-    "/verify-reset-otp",
+    "/auth/verify-reset-otp",
     payload
   );
 
@@ -172,7 +172,7 @@ export const resetPassword = async (
   payload: ResetPasswordPayload
 ) => {
   const { data } = await client.post<ApiResponse<undefined>>(
-    "/reset-password",
+    "/auth/reset-password",
     payload
   );
   return data;
@@ -181,7 +181,7 @@ export const resetPassword = async (
 
 export const sendEmailChangeOtp = async (payload: SendEmailChangeOtpPayload) => {
   const { data } = await client.post<ApiResponse<ForgotPasswordData>>(
-    "/send-email-change-otp",
+    "/auth/send-email-change-otp",
     {
       email: payload.email,
       newEmail: payload.email,
@@ -195,7 +195,7 @@ export const verifyEmailChangeOtp = async (
   payload: VerifyEmailChangeOtpPayload
 ) => {
   const { data } = await client.post<ApiResponse<undefined>>(
-    "/verify-email-change-otp",
+    "/auth/verify-email-change-otp",
     {
       email: payload.email,
       newEmail: payload.email,
@@ -207,7 +207,7 @@ export const verifyEmailChangeOtp = async (
 };
 
 export const updateProfile = async (formData: FormData) => {
-  const response = await client.patch("/profile", formData, {
+  const response = await client.patch("/auth/profile", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },

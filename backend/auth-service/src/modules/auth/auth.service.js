@@ -435,3 +435,20 @@ export const verifyEmailChangeOTPService = async ({
     email: user.email,
   };
 };
+
+
+export const updateFcmTokenService = async (userId, fcmToken) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new Error("User not found.");
+  }
+  const token = fcmToken.trim();
+  if (user.fcmToken === token) {
+    return user;
+  }
+  user.fcmToken = token;
+
+  await user.save();
+
+  return user;
+};

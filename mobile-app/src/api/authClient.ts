@@ -2,7 +2,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const client = axios.create({
-  baseURL: "https://shopease-auth-service.onrender.com/api/v1/auth",
+  baseURL: "https://shopease-auth-service.onrender.com/api/v1",
   timeout: 20000,
   headers: {
     "Content-Type": "application/json",

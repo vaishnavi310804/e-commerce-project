@@ -101,6 +101,10 @@ const userSchema = new mongoose.Schema(
       type: Date,
       select: false,
     },
+    fcmToken: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,

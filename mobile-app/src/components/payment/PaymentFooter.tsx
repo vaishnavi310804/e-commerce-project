@@ -11,15 +11,23 @@ import Fonts from "@/src/constants/fonts";
 
 type Props = {
   onPress: () => void;
+  paymentMethod: "COD" | "RAZORPAY";
   loading?: boolean;
   disabled?: boolean;
 };
 
 const PaymentFooter = ({
   onPress,
+  paymentMethod,
   loading = false,
   disabled = false,
 }: Props) => {
+  const buttonText = loading
+    ? "Processing..."
+    : paymentMethod === "COD"
+      ? "Confirm Order"
+      : "Proceed to Pay";
+
   return (
     <SafeAreaView edges={["bottom"]} style={styles.safeArea}>
       <View style={styles.container}>
@@ -33,7 +41,7 @@ const PaymentFooter = ({
           disabled={loading || disabled}
         >
           <Text style={styles.buttonText}>
-            {loading ? "Processing..." : "Confirm Payment"}
+            {buttonText}
           </Text>
         </TouchableOpacity>
       </View>

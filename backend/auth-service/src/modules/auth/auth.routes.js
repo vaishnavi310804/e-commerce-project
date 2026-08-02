@@ -11,7 +11,8 @@ import {
   adminLogin,
   sendEmailChangeOtp,
   verifyEmailChangeOtp,
-  verifyRegistrationOtp
+  verifyRegistrationOtp,
+  updateFcmToken
 } from "./auth.controller.js";
 import {
   registerValidation,
@@ -23,7 +24,8 @@ import {
   adminLoginValidation,
   sendEmailChangeOtpValidation,
   verifyEmailChangeOtpValidation,
-  verifyRegistrationOtpValidation
+  verifyRegistrationOtpValidation,
+  updateFcmTokenValidation
 } from "./auth.validation.js";
 import validate from "../../middleware/validate.js";
 import { protect } from "../../middleware/auth.middleware.js";
@@ -82,6 +84,13 @@ router.post(
   verifyRegistrationOtpValidation,
   validate,
   verifyRegistrationOtp
+);
+
+router.patch(
+  "/fcm-token",
+  protect,
+  updateFcmTokenValidation,
+  updateFcmToken
 );
 
 export default router;

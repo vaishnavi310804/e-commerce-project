@@ -9,7 +9,8 @@ import {
   adminLoginService,
   sendEmailChangeOTPService,
   verifyEmailChangeOTPService,
-  verifyRegistrationOTPService
+  verifyRegistrationOTPService,
+  updateFcmTokenService,
 } from "./auth.service.js";
 
 export const registerUser = async (req, res, next) => {
@@ -39,11 +40,10 @@ export const registerUser = async (req, res, next) => {
 export const verifyRegistrationOtp = async (req, res, next) => {
   try {
     const { email, otp } = req.body;
-    const { user, accessToken } =
-      await verifyRegistrationOTPService({
-        email,
-        otp,
-      });
+    const { user, accessToken } = await verifyRegistrationOTPService({
+      email,
+      otp,
+    });
     return res.status(200).json({
       success: true,
       message: "Email verified successfully.",
@@ -99,7 +99,7 @@ export const logoutUser = async (req, res, next) => {
 };
 
 export const forgotPassword = async (req, res, next) => {
-   console.log("Forgot Password API Hit");
+  console.log("Forgot Password API Hit");
   console.log(req.body);
   try {
     const { email } = req.body;
@@ -235,6 +235,19 @@ export const verifyEmailChangeOtp = async (req, res, next) => {
       success: true,
       message: result?.message || "Email updated successfully.",
       data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateFcmToken = async (req, res, next) => {
+  try {
+    const { fcmToken } = req.body;
+    await updateFcmTokenService(req.user._id, fcmToken);
+    res.status(200).json({
+      success: true,
+      message: "FCM token updated successfully.",
     });
   } catch (error) {
     next(error);
