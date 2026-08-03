@@ -12,7 +12,8 @@ import {
   sendEmailChangeOtp,
   verifyEmailChangeOtp,
   verifyRegistrationOtp,
-  updateFcmToken
+  updateFcmToken,
+  updateCurrentLocation
 } from "./auth.controller.js";
 import {
   registerValidation,
