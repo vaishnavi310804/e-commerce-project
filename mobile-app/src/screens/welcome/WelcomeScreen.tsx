@@ -56,9 +56,8 @@ const styles = StyleSheet.create({
   },
 
   hero: {
-    flex: 1,
-    justifyContent: "center",
     alignItems: "center",
+    marginTop: -20,
   },
 
   placeholder: {
@@ -69,7 +68,7 @@ const styles = StyleSheet.create({
   },
 
   content: {
-    gap: 20,
+    gap: 28,
   },
 
   title: {
@@ -86,9 +85,10 @@ const styles = StyleSheet.create({
 
   subtitle: {
     fontFamily: Fonts.regular,
-    fontSize: 13,
+    fontSize: 15,
     color: Colors.textSecondary,
-    alignSelf: "center",
+    // alignSelf: "center",
+    textAlign: "center",
     lineHeight: 18,
   },
 

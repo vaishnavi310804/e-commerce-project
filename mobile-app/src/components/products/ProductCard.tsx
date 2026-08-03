@@ -1,4 +1,12 @@
-import { StyleSheet, Text, View, Image, Pressable } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  Pressable,
+  StyleProp,
+  ViewStyle,
+} from "react-native";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { Product } from "../../api/product.api";
@@ -9,6 +17,7 @@ type Props = {
   isWishlisted?: boolean;
   onPress: () => void;
   onWishlist?: () => void;
+  style?: StyleProp<ViewStyle>;
 };
 
 const ProductCard = ({
@@ -16,6 +25,7 @@ const ProductCard = ({
   isWishlisted = false,
   onPress,
   onWishlist,
+  style,
 }: Props) => {
   const price = product?.price ?? 0;
   const discountPrice = product?.discountPrice ?? 0;
@@ -33,7 +43,7 @@ const ProductCard = ({
     product?.productImage?.url || "https://via.placeholder.com/150";
 
   return (
-    <Pressable style={styles.card} onPress={onPress}>
+    <Pressable style={[styles.card, style]} onPress={onPress}>
       <Pressable style={styles.wishlist} onPress={onWishlist}>
         <Ionicons
           name={isWishlisted ? "heart" : "heart-outline"}
@@ -74,7 +84,6 @@ const ProductCard = ({
 
           <Text style={styles.review}>({reviewsCount})</Text>
         </View>
-
       </View>
 
       <View style={styles.priceContainer}>
@@ -90,11 +99,9 @@ export default ProductCard;
 
 const styles = StyleSheet.create({
   card: {
-    width: 180,
     backgroundColor: "#fff",
     borderRadius: 18,
     padding: 12,
-    marginRight: 16,
     marginTop: 10,
     shadowColor: "#000",
     shadowOpacity: 0.08,

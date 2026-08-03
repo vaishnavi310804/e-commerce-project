@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
   locationRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 8,
+    marginTop: 5,
     alignSelf: "flex-start",
     paddingVertical: 6,
   },

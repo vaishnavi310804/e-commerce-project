@@ -22,8 +22,6 @@ const CategorySection = () => {
     }
   };
 
-  console.log("Categories State:", categories);
-
   return (
     <View style={styles.container}>
       <SectionHeader title="Categories" onSeeAll={() => {}} />

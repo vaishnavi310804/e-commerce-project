@@ -32,7 +32,7 @@ const BestSellerSection = () => {
         setwishlist(
           wishlistResponse.data
             .map((item: any) => item.product?._id)
-            .filter(Boolean)
+            .filter(Boolean),
         );
       }
     } catch (error) {
@@ -46,7 +46,7 @@ const BestSellerSection = () => {
       setwishlist((prev) =>
         prev.includes(productId)
           ? prev.filter((id) => id !== productId)
-          : [...prev, productId]
+          : [...prev, productId],
       );
       if (response.message) {
         Alert.alert("Wishlist", response.message);
@@ -60,22 +60,18 @@ const BestSellerSection = () => {
     <View style={styles.container}>
       <SectionHeader title="Best Seller" onSeeAll={() => {}} />
 
-      <FlatList
-        horizontal
-        data={products}
-        keyExtractor={(item) => item._id}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.listContent}
-        renderItem={({ item }) => (
+      <View style={styles.grid}>
+        {products.map((item) => (
           <ProductCard
+            key={item._id}
             product={item}
             isWishlisted={wishlist.includes(item._id)}
             onPress={() => router.push(`/product/${item._id}`)}
             onWishlist={() => handleWishlist(item._id)}
-            onAddToCart={() => {}}
+            style={styles.card}
           />
-        )}
-      />
+        ))}
+      </View>
     </View>
   );
 };
@@ -85,10 +81,18 @@ export default BestSellerSection;
 const styles = StyleSheet.create({
   container: {
     marginTop: 18,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
   },
 
-  listContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 50,
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+
+  card: {
+    width: "48%",
+    marginBottom: 16,
   },
 });
