@@ -9,10 +9,27 @@ import {
   getOrderStatsService,
   cancelOrderService,
 } from "./order.service.js";
+import { sendNotification } from "../../services/notification.service.js";
 
 export const createOrder = async (req, res, next) => {
   try {
     const order = await createOrderService(req.user._id, req.body);
+    try {
+      await sendNotification({
+        userId: req.user._id,
+        title: "Order Placed",
+        body: "Your order has been placed successfully.",
+        type: "ORDER_PLACED",
+        data: {
+          orderId: order._id,
+        },
+      });
+    } catch (notificationError) {
+      console.error(
+        "Failed to send order notification:",
+        notificationError.message
+      );
+    }
     return res.status(201).json({
       success: true,
       message: "Order placed successfully.",

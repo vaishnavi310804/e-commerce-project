@@ -169,6 +169,43 @@ export const updateOrderStatusService = async (orderId, orderStatus) => {
   }
 
   await order.save();
+
+  try {
+    switch (orderStatus) {
+      case "Shipped":
+        await sendNotification({
+          userId: order.user,
+          title: "🚚 Order Shipped",
+          body: `Your order #${order.orderNumber} has been shipped.`,
+          type: "ORDER_SHIPPED",
+          data: {
+            orderId: order._id,
+          },
+        });
+        break;
+
+      case "Delivered":
+        await sendNotification({
+          userId: order.user,
+          title: "✅ Order Delivered",
+          body: `Your order #${order.orderNumber} has been delivered.`,
+          type: "ORDER_DELIVERED",
+          data: {
+            orderId: order._id,
+          },
+        });
+        break;
+
+      default:
+        break;
+    }
+  } catch (notificationError) {
+    console.error(
+      "Failed to send order status notification:",
+      notificationError.message
+    );
+  }
+
   return order;
 };
 

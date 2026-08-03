@@ -14,7 +14,6 @@ const NotificationPermissionScreen = () => {
   const handleAllowNotification = async () => {
   try {
     setLoading(true);
-
     const token = await requestNotificationPermission();
 
 console.log("Generated Token:", token);

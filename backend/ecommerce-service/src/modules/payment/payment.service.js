@@ -3,10 +3,11 @@ import crypto from "crypto";
 import Order from "../orders/order.model.js";
 import Cart from "../cart/cart.model.js";
 import razorpay from "../../config/razorpay.js";
+import { sendNotification } from "../../services/notification.service.js";
 
 export const createRazorpayOrderService = async (
   amount,
-  receipt = `receipt_${Date.now()}`
+  receipt = `receipt_${Date.now()}`,
 ) => {
   const options = {
     amount: Math.round(amount * 100),
@@ -19,11 +20,7 @@ export const createRazorpayOrderService = async (
 
 export const verifyPaymentService = async (
   userId,
-  {
-    razorpay_order_id,
-    razorpay_payment_id,
-    razorpay_signature,
-  }
+  { razorpay_order_id, razorpay_payment_id, razorpay_signature },
 ) => {
   const body = `${razorpay_order_id}|${razorpay_payment_id}`;
 
@@ -63,6 +60,23 @@ export const verifyPaymentService = async (
 
   await order.save();
 
+  try {
+    await sendNotification({
+      userId,
+      title: "💳 Payment Successful",
+      body: `Your payment of ₹${order.totalAmount} for Order #${order.orderNumber} was successful.`,
+      type: "PAYMENT_SUCCESS",
+      data: {
+        orderId: order._id,
+      },
+    });
+  } catch (notificationError) {
+    console.error(
+      "Failed to send payment notification:",
+      notificationError.message,
+    );
+  }
+
   await Cart.findOneAndUpdate(
     { user: userId },
     {
@@ -70,14 +84,11 @@ export const verifyPaymentService = async (
         items: [],
       },
     },
-    { new: true }
+    { new: true },
   );
 
   return await Order.findById(order._id)
     .populate("user", "fullName email phoneNumber")
     .populate("address")
-    .populate(
-      "products.product",
-      "name price productImage brand"
-    );
+    .populate("products.product", "name price productImage brand");
 };
