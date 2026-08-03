@@ -14,6 +14,7 @@ import Fonts from "@/src/constants/fonts";
 type HomeHeaderProps = {
   name?: string;
   image?: string;
+  locationTitle?: string;
   address?: string;
   onLocationPress?: () => void;
   onNotificationPress?: () => void;
@@ -21,12 +22,14 @@ type HomeHeaderProps = {
 
 const HomeHeader = ({
   name,
-  address,
   image,
+  locationTitle,
+  address,
   onLocationPress,
   onNotificationPress,
 }: HomeHeaderProps) => {
-  const imageUri = typeof image === "string" ? image.trim() : (image as any)?.url;
+  const imageUri =
+    typeof image === "string" ? image.trim() : (image as any)?.url;
   const hasValidImage = Boolean(imageUri && imageUri.length > 0);
 
   return (
@@ -63,18 +66,24 @@ const HomeHeader = ({
       </View>
 
       <Pressable style={styles.locationRow} onPress={onLocationPress}>
-        <Ionicons name="location-outline" size={18} color={Colors.white} />
-
-        <Text style={styles.locationText}>
-          {address || "Select Delivery Location"}
-        </Text>
-
         <Ionicons
-          name="chevron-down"
-          size={16}
+          name="location-outline"
+          size={20}
           color={Colors.white}
-          style={{ marginLeft: 4 }}
+          style={{ marginTop: 2 }}
         />
+
+        <View style={styles.locationContent}>
+          <Text style={styles.locationTitle}>
+            {locationTitle || "Deliver to"}
+          </Text>
+
+          <Text style={styles.locationText} numberOfLines={1}>
+            {address || "Set your location"}
+          </Text>
+        </View>
+
+        <Ionicons name="chevron-down" size={16} color={Colors.white} />
       </Pressable>
     </View>
   );
@@ -111,7 +120,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
 
-   header: {
+  header: {
     height: 320,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
@@ -120,7 +129,7 @@ const styles = StyleSheet.create({
 
   headerImage: {
     resizeMode: "cover",
-  }, 
+  },
 
   greeting: {
     color: "#E8DFFF",
@@ -162,10 +171,21 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
 
-  locationText: {
-    color: Colors.white,
-    marginLeft: 6,
-    fontSize: 15,
-    fontFamily: Fonts.medium,
-  },
+  locationContent: {
+  marginHorizontal: 8,
+  flex: 1,
+},
+
+locationTitle: {
+  color: "#E8DFFF",
+  fontSize: 12,
+  fontFamily: Fonts.regular,
+},
+
+locationText: {
+  color: Colors.white,
+  fontSize: 15,
+  fontFamily: Fonts.bold,
+  marginTop: 1,
+},
 });

@@ -1,41 +1,43 @@
 import React from "react";
 import { Alert } from "react-native";
-import * as Location from "expo-location";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 import ScreenWrapper from "@/src/components/common/ScreenWrapper";
 import PermissionScreen from "@/src/components/onboarding/PermissionScreen";
+
 import Colors from "@/src/constants/colors";
+
+import { getCurrentLocation } from "@/src/services/location.service";
+import { updateCurrentLocation } from "@/src/api/auth.api";
 
 const LocationPermissionScreen = () => {
   const handleAllowLocation = async () => {
     try {
-      const { status } =
-        await Location.requestForegroundPermissionsAsync();
+      const location = await getCurrentLocation();
 
-      if (status !== "granted") {
+      if (!location) {
         Alert.alert(
           "Permission Denied",
-          "Location permission is required for accurate delivery estimates."
+          "Location permission was denied or your current location could not be fetched."
         );
+
+        router.push("/notification-permission");
         return;
       }
-      const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-      });
 
-      console.log("Latitude:", location.coords.latitude);
-      console.log("Longitude:", location.coords.longitude);
+      await updateCurrentLocation(location);
 
       router.push("/notification-permission");
     } catch (error) {
       console.log("Location Error:", error);
 
       Alert.alert(
-        "Error",
+        "Location Error",
         "Unable to fetch your current location."
       );
+
+      router.push("/notification-permission");
     }
   };
 

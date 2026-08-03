@@ -452,3 +452,21 @@ export const updateFcmTokenService = async (userId, fcmToken) => {
 
   return user;
 };
+
+export const updateCurrentLocationService = async (
+  userId,
+  currentLocation
+) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    const error = new Error("User not found.");
+    error.statusCode = 404;
+    throw error;
+  }
+  user.currentLocation = currentLocation;
+
+  await user.save();
+
+  return user;
+};

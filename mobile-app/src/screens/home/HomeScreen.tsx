@@ -1,15 +1,16 @@
 import React, { useState, useCallback } from "react";
 import axios from "axios";
 import { ScrollView } from "react-native";
+import { router, useFocusEffect } from "expo-router";
 import ScreenWrapper from "@/src/components/common/ScreenWrapper";
 import HomeHeader from "@/src/components/home/HomeHeader";
 import SearchBar from "@/src/components/home/SearchBar";
 import BannerCarousel from "@/src/components/home/BannerCarousel";
 import CategorySection from "@/src/components/home/CategorySection";
-import { getCurrentUser, AuthUser } from "@/src/api/auth.api";
-import { router, useFocusEffect } from "expo-router";
-import { Address, getDefaultAddress } from "@/src/api/address.api";
 import BestSellerSection from "@/src/components/home/BestSellerSection";
+import { Address, getDefaultAddress } from "@/src/api/address.api";
+
+import { getCurrentUser, AuthUser } from "@/src/api/auth.api";
 
 const HomeScreen = () => {
   const [search, setSearch] = useState("");
@@ -17,26 +18,30 @@ const HomeScreen = () => {
   const [address, setAddress] = useState<Address | null>(null);
 
   const fetchData = useCallback(async () => {
-    try {
-      const userRes = await getCurrentUser();
-      const addressRes = await getDefaultAddress();
+  try {
+    const userRes = await getCurrentUser();
+    setUser(userRes.data ?? null);
 
-      setUser(userRes.data ?? null);
-      setAddress(addressRes.data ?? null);
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.log("Status:", error.response?.status);
-        console.log("Response:", error.response?.data);
-      } else {
-        console.log(error);
-      }
+    try {
+      const addressRes = await getDefaultAddress();
+      setAddress(addressRes.data ??null);
+    } catch {
+      setAddress(null);
     }
-  }, []);
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.log("Status:", error.response?.status);
+      console.log("Response:", error.response?.data);
+    } else {
+      console.log(error);
+    }
+  }
+}, []);
 
   useFocusEffect(
     useCallback(() => {
       fetchData();
-    }, [fetchData])
+    }, [fetchData]),
   );
 
   return (
@@ -48,15 +53,24 @@ const HomeScreen = () => {
         <HomeHeader
           name={user?.fullName}
           image={user?.profileImage}
-          address={address ? `${address.city}, ${address.state}` : undefined}
+          locationTitle={address ? "Deliver to" : "Current Location"}
+          address={
+            address
+              ? `${address.city}, ${address.state}`
+              : user?.currentLocation
+                ? `${user.currentLocation.city}, ${user.currentLocation.state}`
+                : "Set your location"
+          }
           onLocationPress={() => router.push("/address")}
-        // onLocationPress={() => console.log("Open Address Screen")}
         />
+
         <SearchBar value={search} onChangeText={setSearch} />
 
         <BannerCarousel />
+
         <CategorySection />
-        <BestSellerSection/>
+
+        <BestSellerSection />
       </ScrollView>
     </ScreenWrapper>
   );

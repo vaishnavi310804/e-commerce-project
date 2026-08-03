@@ -105,6 +105,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    currentLocation: {
+    city: String,
+    state: String,
+    country: String,
+    postalCode: String,
+    latitude: Number,
+    longitude: Number,
+},
   },
   {
     timestamps: true,

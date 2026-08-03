@@ -93,4 +93,10 @@ router.patch(
   updateFcmToken
 );
 
+router.patch(
+  "/current-location",
+  protect,
+  updateCurrentLocation
+);
+
 export default router;

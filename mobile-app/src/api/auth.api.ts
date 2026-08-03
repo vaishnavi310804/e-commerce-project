@@ -2,6 +2,15 @@ import client from "./authClient";
 import ecommerceClient from "./ecommerceClient";
 
 export type UserRole = "CUSTOMER" | "ADMIN";
+export type CurrentLocation = {
+  city: string;
+  state: string;
+  country: string;
+  postalCode: string;
+  latitude: number;
+  longitude: number;
+};
+
 export type AuthUser = {
   _id: string;
   fullName: string;
@@ -13,6 +22,7 @@ export type AuthUser = {
   isEmailVerified: boolean;
   isActive: boolean;
   isProfileCompleted?: boolean;
+  currentLocation?: CurrentLocation;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -216,6 +226,17 @@ export const updateProfile = async (formData: FormData) => {
   return response.data;
 };
 
+export const updateCurrentLocation = async (
+  payload: CurrentLocation
+) => {
+  const { data } = await client.patch(
+    "/auth/current-location",
+    payload
+  );
+
+  return data;
+};
+
 const authApi = {
   register,
   verifyRegistrationOtp,
@@ -229,6 +250,7 @@ const authApi = {
   verifyEmailChangeOtp,
   setAuthToken,
   updateProfile,
+  updateCurrentLocation
 };
 
 export default authApi;
