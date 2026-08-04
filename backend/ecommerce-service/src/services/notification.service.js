@@ -3,6 +3,9 @@ import axios from "axios";
 const authService = axios.create({
   baseURL: process.env.AUTH_SERVICE_URL,
   timeout: 10000,
+  headers: {
+    "x-service-key": process.env.INTERNAL_SERVICE_KEY,
+  },
 });
 
 export const sendNotification = async ({

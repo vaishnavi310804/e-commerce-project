@@ -1,5 +1,6 @@
 import express from "express";
 import { protect } from "../../middleware/auth.middleware.js";
+import { verifyServiceKey } from "../../middleware/serviceAuth.middleware.js";
 import {
   deleteNotification,
   getNotifications,
@@ -14,16 +15,17 @@ import { createNotificationValidation } from "./notification.validation.js";
 
 const router = express.Router();
 
-router.use(protect);
-
-router.post("/test", sendTestNotification);
-
 router.post(
   "/send",
+  verifyServiceKey,
   createNotificationValidation,
   validate,
   createNotification,
 );
+
+router.use(protect);
+
+router.post("/test", sendTestNotification);
 
 router.get("/", getNotifications);
 
