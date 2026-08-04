@@ -102,7 +102,11 @@ const LoginForm = () => {
             Remember me
           </label>
 
-          <button type="button" className="text-[#6C63FF] font-medium">
+          <button
+            type="button"
+            onClick={() => navigate("/forgot-password")}
+            className="text-[#6C63FF] font-medium hover:underline"
+          >
             Forgot Password?
           </button>
         </div>

@@ -5,6 +5,7 @@ import CategoryItem from "./CategoryItem";
 import SectionHeader from "./SectionHeader";
 import { router } from "expo-router";
 
+
 const CategorySection = () => {
   const [categories, setCategories] = useState<Category[]>([]);
 
@@ -24,7 +25,10 @@ const CategorySection = () => {
 
   return (
     <View style={styles.container}>
-      <SectionHeader title="Categories" onSeeAll={() => {}} />
+      <SectionHeader
+        title="Categories"
+        onSeeAll={() => router.push("/category/categories")}
+      />
 
       <FlatList
         horizontal

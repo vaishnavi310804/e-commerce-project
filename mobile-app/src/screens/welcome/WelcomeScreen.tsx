@@ -7,6 +7,7 @@ import Fonts from "@/src/constants/fonts";
 import Spacing from "@/src/constants/spacing";
 import HeroSection from "@/src/screens/welcome/HeroSection";
 
+
 export default function WelcomeScreen() {
   return (
     <ScreenWrapper>

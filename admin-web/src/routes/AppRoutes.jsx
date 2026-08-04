@@ -7,6 +7,9 @@ import Products from "../pages/products/Products";
 import Orders from "../pages/orders/Orders";
 import Customers from "../pages/customers/Customers";
 import Reviews from "../pages/reviews/Reviews";
+import ForgotPassword from "../pages/auth/ForgotPassword";
+import VerifyOtp from "../pages/auth/VerifyOtp";
+import ResetPassword from "../pages/auth/ResetPassword";
 
 function AppRoutes() {
   return (
@@ -60,6 +63,11 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+
+      <Route path="/verify-reset-otp" element={<VerifyOtp />} />
+
+      <Route path="/reset-password" element={<ResetPassword />} />
     </Routes>
   );
 }
