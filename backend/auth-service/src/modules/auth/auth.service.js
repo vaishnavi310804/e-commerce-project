@@ -219,15 +219,12 @@ export const verifyResetOTPService = async ({ email, otp }) => {
   const user = await User.findOne({ email: formattedEmail }).select(
     "+resetPasswordOTP +resetPasswordOTPExpires +isResetOTPVerified"
   );
-
   if (!user) {
     throw new Error("User not found.");
   }
-
   if (!user.resetPasswordOTP || !user.resetPasswordOTPExpires) {
     throw new Error("No OTP found. Please request a new one.");
   }
-
   if (new Date(user.resetPasswordOTPExpires).getTime() < Date.now()) {
     throw new Error("OTP has expired.");
   }
@@ -237,13 +234,11 @@ export const verifyResetOTPService = async ({ email, otp }) => {
   if (hashedOTP !== user.resetPasswordOTP) {
     throw new Error("Invalid OTP.");
   }
-
   const resetToken = generatePasswordResetToken(user);
 
   user.resetPasswordOTP = null;
   user.resetPasswordOTPExpires = null;
   await user.save();
-
   return {
     resetToken,
   };

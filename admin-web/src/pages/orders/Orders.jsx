@@ -144,7 +144,6 @@ const Orders = () => {
             </div>
           </div>
 
-          {/* Pending Orders */}
           <div className="flex items-center gap-4 rounded-xl bg-white p-5 shadow">
             <div className="rounded-xl bg-amber-50 p-3 text-amber-600">
               <FaClock size={22} />
@@ -159,7 +158,6 @@ const Orders = () => {
             </div>
           </div>
 
-          {/* Delivered Orders */}
           <div className="flex items-center gap-4 rounded-xl bg-white p-5 shadow">
             <div className="rounded-xl bg-emerald-50 p-3 text-emerald-600">
               <FaCheckCircle size={22} />
@@ -174,7 +172,6 @@ const Orders = () => {
             </div>
           </div>
 
-          {/* Cancelled Orders */}
           <div className="flex items-center gap-4 rounded-xl bg-white p-5 shadow">
             <div className="rounded-xl bg-rose-50 p-3 text-rose-600">
               <FaBan size={22} />
@@ -189,7 +186,6 @@ const Orders = () => {
             </div>
           </div>
 
-          {/* Total Revenue */}
           <div className="flex items-center gap-4 rounded-xl bg-white p-5 shadow">
             <div className="rounded-xl bg-purple-50 p-3 text-purple-600">
               <FaDollarSign size={22} />
@@ -199,7 +195,7 @@ const Orders = () => {
                 Total Revenue
               </p>
               <h3 className="text-2xl font-bold text-gray-800">
-                ${totalRevenue.toFixed(2)}
+                ₹{totalRevenue.toFixed(2)}
               </h3>
             </div>
           </div>

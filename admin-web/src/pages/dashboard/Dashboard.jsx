@@ -123,8 +123,8 @@ const Dashboard = () => {
       "data:text/csv;charset=utf-8," +
       [
         ["Metric", "Value"],
-        ["Total Revenue", `$${(stats.totalRevenue || 0).toFixed(2)}`],
-        ["Monthly Revenue", `$${(stats.monthlyRevenue || 0).toFixed(2)}`],
+        ["Total Revenue", `₹${(stats.totalRevenue || 0).toFixed(2)}`],
+        ["Monthly Revenue", `₹${(stats.monthlyRevenue || 0).toFixed(2)}`],
         ["Total Orders", stats.totalOrders || 0],
         ["Completed Orders", stats.completedOrders || 0],
         ["Pending Orders", stats.pendingOrders || 0],
@@ -166,21 +166,21 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
             title="Total Revenue"
-            value={`$${Number(stats.totalRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+            value={`₹${Number(stats.totalRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
             growth={stats.revenueGrowth}
             icon={FaDollarSign}
             color="indigo"
           />
           <StatCard
             title="Today's Revenue"
-            value={`$${Number(stats.todayRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+            value={`₹${Number(stats.todayRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
             icon={FaChartLine}
             color="emerald"
             subText="Today"
           />
           <StatCard
             title="Monthly Revenue"
-            value={`$${Number(stats.monthlyRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+            value={`₹${Number(stats.monthlyRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
             icon={FaDollarSign}
             color="purple"
             subText="This month"

@@ -74,50 +74,41 @@ const OrderTable = ({
                 key={order._id}
                 className="transition hover:bg-gray-50/80"
               >
-                {/* Order ID */}
                 <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-800">
                   {order.orderNumber || order._id.substring(18)}
                 </td>
 
-                {/* Customer */}
                 <td className="px-6 py-4 whitespace-nowrap text-gray-700">
                   <div className="font-medium text-gray-900">{customerName}</div>
                   <div className="text-xs text-gray-500">{order.user?.email || ""}</div>
                 </td>
 
-                {/* Items count */}
                 <td className="px-6 py-4 whitespace-nowrap text-gray-700">
                   {itemCount} {itemCount === 1 ? "item" : "items"}
                 </td>
 
-                {/* Total amount */}
                 <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-900">
-                  ${Number(order.totalAmount || 0).toFixed(2)}
+                  ₹{Number(order.totalAmount || 0).toFixed(2)}
                 </td>
 
-                {/* Payment method */}
                 <td className="px-6 py-4 whitespace-nowrap text-gray-700">
                   <span className="rounded bg-gray-100 px-2 py-1 text-xs font-medium">
                     {order.paymentMethod || "COD"}
                   </span>
                 </td>
 
-                {/* Payment status */}
                 <td className="px-6 py-4 whitespace-nowrap">
                   <StatusBadge type="payment" status={order.paymentStatus} />
                 </td>
 
-                {/* Order status */}
                 <td className="px-6 py-4 whitespace-nowrap">
                   <StatusBadge type="order" status={order.orderStatus} />
                 </td>
 
-                {/* Created Date */}
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                   {new Date(order.createdAt).toLocaleDateString()}
                 </td>
-
-                {/* Actions */}
+                
                 <td className="px-6 py-4 whitespace-nowrap text-center">
                   <div className="flex items-center justify-center gap-2">
                     <button

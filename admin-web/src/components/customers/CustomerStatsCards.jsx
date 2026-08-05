@@ -77,7 +77,7 @@ const CustomerStatsCards = ({ stats }) => {
         <div>
           <p className="text-xs font-semibold text-gray-500">Total Revenue</p>
           <h3 className="text-xl font-bold text-gray-800">
-            ${totalRevenue.toFixed(2)}
+            ₹{totalRevenue.toFixed(2)}
           </h3>
         </div>
       </div>

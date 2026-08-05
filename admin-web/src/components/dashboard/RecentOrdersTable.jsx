@@ -41,7 +41,7 @@ const RecentOrdersTable = ({ orders = [] }) => {
                     {ord.user?.fullName || ord.user?.name || "Guest Customer"}
                   </td>
                   <td className="px-4 py-3 font-semibold text-gray-900">
-                    ${Number(ord.totalAmount || 0).toFixed(2)}
+                    ₹{Number(ord.totalAmount || 0).toFixed(2)}
                   </td>
                   <td className="px-4 py-3">
                     <StatusBadge type="payment" status={ord.paymentStatus} />

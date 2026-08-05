@@ -94,7 +94,7 @@ const CustomerTable = ({
               </td>
 
               <td className="px-6 py-4 whitespace-nowrap font-semibold text-emerald-600">
-                ${Number(cust.totalSpending || 0).toFixed(2)}
+                ₹{Number(cust.totalSpending || 0).toFixed(2)}
               </td>
 
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
