@@ -69,7 +69,7 @@ export default function LoginScreen() {
       await AsyncStorage.setItem("authUser", JSON.stringify(user));
 
       setAuthToken(accessToken);
-      router.replace("/(tabs)");
+      router.replace("/notification-permission");
     } catch (err) {
       const message = getErrorMessage(err);
       setError(message);

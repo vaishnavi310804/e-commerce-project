@@ -11,27 +11,27 @@ import { updateFcmToken } from "@/src/api/notification.api";
 const NotificationPermissionScreen = () => {
   const [loading, setLoading] = useState(false);
 
-  const handleAllowNotification = async () => {
+const handleAllowNotification = async () => {
   try {
     setLoading(true);
+
     const token = await requestNotificationPermission();
 
-console.log("Generated Token:", token);
+    if (!token) {
+      Alert.alert("Unable to enable notifications.");
+      return;
+    }
 
-if (!token) {
-  Alert.alert("No FCM Token Generated");
-  return;
-}
-const response = await updateFcmToken(token);
-console.log("Update Response:", response);
+    const response = await updateFcmToken(token);
 
-if (!response.success) {
-  Alert.alert("Failed to save FCM Token");
-  return;
-}
-router.replace("/(tabs)");
+    if (!response.success) {
+      Alert.alert("Failed to save FCM Token");
+      return;
+    }
+
+    router.replace("/(tabs)");
   } catch (error: any) {
-    console.log("Notification Error:", error);
+    console.log(error);
 
     Alert.alert(
       "Error",
