@@ -1,10 +1,33 @@
-import { getMessaging, getToken, AuthorizationStatus } from "@react-native-firebase/messaging";
+import { Platform, PermissionsAndroid } from "react-native";
+import {
+  getMessaging,
+  requestPermission,
+  getToken,
+  AuthorizationStatus,
+} from "@react-native-firebase/messaging";
 
 export const requestNotificationPermission = async () => {
   try {
     const messaging = getMessaging();
 
-    const authStatus = await messaging.requestPermission();
+    if (Platform.OS === "android" && Platform.Version >= 33) {
+      const hasPermission = await PermissionsAndroid.check(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+      );
+
+      if (!hasPermission) {
+        const status = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+        );
+
+        if (status !== PermissionsAndroid.RESULTS.GRANTED) {
+          console.log("Android notification permission denied");
+          return null;
+        }
+      }
+    }
+
+    const authStatus = await requestPermission(messaging);
 
     const enabled =
       authStatus === AuthorizationStatus.AUTHORIZED ||

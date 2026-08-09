@@ -431,7 +431,6 @@ export const verifyEmailChangeOTPService = async ({
   };
 };
 
-
 export const updateFcmTokenService = async (userId, fcmToken) => {
   const user = await User.findById(userId);
   if (!user) {
