@@ -10,10 +10,11 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  PermissionsAndroid,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router"; 
+import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AxiosError } from "axios";
 import Colors from "@/src/constants/colors";
@@ -50,6 +51,7 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (isDisabled) return;
+
     try {
       setError("");
       setLoading(true);
@@ -69,6 +71,21 @@ export default function LoginScreen() {
       await AsyncStorage.setItem("authUser", JSON.stringify(user));
 
       setAuthToken(accessToken);
+
+      // Check whether Android notification permission is already granted
+      if (Platform.OS === "android" && Platform.Version >= 33) {
+        const hasNotificationPermission = await PermissionsAndroid.check(
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+        );
+
+        if (hasNotificationPermission) {
+          // Permission already granted → skip permission screen
+          router.replace("/(tabs)");
+          return;
+        }
+      }
+
+      // Permission not granted → show notification permission screen
       router.replace("/notification-permission");
     } catch (err) {
       const message = getErrorMessage(err);
