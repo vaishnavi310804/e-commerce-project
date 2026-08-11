@@ -48,14 +48,12 @@ const ReceiptScreen = () => {
 
   const handleShare = () => {
     Alert.alert(
-      "Coming Soon",
       "Share receipt will be available soon."
     );
   };
 
   const handleDownload = () => {
     Alert.alert(
-      "Coming Soon",
       "PDF download will be available soon."
     );
   };

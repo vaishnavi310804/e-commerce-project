@@ -85,7 +85,7 @@ export default function LoginScreen() {
         }
       }
 
-      // Permission not granted → show notification permission screen
+      // Permission not granted show notification permission screen
       router.replace("/notification-permission");
     } catch (err) {
       const message = getErrorMessage(err);
