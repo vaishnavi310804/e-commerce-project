@@ -4,7 +4,6 @@ import DashboardLayout from "../../layouts/DashboardLayout";
 import SearchBar from "../../components/common/SearchBar";
 import CategoryTable from "../../components/categories/CategoryTable";
 import CategoryModel from "../../components/categories/CategoryModel";
-import DeleteConfirmation from "../../components/categories/DeleteConfirmation";
 
 import {
   getAllCategories,
@@ -95,7 +94,6 @@ const inactiveCount = categories.filter(
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-800">Categories</h1>
-
             <p className="mt-1 text-gray-500">Manage all product categories</p>
           </div>
 

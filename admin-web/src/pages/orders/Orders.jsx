@@ -125,6 +125,7 @@ const Orders = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-800">Orders Dashboard</h1>
+            <p className="mt-1 text-gray-500">Manage all the orders.</p>
           </div>
         </div>
 
@@ -213,7 +214,6 @@ const Orders = () => {
           onReset={handleResetFilters}
         />
 
-   
         <OrderTable
           orders={paginatedOrders}
           loading={loading}

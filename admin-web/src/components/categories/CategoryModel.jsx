@@ -81,7 +81,6 @@ const CategoryModel = ({ open, onClose, category, onSuccess }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="w-full max-w-lg rounded-2xl bg-white shadow-xl">
-        {/* Header */}
         <div className="flex items-center justify-between border-b px-6 py-4">
           <h2 className="text-xl font-semibold">
             {category ? "Edit Category" : "Add Category"}
