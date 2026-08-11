@@ -125,10 +125,7 @@ export default function RegisterScreen() {
               style={styles.header}
               imageStyle={styles.headerImage}
             >
-              <LinearGradient
-                colors={["rgba(108,78,255,0.88)", "rgba(124,92,255,0.92)"]}
-                style={StyleSheet.absoluteFill}
-              />
+              <View style={styles.bgColor} />
 
               <View style={styles.headerContent}>
                 <Image
@@ -259,7 +256,8 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8F7FF",
+    backgroundColor: "#F6F6F6",
+    paddingBottom: 100,
   },
 
   scrollContainer: {
@@ -275,6 +273,12 @@ const styles = StyleSheet.create({
 
   headerImage: {
     resizeMode: "cover",
+  },
+
+  bgColor: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "#6547C9",
+    opacity: 0.85,
   },
 
   headerContent: {
@@ -296,7 +300,7 @@ const styles = StyleSheet.create({
 
   subHeading: {
     fontFamily: Fonts.regular,
-    color: "rgba(255,255,255,0.9)",
+    color: Colors.white,
     fontSize: 15,
   },
 
@@ -351,7 +355,7 @@ const styles = StyleSheet.create({
   line: {
     flex: 1,
     height: 1,
-    backgroundColor: "#E5E7EB",
+    backgroundColor: "#797979",
   },
 
   orText: {

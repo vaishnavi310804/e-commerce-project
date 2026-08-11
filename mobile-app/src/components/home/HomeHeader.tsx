@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  ImageBackground,
-} from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "@/src/constants/colors";
 import Fonts from "@/src/constants/fonts";
@@ -95,10 +88,11 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.primary,
     paddingHorizontal: 20,
-    paddingTop: 30,
-    paddingBottom: 28,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
+    paddingTop: 48,
+    paddingBottom: 65,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    zIndex: 1,
   },
 
   topRow: {
@@ -110,18 +104,18 @@ const styles = StyleSheet.create({
   leftSection: {
     flexDirection: "row",
     alignItems: "center",
+    flex: 1,
   },
 
   avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     marginRight: 14,
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
   },
 
   header: {
-    height: 320,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
     overflow: "hidden",
@@ -141,21 +135,21 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontSize: 20,
     fontFamily: Fonts.bold,
-    marginTop: 2,
+    marginTop: 1,
   },
 
   notificationButton: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: Colors.white,
     justifyContent: "center",
     alignItems: "center",
   },
 
   badge: {
-    width: 10,
-    height: 10,
+    width: 8,
+    height: 8,
     borderRadius: 5,
     backgroundColor: "#FF3B30",
     position: "absolute",
@@ -166,26 +160,25 @@ const styles = StyleSheet.create({
   locationRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 5,
-    alignSelf: "flex-start",
+    marginTop: 6,
     paddingVertical: 6,
   },
 
   locationContent: {
-  marginHorizontal: 8,
-  flex: 1,
-},
+    marginHorizontal: 8,
+    flex: 1,
+  },
 
-locationTitle: {
-  color: "#E8DFFF",
-  fontSize: 12,
-  fontFamily: Fonts.regular,
-},
+  locationTitle: {
+    color: "#E8DFFF",
+    fontSize: 12,
+    fontFamily: Fonts.regular,
+  },
 
-locationText: {
-  color: Colors.white,
-  fontSize: 15,
-  fontFamily: Fonts.bold,
-  marginTop: 1,
-},
+  locationText: {
+    color: Colors.white,
+    fontSize: 15,
+    fontFamily: Fonts.bold,
+    // marginTop: 1,
+  },
 });

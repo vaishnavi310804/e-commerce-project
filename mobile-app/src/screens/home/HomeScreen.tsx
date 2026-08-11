@@ -9,8 +9,9 @@ import BannerCarousel from "@/src/components/home/BannerCarousel";
 import CategorySection from "@/src/components/home/CategorySection";
 import BestSellerSection from "@/src/components/home/BestSellerSection";
 import { Address, getDefaultAddress } from "@/src/api/address.api";
-
 import { getCurrentUser, AuthUser } from "@/src/api/auth.api";
+import Colors from "@/src/constants/colors";
+import { StatusBar } from "expo-status-bar";
 
 const HomeScreen = () => {
   const [search, setSearch] = useState("");
@@ -18,25 +19,25 @@ const HomeScreen = () => {
   const [address, setAddress] = useState<Address | null>(null);
 
   const fetchData = useCallback(async () => {
-  try {
-    const userRes = await getCurrentUser();
-    setUser(userRes.data ?? null);
-
     try {
-      const addressRes = await getDefaultAddress();
-      setAddress(addressRes.data ??null);
-    } catch {
-      setAddress(null);
+      const userRes = await getCurrentUser();
+      setUser(userRes.data ?? null);
+
+      try {
+        const addressRes = await getDefaultAddress();
+        setAddress(addressRes.data ?? null);
+      } catch {
+        setAddress(null);
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.log("Status:", error.response?.status);
+        console.log("Response:", error.response?.data);
+      } else {
+        console.log(error);
+      }
     }
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.log("Status:", error.response?.status);
-      console.log("Response:", error.response?.data);
-    } else {
-      console.log(error);
-    }
-  }
-}, []);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -45,7 +46,12 @@ const HomeScreen = () => {
   );
 
   return (
-    <ScreenWrapper>
+    <ScreenWrapper
+      safeArea={false}
+      statusBarStyle="light"
+      backgroundColor="#F8F7FF"
+    >
+      <StatusBar style="light" backgroundColor={Colors.primary} />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 30 }}

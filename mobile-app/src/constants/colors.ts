@@ -1,5 +1,5 @@
 const Colors = {
-  primary: "#6C63FF",
+  primary: "#6547C9",
   secondary: "#8B5CF6",
 
   background: "#F8F7FF",
@@ -15,9 +15,9 @@ const Colors = {
   warning: "#F59E0B",
   error: "#EF4444",
 
-  white: "#FFFFFF",
-  black: "#000000",
-  gray: "#808080",
+  white: "#F6F6F6",
+  black: "#010101",
+  gray: "#797979",
 };
 
 export default Colors;

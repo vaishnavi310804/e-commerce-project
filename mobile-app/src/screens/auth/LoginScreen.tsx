@@ -114,10 +114,7 @@ export default function LoginScreen() {
               style={styles.header}
               imageStyle={styles.headerImage}
             >
-              <LinearGradient
-                colors={["rgba(108,78,255,0.88)", "rgba(124,92,255,0.92)"]}
-                style={StyleSheet.absoluteFill}
-              />
+              <View style={styles.bgColor} />
               <View style={styles.headerContent}>
                 <Image
                   source={require("../../../assets/images/logo2.png")}
@@ -211,10 +208,9 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#F8F7FF",
+    backgroundColor: "#F6F6F6",
     flexGrow: 1,
-    paddingBottom: 20,
+    paddingBottom: 180,
   },
 
   header: {
@@ -232,6 +228,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  bgColor: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "#6547C9",
+    opacity: 0.85,
   },
 
   logo: {
@@ -254,17 +255,17 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: "#FFFFFF",
     marginHorizontal: 24,
-    marginTop: -60,
+    marginTop: -50,
     borderRadius: 36,
     padding: 24,
     shadowColor: "#000",
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.06,
     shadowRadius: 18,
     shadowOffset: {
       width: 0,
       height: 8,
     },
-    elevation: 8,
+    elevation: 6,
   },
 
   socialContainer: {
@@ -300,9 +301,8 @@ const styles = StyleSheet.create({
   line: {
     flex: 1,
     height: 1,
-    backgroundColor: "#E5E7EB",
+    backgroundColor: "#797979",
   },
-
   orText: {
     marginHorizontal: 12,
     fontFamily: Fonts.medium,
@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
 
   footerText: {
     fontFamily: Fonts.regular,
-    color: "#6B7280",
+    color: Colors.gray,
     fontSize: 14,
   },
 

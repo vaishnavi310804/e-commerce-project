@@ -4,10 +4,9 @@ import {
   Text,
   TextInput,
   View,
-  Pressable, KeyboardTypeOptions, TextInputProps
+  Pressable, TextInputProps
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { AntDesign } from "@expo/vector-icons";
 import Colors from "@/src/constants/colors";
 import Fonts from "@/src/constants/fonts";
 
@@ -42,7 +41,7 @@ export default function Input({
         <TextInput
           style={styles.input}
           placeholder={placeholder}
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor="#797979"
           value={value}
           onChangeText={onChangeText}
           secureTextEntry={hidePassword}
@@ -71,18 +70,19 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: Fonts.medium,
     fontSize: 14,
+    borderRadius: 14,
     color: Colors.text,
     marginBottom: 8,
   },
 
   inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F5F5F7",
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    height: 56,
-  },
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "#E0E0E0",
+  borderRadius: 14,
+  paddingHorizontal: 16,
+  height: 56,
+},
 
   input: {
     flex: 1,

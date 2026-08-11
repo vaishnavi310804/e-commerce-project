@@ -60,11 +60,12 @@ export default SearchBar;
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: -20,
-    paddingHorizontal: 20,
-  },
+  flexDirection: "row",
+  alignItems: "center",
+  marginTop: -58,
+  paddingHorizontal: 20,
+  zIndex: 2,
+},
 
   searchContainer: {
     flex: 1,
@@ -74,9 +75,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
-
     shadowColor: "#000",
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.10,
     shadowRadius: 6,
     shadowOffset: {
       width: 0,
@@ -97,8 +97,8 @@ const styles = StyleSheet.create({
   filterButton: {
     width: 45,
     height: 45,
-    marginLeft: 12,
-    borderRadius: 30,
+    marginLeft: 10,
+    borderRadius: 25,
     backgroundColor: Colors.white,
     justifyContent: "center",
     alignItems: "center",

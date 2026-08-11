@@ -1,13 +1,11 @@
 import React, { useState } from "react";
-import {
-  Dimensions,
-  StyleSheet,
-  View,
-} from "react-native";
+import { Dimensions, StyleSheet, View } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import BannerItem from "./BannerItem";
 import { banners } from "@/src/constants/banner";
 import Colors from "@/src/constants/colors";
+import SectionHeader from "@/src/components/home/SectionHeader";
+import { router } from "expo-router";
 
 const { width } = Dimensions.get("window");
 
@@ -16,9 +14,14 @@ const BannerCarousel = () => {
 
   return (
     <View style={styles.container}>
+      <SectionHeader
+        title="Special Offers"
+        onSeeAll={() => router.push("/(tabs)")}
+      />
+
       <Carousel
         width={width}
-        height={190}
+        height={160}
         data={banners}
         autoPlay
         autoPlayInterval={3000}
@@ -34,6 +37,8 @@ const BannerCarousel = () => {
               buttonText={item.buttonText}
               image={item.image}
               backgroundColor={item.backgroundColor}
+              imageWidth={item.imageWidth}
+              imageHeight={item.imageHeight}
             />
           </View>
         )}
@@ -43,10 +48,7 @@ const BannerCarousel = () => {
         {banners.map((_, index) => (
           <View
             key={index}
-            style={[
-              styles.dot,
-              activeIndex === index && styles.activeDot,
-            ]}
+            style={[styles.dot, activeIndex === index && styles.activeDot]}
           />
         ))}
       </View>
@@ -58,17 +60,18 @@ export default BannerCarousel;
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 10,
+    marginTop: 25,
   },
 
   bannerWrapper: {
     paddingHorizontal: 20,
+    paddingTop: 8,
   },
 
   pagination: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 2,
+    marginTop: 3,
   },
 
   dot: {
