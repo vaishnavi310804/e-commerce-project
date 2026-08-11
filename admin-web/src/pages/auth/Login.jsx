@@ -6,7 +6,7 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-[#F8F7FF] flex">
 
-      <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-[#6C63FF] to-[#8B5CF6] relative overflow-hidden">
+      <div className="hidden lg:flex w-1/2 bg-[#8B5CF6] relative overflow-hidden">
 
 
         <div className="absolute -top-24 -left-24 w-72 h-72 bg-white/10 rounded-full"></div>

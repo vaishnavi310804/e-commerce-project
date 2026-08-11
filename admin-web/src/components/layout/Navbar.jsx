@@ -93,7 +93,7 @@ const Navbar = () => {
             onClick={() => setMenuOpen(false)}
           />
 
-          <div className="fixed right-0 top-16 z-50 w-72 max-w-[65vw] rounded-bl-2xl border-b border-l border-slate-200 bg-white/100 p-4 shadow-xl lg:hidden">
+          <div className="fixed right-0 top-16 z-50 w-72 max-w-[60vw] rounded-bl-2xl border-b border-l border-slate-200 bg-white/100 p-4 shadow-xl lg:hidden">
             <nav className="space-y-1">
               {navigationItems.map(({ icon: Icon, title, path }) => (
                 <button
