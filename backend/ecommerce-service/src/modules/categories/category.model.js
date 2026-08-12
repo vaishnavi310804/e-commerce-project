@@ -23,6 +23,12 @@ const categorySchema = new mongoose.Schema(
       default: "",
     },
 
+    icon: {
+      type: String,
+      trim: true,
+      default: "shirt",
+    },
+
     image: {
       url: {
         type: String,

@@ -8,6 +8,7 @@ import { router } from "expo-router";
 
 const CategorySection = () => {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCategories();
@@ -21,6 +22,18 @@ const CategorySection = () => {
     } catch (error) {
       console.log("Category Error:", error);
     }
+  };
+
+  const handleCategoryPress = (item: Category) => {
+    setSelectedCategory(item._id);
+    router.push({
+      pathname: "/category/[categoryId]",
+      params: {
+        categoryId: item._id,
+        categoryName: item.name,
+        slug: item.slug,
+      },
+    });
   };
 
   return (
@@ -39,16 +52,8 @@ const CategorySection = () => {
         renderItem={({ item }) => (
           <CategoryItem
             item={item}
-            onPress={() =>
-              router.push({
-                pathname: "/category/[categoryId]",
-                params: {
-                  categoryId: item._id,
-                  categoryName: item.name,
-                  slug: item.slug,
-                },
-              })
-            }
+            selected={selectedCategory === item._id}
+            onPress={() => handleCategoryPress(item)}
           />
         )}
       />
@@ -65,5 +70,6 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: 20,
     paddingVertical: 8,
+    paddingBottom: 4,
   },
 });

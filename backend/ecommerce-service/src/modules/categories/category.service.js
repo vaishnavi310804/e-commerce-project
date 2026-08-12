@@ -3,7 +3,12 @@ import slugify from "../../utils/slug.js";
 
 
 export const createCategoryService = async (categoryData) => {
-  const { name, description, isActive } = categoryData;
+  const {
+    name,
+    description,
+    icon,
+    isActive,
+  } = categoryData;
 
   const slug = slugify(name);
 
@@ -19,6 +24,7 @@ export const createCategoryService = async (categoryData) => {
     name,
     slug,
     description,
+    icon,
     isActive,
   });
 

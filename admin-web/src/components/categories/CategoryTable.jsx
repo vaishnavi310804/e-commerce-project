@@ -1,5 +1,33 @@
 import React from "react";
-import { FaEdit } from "react-icons/fa";
+import {
+  FaEdit,
+  FaTshirt,
+  FaMobileAlt,
+  FaClock,
+  FaLaptop,
+  FaHeadphones,
+  FaShoppingBag,
+  FaHome,
+  FaBook,
+  FaGamepad,
+} from "react-icons/fa";
+import { GiSonicShoes, GiLipstick } from "react-icons/gi";
+import { TbHorseToy } from "react-icons/tb";
+
+const categoryIcons = {
+  shirt: FaTshirt,
+  mobile: FaMobileAlt,
+  watch: FaClock,
+  laptop: FaLaptop,
+  audio: FaHeadphones,
+  bag: FaShoppingBag,
+  shoes: GiSonicShoes,
+  home: FaHome,
+  books: FaBook,
+  gaming: FaGamepad,
+  beauty: GiLipstick,
+  toy: TbHorseToy,
+};
 
 const CategoryTable = ({
   categories,
@@ -30,6 +58,7 @@ const CategoryTable = ({
           <table className="w-full min-w-[700px]">
             <thead className="bg-gray-100">
               <tr>
+                <th className="px-6 py-4 text-left">Icon</th>
                 <th className="px-6 py-4 text-left">Name</th>
                 <th className="px-6 py-4 text-left">Description</th>
                 <th className="px-6 py-4 text-left">Status</th>
@@ -44,6 +73,10 @@ const CategoryTable = ({
                   key={category._id}
                   className="border-t transition hover:bg-gray-50"
                 >
+                  <td className="px-6 py-4">
+                    <CategoryIcon icon={category.icon} />
+                  </td>
+
                   <td className="px-6 py-4 font-medium">
                     {category.name}
                   </td>
@@ -87,14 +120,18 @@ const CategoryTable = ({
             className="rounded-xl bg-white p-4 shadow"
           >
             <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <h3 className="truncate text-base font-semibold text-gray-900">
-                  {category.name}
-                </h3>
+              <div className="flex min-w-0 flex-1 items-start gap-3">
+                <CategoryIcon icon={category.icon} />
 
-                <p className="mt-1 text-sm text-gray-500">
-                  {category.description || "No description"}
-                </p>
+                <div className="min-w-0">
+                  <h3 className="truncate text-base font-semibold text-gray-900">
+                    {category.name}
+                  </h3>
+
+                  <p className="mt-1 text-sm text-gray-500">
+                    {category.description || "No description"}
+                  </p>
+                </div>
               </div>
 
               <EditButton
@@ -103,7 +140,7 @@ const CategoryTable = ({
               />
             </div>
 
-            <div className="mt-4 flex items-center justify-between border-gray-100 pt-3">
+            <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
               <div>
                 <p className="text-xs text-gray-400">
                   Created
@@ -129,6 +166,24 @@ const CategoryTable = ({
         ))}
       </div>
     </>
+  );
+};
+
+const CategoryIcon = ({ icon }) => {
+  const Icon = categoryIcons[icon];
+
+  if (!Icon) {
+    return (
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-400">
+        ?
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+      <Icon size={20} />
+    </div>
   );
 };
 
