@@ -8,6 +8,7 @@ export type Category = {
     public_id: string;
     url: string;
   };
+  icon?: string;
 };
 
 type ApiResponse<T> = {

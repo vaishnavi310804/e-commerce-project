@@ -12,7 +12,7 @@ export const banners = [
   {
     id: "2",
     title: "New Collection",
-    subtitle: "Summer Sale",
+    subtitle: "Up to 10% OFF",
     buttonText: "Explore",
     image: require("@/assets/images/carousal_pic_2.png"),
     backgroundColor: "#FFF4E5",

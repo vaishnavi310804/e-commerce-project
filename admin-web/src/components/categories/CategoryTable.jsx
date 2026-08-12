@@ -181,7 +181,7 @@ const CategoryIcon = ({ icon }) => {
   }
 
   return (
-    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#cdcad7] text-[#6547C9]">
       <Icon size={20} />
     </div>
   );

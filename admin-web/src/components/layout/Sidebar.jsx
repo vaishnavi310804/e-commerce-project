@@ -62,7 +62,7 @@ const Sidebar = () => {
       <aside className="fixed left-0 top-0 hidden h-screen w-65 flex-col justify-between overflow-y-auto border-r border-slate-200 bg-white p-4 lg:flex">
         <div>
           <div className="flex justify-center mb-5">
-            <h1 className="text-3xl font-extrabold tracking-tight text-[#6C63FF]">
+            <h1 className="text-3xl font-extrabold tracking-tight text-[#6547C9]">
               ShopEase
             </h1>
           </div>
@@ -76,17 +76,17 @@ const Sidebar = () => {
                   onError={() => setImgError(true)}
                 />
               ) : (
-                <div className="w-12 h-12 rounded-full bg-[#F0EEFF] text-[#6C63FF] font-bold text-base flex items-center justify-center">
+                <div className="w-12 h-12 rounded-full bg-[#F0EEFF] text-[#6547C9] font-bold text-base flex items-center justify-center">
                   {initialLetter}
                 </div>
               )}
             </div>
 
-            <h3 className="text-sm font-semibold text-[#6C63FF]">
+            <h3 className="text-sm font-semibold text-[#6547C9]">
               Welcome, {user?.fullName || user?.name || "User"}
             </h3>
 
-            <p className="text-xs font-medium text-[#6C63FF]">
+            <p className="text-xs font-medium text-[#6547C9]">
               {user?.email || ""}
             </p>
           </div>

@@ -80,7 +80,7 @@ export default BestSellerSection;
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 18,
+    marginTop: 20,
     paddingHorizontal: 20,
     paddingBottom: 20,
   },

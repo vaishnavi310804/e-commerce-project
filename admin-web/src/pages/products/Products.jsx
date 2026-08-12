@@ -85,7 +85,7 @@ const Products = () => {
 
           <button
             onClick={handleAddProduct}
-            className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-white transition hover:bg-indigo-700"
+            className="flex items-center gap-2 rounded-xl bg-[#6547C9] px-5 py-3 text-white transition hover:bg-indigo-700"
           >
             <FaPlus /> Add Product
           </button>
@@ -102,7 +102,7 @@ const Products = () => {
             onClick={() => setStatusFilter("active")}
             className={`rounded-lg px-5 py-2 font-medium transition ${
               statusFilter === "active"
-                ? "bg-indigo-600 text-white"
+                ? "bg-[#6547C9] text-white"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
@@ -113,7 +113,7 @@ const Products = () => {
             onClick={() => setStatusFilter("inactive")}
             className={`rounded-lg px-5 py-2 font-medium transition ${
               statusFilter === "inactive"
-                ? "bg-indigo-600 text-white"
+                ? "bg-[#6547C9] text-white"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >

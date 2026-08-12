@@ -17,7 +17,6 @@ const CategorySection = () => {
   const fetchCategories = async () => {
     try {
       const response = await getCategories();
-
       setCategories(response.data ?? []);
     } catch (error) {
       console.log("Category Error:", error);
@@ -32,6 +31,7 @@ const CategorySection = () => {
         categoryId: item._id,
         categoryName: item.name,
         slug: item.slug,
+        icon: item.icon,
       },
     });
   };

@@ -27,7 +27,7 @@ const DashboardFilters = ({
             onClick={() => onFilterChange(opt.id)}
             className={`rounded-md px-3.5 py-1.5 text-xs font-semibold transition ${
               activeFilter === opt.id
-                ? "bg-indigo-600 text-white shadow"
+                ? "bg-[#6547C9] text-white shadow"
                 : "text-gray-600 hover:text-gray-900"
             }`}
           >
@@ -53,7 +53,7 @@ const DashboardFilters = ({
           />
           <button
             onClick={onApplyCustom}
-            className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700"
+            className="rounded-lg bg-[#6547C9] px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700"
           >
             Apply
           </button>

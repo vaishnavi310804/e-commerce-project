@@ -11,14 +11,36 @@ type Props = {
   onPress: () => void;
 };
 
+type IconName = keyof typeof Ionicons.glyphMap;
+
+const categoryIcons: Record<string, IconName> = {
+  shirt: "shirt-outline",
+  mobile: "phone-portrait-outline",
+  watch: "watch-outline",
+  laptop: "laptop-outline",
+  audio: "headset-outline",
+  bag: "bag-handle-outline",
+  shoes: "footsteps-outline",
+  home: "home-outline",
+  books: "book-outline",
+  gaming: "game-controller-outline",
+  beauty: "color-palette-outline",
+  toy: "game-controller-outline",
+};
+
 const CategoryItem = ({ item, onPress, selected }: Props) => {
+  const iconName = categoryIcons[item.icon || ""] || "-";
+
   return (
     <Pressable
       onPress={onPress}
       style={[styles.container, selected && styles.selectedContainer]}
     >
       <View
-        style={[styles.iconContainer, selected && styles.selectedIconContainer]}
+        style={[
+          styles.iconContainer,
+          selected && styles.selectedIconContainer,
+        ]}
       >
         {item.image?.url ? (
           <Image
@@ -28,9 +50,9 @@ const CategoryItem = ({ item, onPress, selected }: Props) => {
           />
         ) : (
           <Ionicons
-            name="grid-outline"
+            name={iconName}
             size={18}
-            color={selected ? Colors.primary : Colors.black}
+            color={selected ? Colors.white : Colors.black}
           />
         )}
       </View>
@@ -75,7 +97,7 @@ const styles = StyleSheet.create({
   },
 
   selectedIconContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: '#836dcf',
   },
 
   image: {

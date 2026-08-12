@@ -132,7 +132,7 @@ const Orders = () => {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
 
           <div className="flex items-center gap-4 rounded-xl bg-white p-5 shadow">
-            <div className="rounded-xl bg-indigo-50 p-3 text-indigo-600">
+            <div className="rounded-xl bg-indigo-50 p-3 text-[#6547C9]">
               <FaShoppingBag size={22} />
             </div>
             <div>
