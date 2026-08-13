@@ -1,11 +1,13 @@
 import Review from "./review.model.js";
 import Product from "../products/product.model.js";
+import mongoose from "mongoose";
 
 const updateProductRating = async (productId) => {
+  const productObjectId = new mongoose.Types.ObjectId(productId);
   const stats = await Review.aggregate([
     {
       $match: {
-        product: productId,
+        product: productObjectId,
         isHidden: false,
       },
     },
@@ -98,6 +100,7 @@ export const toggleHideReviewService = async (reviewId) => {
 
   review.isHidden = !review.isHidden;
   await review.save();
+  await updateProductRating(review.product);
 
   return review;
 };
@@ -108,7 +111,7 @@ export const deleteReviewService = async (reviewId) => {
   if (!review) {
     throw new Error("Review not found.");
   }
-
+  await updateProductRating(review.product); 
   return review;
 };
 

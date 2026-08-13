@@ -59,7 +59,7 @@ const ProductReview = ({
           {reviewData.reviews.slice(0, 5).map((review: any) => (
             <View key={review._id} style={styles.reviewCard}>
               <View style={styles.reviewTop}>
-                <Text style={styles.reviewUser}>{review.user.fullName}</Text>
+                <Text style={styles.reviewUser}>{review.user?.fullName || "Anonymous"}</Text>
                 <View style={{ flexDirection: "row" }}>
                   {Array.from({ length: review.rating }).map((_, index) => (
                     <Ionicons
