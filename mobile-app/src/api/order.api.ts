@@ -15,6 +15,7 @@ export interface OrderItem {
     | "Placed"
     | "Confirmed"
     | "Packed"
+    |  "Processing"
     | "Shipped"
     | "Delivered"
     | "Cancelled";

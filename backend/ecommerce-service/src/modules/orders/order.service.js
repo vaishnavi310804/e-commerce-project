@@ -25,33 +25,33 @@ export const createOrderService = async (userId, payload) => {
   let rawDiscount = 0;
 
   const orderProducts = cart.items.map((item) => {
-  const product = item.product;
+    const product = item.product;
 
-  if (!product) {
-    throw new Error("One or more products in your cart are unavailable.");
-  }
+    if (!product) {
+      throw new Error("One or more products in your cart are unavailable.");
+    }
 
-  const price = product.price || 0;
+    const price = product.price || 0;
 
-  const unitPrice =
-    product.discountPrice > 0 && product.discountPrice < price
-      ? product.discountPrice
-      : price;
+    const unitPrice =
+      product.discountPrice > 0 && product.discountPrice < price
+        ? product.discountPrice
+        : price;
 
-  rawSubtotal += price * item.quantity;
+    rawSubtotal += price * item.quantity;
 
-  if (product.discountPrice > 0 && product.discountPrice < price) {
-    rawDiscount += (price - product.discountPrice) * item.quantity;
-  }
+    if (product.discountPrice > 0 && product.discountPrice < price) {
+      rawDiscount += (price - product.discountPrice) * item.quantity;
+    }
 
-  return {
-    product: product._id,
-    quantity: item.quantity,
-    price: unitPrice,
-    itemStatus: "Placed",
-    returnStatus: "Not Requested",
-  };
-});
+    return {
+      product: product._id,
+      quantity: item.quantity,
+      price: unitPrice,
+      itemStatus: "Placed",
+      returnStatus: "Not Requested",
+    };
+  });
 
   const shippingCharge = 0;
   const tax = 0;
@@ -202,7 +202,7 @@ export const updateOrderStatusService = async (orderId, orderStatus) => {
   } catch (notificationError) {
     console.error(
       "Failed to send order status notification:",
-      notificationError.message
+      notificationError.message,
     );
   }
 
@@ -258,15 +258,34 @@ export const cancelOrderService = async (userId, orderId) => {
     error.statusCode = 404;
     throw error;
   }
+  const cancellableStatus = [
+    "Pending",
+    "Placed",
+    "Confirmed",
+    "Processing",
+    "Packed",
+  ];
 
-  if (order.orderStatus !== "Placed" && order.orderStatus !== "Pending") {
+  if (!cancellableStatuses.includes(order.orderStatus)) {
     const error = new Error("This order cannot be cancelled.");
     error.statusCode = 400;
     throw error;
   }
 
   order.orderStatus = "Cancelled";
-  await order.save();
+  order.products.forEach((item) => {
+    const cancellableItemStatuses = [
+      "Placed",
+      "Confirmed",
+      "Processing",
+      "Packed",
+    ];
 
+    if (cancellableItemStatuses.includes(item.itemStatus)) {
+      item.itemStatus = "Cancelled";
+    }
+  });
+
+  await order.save();
   return order;
 };

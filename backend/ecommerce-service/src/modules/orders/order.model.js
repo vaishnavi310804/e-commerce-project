@@ -29,6 +29,7 @@ const orderItemSchema = new mongoose.Schema({
     enum: [
       "Placed",
       "Confirmed",
+      "Processing",
       "Packed",
       "Shipped",
       "Delivered",

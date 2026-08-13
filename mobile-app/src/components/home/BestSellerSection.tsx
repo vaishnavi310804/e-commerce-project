@@ -59,7 +59,6 @@ const BestSellerSection = () => {
   return (
     <View style={styles.container}>
       <SectionHeader title="Best Seller" onSeeAll={() => {}} />
-
       <View style={styles.grid}>
         {products.map((item) => (
           <ProductCard
@@ -81,7 +80,6 @@ export default BestSellerSection;
 const styles = StyleSheet.create({
   container: {
     marginTop: 20,
-    paddingHorizontal: 20,
     paddingBottom: 20,
   },
 
@@ -89,6 +87,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
+    paddingHorizontal: 20,
   },
 
   card: {

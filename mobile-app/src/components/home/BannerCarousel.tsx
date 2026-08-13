@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Dimensions, StyleSheet, View } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
-import BannerItem from "./BannerItem";
-import { banners } from "@/src/constants/banner";
+import BannerItem, {banners} from "./BannerItem";
 import Colors from "@/src/constants/colors";
 import SectionHeader from "@/src/components/home/SectionHeader";
 import { router } from "expo-router";
@@ -32,13 +31,7 @@ const BannerCarousel = () => {
         renderItem={({ item }) => (
           <View style={styles.bannerWrapper}>
             <BannerItem
-              title={item.title}
-              subtitle={item.subtitle}
-              buttonText={item.buttonText}
-              image={item.image}
-              backgroundColor={item.backgroundColor}
-              imageWidth={item.imageWidth}
-              imageHeight={item.imageHeight}
+              banner={item}
             />
           </View>
         )}

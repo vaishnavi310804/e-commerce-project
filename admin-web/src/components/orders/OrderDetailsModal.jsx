@@ -98,7 +98,6 @@ const OrderDetailsModal = ({ open, onClose, order, onSuccess }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="flex max-h-[90vh] w-full max-w-4xl flex-col rounded-2xl bg-white shadow-xl">
-        {/* Header */}
         <div className="flex items-center justify-between border-b px-6 py-4">
           <div>
             <h2 className="text-xl font-semibold text-gray-800">
@@ -117,9 +116,7 @@ const OrderDetailsModal = ({ open, onClose, order, onSuccess }) => {
           </button>
         </div>
 
-        {/* Modal Scrollable Body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {/* Quick Status Update Controls */}
           <div className="grid grid-cols-1 gap-4 rounded-xl border border-gray-200 bg-gray-50 p-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-gray-600">
@@ -158,7 +155,7 @@ const OrderDetailsModal = ({ open, onClose, order, onSuccess }) => {
             </div>
           </div>
 
-          {/* Cancellation Confirmation Box */}
+
           {showCancelConfirm && (
             <div className="flex items-center justify-between rounded-xl border border-rose-200 bg-rose-50 p-4 text-rose-800">
               <div className="flex items-center gap-3">
@@ -184,9 +181,7 @@ const OrderDetailsModal = ({ open, onClose, order, onSuccess }) => {
             </div>
           )}
 
-          {/* Customer & Address Details Grid */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {/* Customer Info */}
             <div className="rounded-xl border border-gray-200 p-4">
               <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-700">
                 Customer Information
@@ -200,7 +195,6 @@ const OrderDetailsModal = ({ open, onClose, order, onSuccess }) => {
               </div>
             </div>
 
-            {/* Shipping Address */}
             <div className="rounded-xl border border-gray-200 p-4">
               <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-700">
                 Shipping Address
@@ -218,7 +212,6 @@ const OrderDetailsModal = ({ open, onClose, order, onSuccess }) => {
             </div>
           </div>
 
-          {/* Ordered Products Table */}
           <div>
             <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-700">
               Ordered Products ({productsList.length})
@@ -280,7 +273,6 @@ const OrderDetailsModal = ({ open, onClose, order, onSuccess }) => {
             </div>
           </div>
 
-          {/* Order Summary & Status Breakdown */}
           <div className="flex flex-col justify-between gap-6 rounded-xl border border-gray-200 p-4 sm:flex-row">
             <div className="space-y-2">
               <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
@@ -305,37 +297,36 @@ const OrderDetailsModal = ({ open, onClose, order, onSuccess }) => {
             <div className="w-full max-w-xs space-y-2 text-sm">
               <div className="flex justify-between text-gray-600">
                 <span>Subtotal</span>
-                <span>${Number(order.subtotal || order.totalAmount || 0).toFixed(2)}</span>
+                <span>₹{Number(order.subtotal || order.totalAmount || 0).toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-gray-600">
                 <span>Shipping Fee</span>
-                <span>${Number(order.shippingCharge || 0).toFixed(2)}</span>
+                <span>₹{Number(order.shippingCharge || 0).toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-gray-600">
                 <span>Tax</span>
-                <span>${Number(order.tax || 0).toFixed(2)}</span>
+                <span>₹{Number(order.tax || 0).toFixed(2)}</span>
               </div>
               {order.discount > 0 && (
                 <div className="flex justify-between text-emerald-600">
                   <span>Discount</span>
-                  <span>-${Number(order.discount).toFixed(2)}</span>
+                  <span>-₹{Number(order.discount).toFixed(2)}</span>
                 </div>
               )}
               <div className="border-t pt-2 flex justify-between font-bold text-base text-gray-900">
                 <span>Grand Total</span>
-                <span>${Number(order.totalAmount || 0).toFixed(2)}</span>
+                <span>₹{Number(order.totalAmount || 0).toFixed(2)}</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Footer */}
         <div className="flex justify-end border-t px-6 py-4">
           <button
             onClick={onClose}
             className="rounded-lg border border-gray-300 px-5 py-2 text-gray-700 hover:bg-gray-100"
           >
-            Close
+            Done
           </button>
         </div>
       </div>

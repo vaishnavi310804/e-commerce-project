@@ -85,38 +85,47 @@ const OrderDetailsScreen = () => {
   };
 
   const getActionButton = () => {
-    if (!order) return null;
-    switch (order.orderStatus) {
-      case "Placed":
-        return {
-          title: "Cancel Order",
-          onPress: handleCancel,
-        };
-      case "Shipped":
-        return {
-          title: "Track Order",
-          onPress: () => {
-            console.log("Track Order");
-          },
-        };
-      case "Delivered":
-        return {
-          title: "Buy Again",
-          onPress: () => {
-            console.log("Buy Again");
-          },
-        };
-      case "Cancelled":
-        return {
-          title: "Reorder",
-          onPress: () => {
-            console.log("Reorder");
-          },
-        };
-      default:
-        return null;
-    }
-  };
+  if (!order) return null;
+
+  switch (order.orderStatus) {
+    case "Pending":
+    case "Placed":
+    case "Confirmed":
+    case "Processing":
+    case "Packed":
+      return {
+        title: "Cancel Order",
+        onPress: handleCancel,
+      };
+
+    case "Shipped":
+      return {
+        title: "Track Order",
+        onPress: () => {
+          console.log("Track Order");
+        },
+      };
+
+    case "Delivered":
+      return {
+        title: "Buy Again",
+        onPress: () => {
+          console.log("Buy Again");
+        },
+      };
+
+    case "Cancelled":
+      return {
+        title: "Reorder",
+        onPress: () => {
+          console.log("Re-Order");
+        },
+      };
+
+    default:
+      return null;
+  }
+};
 
   const action = getActionButton();
 

@@ -21,9 +21,17 @@ const OrderCard = ({
   const getButtons = () => {
     switch (order.orderStatus) {
       case "Placed":
+      case "Confirmed":
+      case "Processing":
+      case "Packed":
+        return {
+          left: "Cancel Order",
+          right: "Track Order",
+        };
+
       case "Shipped":
         return {
-          left: "Cancel",
+          left: "",
           right: "Track Order",
         };
 
