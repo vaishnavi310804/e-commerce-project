@@ -20,6 +20,7 @@ const OrderCard = ({
 }: Props) => {
   const getButtons = () => {
     switch (order.orderStatus) {
+      case"Pending":
       case "Placed":
       case "Confirmed":
       case "Processing":
