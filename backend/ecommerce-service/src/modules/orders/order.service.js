@@ -266,7 +266,7 @@ export const cancelOrderService = async (userId, orderId) => {
     "Packed",
   ];
 
-  if (!cancellableStatuses.includes(order.orderStatus)) {
+  if (!cancellableStatus.includes(order.orderStatus)) {
     const error = new Error("This order cannot be cancelled.");
     error.statusCode = 400;
     throw error;
@@ -274,14 +274,14 @@ export const cancelOrderService = async (userId, orderId) => {
 
   order.orderStatus = "Cancelled";
   order.products.forEach((item) => {
-    const cancellableItemStatuses = [
+    const cancellableItemStatus = [
       "Placed",
       "Confirmed",
       "Processing",
       "Packed",
     ];
 
-    if (cancellableItemStatuses.includes(item.itemStatus)) {
+    if (cancellableItemStatus.includes(item.itemStatus)) {
       item.itemStatus = "Cancelled";
     }
   });
