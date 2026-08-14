@@ -63,7 +63,7 @@ export const verifyPaymentService = async (
   try {
     await sendNotification({
       userId,
-      title: "💳 Payment Successful",
+      title: "Payment Successful",
       body: `Your payment of ₹${order.totalAmount} for Order #${order.orderNumber} was successful.`,
       type: "PAYMENT_SUCCESS",
       data: {
@@ -91,4 +91,62 @@ export const verifyPaymentService = async (
     .populate("user", "fullName email phoneNumber")
     .populate("address")
     .populate("products.product", "name price productImage brand");
+};
+
+export const refundPaymentService = async (order) => {
+  if (order.paymentMethod !== "RAZORPAY") {
+    return null;
+  }
+
+  if (order.paymentStatus !== "Paid") {
+    throw new Error("Payment is not eligible for refund.");
+  }
+
+  if (!order.razorpayPaymentId) {
+    throw new Error("Razorpay payment ID not found.");
+  }
+
+  if (order.refundStatus === "Processed") {
+    throw new Error("This order has already been refunded.");
+  }
+
+  const refundAmount = Math.round(order.totalAmount * 100);
+
+  order.refundStatus = "Pending";
+  order.refundAmount = order.totalAmount;
+
+  await order.save();
+
+  try {
+    const refund = await razorpay.payments.refund(
+      order.razorpayPaymentId,
+      {
+        amount: refundAmount,
+        speed: "normal",
+        receipt: `refund_${order.orderNumber}`,
+        notes: {
+          orderNumber: order.orderNumber,
+        },
+      },
+    );
+
+    order.razorpayRefundId = refund.id;
+    order.refundStatus =
+      refund.status === "processed" ? "Processed" : "Pending";
+
+    if (refund.status === "processed") {
+      order.paymentStatus = "Refunded";
+      order.refundDate = new Date();
+    }
+
+    await order.save();
+
+    return refund;
+  } catch (error) {
+    order.refundStatus = "Failed";
+
+    await order.save();
+
+    throw error;
+  }
 };

@@ -235,7 +235,7 @@ const OrderActions = ({ order, onViewOrder, onUpdateStatus }) => {
       <button
         type="button"
         onClick={() => onViewOrder(order)}
-        className="rounded-lg p-2 text-indigo-600 transition hover:bg-indigo-50 hover:text-indigo-700"
+        className="rounded-lg p-2 text-[#6547C9] transition hover:bg-indigo-50 hover:text-indigo-700"
         title="View Details"
       >
         <FaEye size={16} />

@@ -1,6 +1,7 @@
 import Order from "./order.model.js";
 import Cart from "../cart/cart.model.js";
 import Address from "../address/address.model.js";
+import {refundPaymentService} from "../../modules/payment/payment.service.js"
 
 export const createOrderService = async (userId, payload) => {
   const { addressId, paymentMethod = "COD" } = payload;
@@ -175,7 +176,7 @@ export const updateOrderStatusService = async (orderId, orderStatus) => {
       case "Shipped":
         await sendNotification({
           userId: order.user,
-          title: "🚚 Order Shipped",
+          title: "Order Shipped",
           body: `Your order #${order.orderNumber} has been shipped.`,
           type: "ORDER_SHIPPED",
           data: {
@@ -187,7 +188,7 @@ export const updateOrderStatusService = async (orderId, orderStatus) => {
       case "Delivered":
         await sendNotification({
           userId: order.user,
-          title: "✅ Order Delivered",
+          title: "Order Delivered",
           body: `Your order #${order.orderNumber} has been delivered.`,
           type: "ORDER_DELIVERED",
           data: {
@@ -271,21 +272,25 @@ export const cancelOrderService = async (userId, orderId) => {
     error.statusCode = 400;
     throw error;
   }
-
   order.orderStatus = "Cancelled";
-  order.products.forEach((item) => {
     const cancellableItemStatus = [
       "Placed",
       "Confirmed",
       "Processing",
       "Packed",
     ];
-
+order.products.forEach((item) => {
     if (cancellableItemStatus.includes(item.itemStatus)) {
       item.itemStatus = "Cancelled";
     }
   });
 
   await order.save();
+  if (
+    order.paymentMethod === "RAZORPAY" &&
+    order.paymentStatus === "Paid"
+  ) {
+    await refundPaymentService(order);
+  }
   return order;
 };

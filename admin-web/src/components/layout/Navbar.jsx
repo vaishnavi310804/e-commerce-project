@@ -73,7 +73,7 @@ const Navbar = () => {
   return (
     <>
       <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-slate-200 bg-white px-4 shadow-md lg:hidden">
-        <h1 className="text-2xl font-extrabold tracking-tight text-[#6C63FF]">
+        <h1 className="text-2xl font-extrabold tracking-tight text-[#6547C9]">
           ShopEase
         </h1>
 
@@ -100,7 +100,7 @@ const Navbar = () => {
                   key={path}
                   type="button"
                   onClick={() => handleNavigate(path)}
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left font-medium text-slate-700 transition hover:bg-[#F0EEFF] hover:text-[#6C63FF]"
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left font-medium text-slate-700 transition hover:bg-[#F0EEFF] hover:text-[#6547C9]"
                 >
                   <Icon />
                   <span>{title}</span>
