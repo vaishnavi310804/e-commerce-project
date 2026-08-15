@@ -10,6 +10,7 @@ import Reviews from "../pages/reviews/Reviews";
 import ForgotPassword from "../pages/auth/ForgotPassword";
 import VerifyOtp from "../pages/auth/VerifyOtp";
 import ResetPassword from "../pages/auth/ResetPassword";
+import Refunds from "../pages/refunds/Refunds";
 
 function AppRoutes() {
   return (
@@ -44,6 +45,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <Orders />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/refund"
+        element={
+          <ProtectedRoute>
+            <Refunds />
           </ProtectedRoute>
         }
       />

@@ -5,7 +5,7 @@ import {
   FaUserSlash,
   FaUserPlus,
   FaShoppingBag,
-  FaDollarSign,
+  FaRupeeSign,
 } from "react-icons/fa";
 
 const CustomerStatsCards = ({ stats }) => {
@@ -41,7 +41,7 @@ const CustomerStatsCards = ({ stats }) => {
       </div>
 
       <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow">
-        <div className="rounded-lg bg-rose-50 p-3 text-rose-600">
+        <div className="rounded-lg bg-red-50 p-3 text-red-600">
           <FaUserSlash size={20} />
         </div>
         <div>
@@ -72,7 +72,7 @@ const CustomerStatsCards = ({ stats }) => {
 
       <div className="flex items-center gap-3 rounded-xl bg-white p-4 shadow">
         <div className="rounded-lg bg-purple-50 p-3 text-purple-600">
-          <FaDollarSign size={20} />
+          <FaRupeeSign size={20} />
         </div>
         <div>
           <p className="text-xs font-semibold text-gray-500">Total Revenue</p>

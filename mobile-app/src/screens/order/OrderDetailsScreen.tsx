@@ -19,6 +19,7 @@ import { getMyOrderDetails, OrderData, cancelOrder } from "@/src/api/order.api";
 import ShippingDetailsCard from "@/src/components/order/ShippingDetailsCard";
 import PaymentDetailsCard from "@/src/components/payment/PaymentDetailsCard";
 import PriceSummaryCard from "@/src/components/payment/PriceSummaryCard";
+import RefundDetailsCard from "@/src/components/payment/RefundDetailsCard";
 
 const OrderDetailsScreen = () => {
   const { orderId } = useLocalSearchParams();
@@ -206,6 +207,17 @@ const OrderDetailsScreen = () => {
           paymentMethod={order.paymentMethod}
           paymentStatus={order.paymentStatus}
         />
+
+        {order.paymentMethod === "RAZORPAY" &&
+          order.paymentStatus !== "Pending" &&
+          order.orderStatus === "Cancelled" &&
+          order.refundStatus !== "Not Applicable" && (
+            <RefundDetailsCard
+              refundStatus={order.refundStatus}
+              refundAmount={order.refundAmount}
+              refundDate={order.refundDate}
+            />
+          )}
 
         <PriceSummaryCard
           subtotal={order.subtotal}

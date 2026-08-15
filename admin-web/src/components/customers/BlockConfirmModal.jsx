@@ -12,7 +12,7 @@ const BlockConfirmModal = ({ open, onClose, customer, onConfirm, loading }) => {
         <div className="flex items-center justify-between border-b pb-4">
           <div className="flex items-center gap-3">
             {isBlocking ? (
-              <div className="rounded-full bg-rose-100 p-2 text-rose-600">
+              <div className="rounded-full bg-red-100 p-2 text-red-600">
                 <FaBan size={20} />
               </div>
             ) : (
@@ -61,7 +61,7 @@ const BlockConfirmModal = ({ open, onClose, customer, onConfirm, loading }) => {
             onClick={onConfirm}
             className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition ${
               isBlocking
-                ? "bg-rose-600 hover:bg-rose-700"
+                ? "bg-red-600 hover:bg-red-700"
                 : "bg-emerald-600 hover:bg-emerald-700"
             } disabled:opacity-50`}
           >

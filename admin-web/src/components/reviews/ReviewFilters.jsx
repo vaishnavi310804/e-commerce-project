@@ -105,7 +105,7 @@ const ReviewFilters = ({
             </button>
             <button
               onClick={onBulkDelete}
-              className="flex items-center gap-1.5 rounded bg-rose-600 px-3 py-1 text-xs font-semibold text-white hover:bg-rose-700"
+              className="flex items-center gap-1.5 rounded bg-red-600 px-3 py-1 text-xs font-semibold text-white hover:bg-red-700"
             >
               <FaTrash /> Delete Selected
             </button>

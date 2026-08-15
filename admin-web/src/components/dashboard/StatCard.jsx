@@ -6,7 +6,7 @@ const colorMap = {
   emerald: "bg-emerald-50 text-emerald-600",
   purple: "bg-purple-50 text-purple-600",
   sky: "bg-sky-50 text-sky-600",
-  rose: "bg-rose-50 text-rose-600",
+  red: "bg-red-50 text-red-600",
   amber: "bg-amber-50 text-amber-600",
   blue: "bg-blue-50 text-blue-600",
 };
@@ -33,7 +33,7 @@ const StatCard = ({ title, value, growth, icon: Icon, color = "indigo", subText 
         {growth !== undefined && growth !== null && (
           <span
             className={`flex items-center text-xs font-semibold ${
-              isPositive ? "text-emerald-600" : "text-rose-600"
+              isPositive ? "text-emerald-600" : "text-red-600"
             }`}
           >
             {isPositive ? <FaArrowUp className="mr-1" /> : <FaArrowDown className="mr-1" />}

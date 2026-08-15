@@ -104,7 +104,7 @@ const ReviewDetailsModal = ({
               <span
                 className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${
                   review.isHidden
-                    ? "bg-rose-50 text-red-700 border-rose-200"
+                    ? "bg-red-50 text-red-700 border-red-200"
                     : "bg-emerald-50 text-emerald-700 border-emerald-200"
                 }`}
               >
@@ -141,7 +141,7 @@ const ReviewDetailsModal = ({
 
             <button
               onClick={() => onDelete(review)}
-              className="flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-rose-700"
+              className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700"
             >
               <FaTrash /> Delete Review
             </button>

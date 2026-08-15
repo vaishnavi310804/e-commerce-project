@@ -8,19 +8,31 @@ const orderStatusStyles = {
   Packed: "bg-cyan-50 text-cyan-700 border-cyan-200",
   Shipped: "bg-sky-50 text-sky-700 border-sky-200",
   Delivered: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  Cancelled: "bg-rose-50 text-rose-700 border-rose-200",
+  Cancelled: "bg-red-50 text-red-700 border-red-200",
 };
 
 const paymentStatusStyles = {
   Pending: "bg-amber-50 text-amber-700 border-amber-200",
   Paid: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  Failed: "bg-rose-50 text-rose-700 border-rose-200",
+  Failed: "bg-red-50 text-red-700 border-red-200",
   Refunded: "bg-slate-100 text-slate-700 border-slate-300",
 };
 
+const refundStatusStyles = {
+  Pending: "bg-amber-50 text-amber-700 border-amber-200",
+  Processed: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  Failed: "bg-red-50 text-red-700 border-red-200",
+};
+
 const StatusBadge = ({ type = "order", status }) => {
-  const stylesMap = type === "payment" ? paymentStatusStyles : orderStatusStyles;
-  const style = stylesMap[status] || "bg-gray-100 text-gray-700 border-gray-200";
+  const stylesMap =
+    type === "payment"
+      ? paymentStatusStyles
+      : type === "refund"
+        ? refundStatusStyles
+        : orderStatusStyles;
+  const style =
+    stylesMap[status] || "bg-gray-100 text-gray-700 border-gray-200";
 
   return (
     <span

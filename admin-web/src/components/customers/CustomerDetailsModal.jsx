@@ -94,7 +94,7 @@ const CustomerDetailsModal = ({ open, onClose, customerId }) => {
                   className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${
                     customer.isActive
                       ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                      : "bg-rose-50 text-rose-700 border-rose-200"
+                      : "bg-red-50 text-red-700 border-red-200"
                   }`}
                 >
                   {customer.isActive ? "Active Account" : "Blocked Account"}
@@ -128,8 +128,8 @@ const CustomerDetailsModal = ({ open, onClose, customerId }) => {
               </div>
 
               <div className="rounded-xl border border-gray-200 bg-white p-3 text-center">
-                <p className="text-xs font-semibold text-rose-600">Cancelled</p>
-                <p className="text-lg font-bold text-rose-700">
+                <p className="text-xs font-semibold text-red-600">Cancelled</p>
+                <p className="text-lg font-bold text-red-700">
                   {stats.cancelledOrders || 0}
                 </p>
               </div>

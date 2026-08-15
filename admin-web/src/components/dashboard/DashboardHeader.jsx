@@ -16,7 +16,7 @@ const DashboardHeader = ({
       <div className="flex flex-wrap items-center gap-3">
         <button
           onClick={onExportPDF}
-          className="flex items-center gap-2 rounded-lg bg-rose-600 px-3.5 py-2 text-sm font-medium text-white transition hover:bg-rose-700"
+          className="flex items-center gap-2 rounded-lg bg-red-600 px-3.5 py-2 text-sm font-medium text-white transition hover:bg-red-700"
         >
           <FaFilePdf /> Export PDF
         </button>

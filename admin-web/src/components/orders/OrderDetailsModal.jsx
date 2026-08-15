@@ -157,9 +157,9 @@ const OrderDetailsModal = ({ open, onClose, order, onSuccess }) => {
 
 
           {showCancelConfirm && (
-            <div className="flex items-center justify-between rounded-xl border border-rose-200 bg-rose-50 p-4 text-rose-800">
+            <div className="flex items-center justify-between rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">
               <div className="flex items-center gap-3">
-                <FaExclamationTriangle className="text-xl text-rose-600" />
+                <FaExclamationTriangle className="text-xl text-red-600" />
                 <span className="text-sm font-medium">
                   Are you sure you want to cancel this order?
                 </span>
@@ -173,7 +173,7 @@ const OrderDetailsModal = ({ open, onClose, order, onSuccess }) => {
                 </button>
                 <button
                   onClick={() => executeOrderStatusUpdate("Cancelled")}
-                  className="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-700"
+                  className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700"
                 >
                   Yes, Cancel Order
                 </button>

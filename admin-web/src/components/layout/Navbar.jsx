@@ -15,7 +15,8 @@ import {
   FaCog,
   FaSignOutAlt,
   FaBars,
-  FaTimes
+  FaTimes,
+  FaUndoAlt
 } from "react-icons/fa";
 
 const navigationItems = [
@@ -38,6 +39,11 @@ const navigationItems = [
     icon: FaShoppingCart,
     title: "Orders",
     path: "/orders",
+  },
+  {
+    icon: FaUndoAlt,
+    title: "Refunds",
+    path: "/refund",
   },
   {
     icon: FaUsers,

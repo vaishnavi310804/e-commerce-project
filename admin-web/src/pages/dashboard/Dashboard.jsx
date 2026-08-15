@@ -13,7 +13,7 @@ import RecentReviewsTable from "../../components/dashboard/RecentReviewsTable";
 import TopProductsTable from "../../components/dashboard/TopProductsTable";
 import LowStockTable from "../../components/dashboard/LowStockTable";
 import {
-  FaDollarSign,
+  FaRupeeSign,
   FaShoppingBag,
   FaClock,
   FaCheckCircle,
@@ -168,7 +168,7 @@ const Dashboard = () => {
             title="Total Revenue"
             value={`₹${Number(stats.totalRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
             growth={stats.revenueGrowth}
-            icon={FaDollarSign}
+            icon={FaRupeeSign}
             color="indigo"
           />
           <StatCard
@@ -181,7 +181,7 @@ const Dashboard = () => {
           <StatCard
             title="Monthly Revenue"
             value={`₹${Number(stats.monthlyRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
-            icon={FaDollarSign}
+            icon={FaRupeeSign}
             color="purple"
             subText="This month"
           />
@@ -203,7 +203,7 @@ const Dashboard = () => {
             title="Cancelled Orders"
             value={stats.cancelledOrders || 0}
             icon={FaTimesCircle}
-            color="rose"
+            color="red"
             subText="Cancelled by user/admin"
           />
           <StatCard
@@ -246,7 +246,7 @@ const Dashboard = () => {
             title="Out of Stock"
             value={stats.outOfStockProducts || 0}
             icon={FaBan}
-            color="rose"
+            color="red"
             subText="Stock <= 0"
           />
         </div>

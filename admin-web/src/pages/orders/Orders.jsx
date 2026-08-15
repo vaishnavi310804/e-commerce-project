@@ -4,7 +4,7 @@ import {
   FaClock,
   FaCheckCircle,
   FaBan,
-  FaDollarSign,
+  FaRupeeSign,
 } from "react-icons/fa";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import OrderFilters from "../../components/orders/OrderFilters";
@@ -174,7 +174,7 @@ const Orders = () => {
           </div>
 
           <div className="flex items-center gap-4 rounded-xl bg-white p-5 shadow">
-            <div className="rounded-xl bg-rose-50 p-3 text-rose-600">
+            <div className="rounded-xl bg-red-50 p-3 text-red-600">
               <FaBan size={22} />
             </div>
             <div>
@@ -189,7 +189,7 @@ const Orders = () => {
 
           <div className="flex items-center gap-4 rounded-xl bg-white p-5 shadow">
             <div className="rounded-xl bg-purple-50 p-3 text-purple-600">
-              <FaDollarSign size={22} />
+              <FaRupeeSign size={22} />
             </div>
             <div>
               <p className="text-xs font-semibold text-gray-500">

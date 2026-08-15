@@ -14,6 +14,7 @@ import {
   FaStar,
   FaCog,
   FaSignOutAlt,
+  FaUndoAlt
 } from "react-icons/fa";
 
 const Sidebar = () => {
@@ -103,6 +104,8 @@ const Sidebar = () => {
             <SidebarItem icon={FaBoxOpen} title="Products" path="/products" />
 
             <SidebarItem icon={FaShoppingCart} title="Orders" path="/orders" />
+
+            <SidebarItem icon={FaUndoAlt} title="Refunds" path="/refund" />
 
             <SidebarItem icon={FaUsers} title="Customers" path="/customers" />
 

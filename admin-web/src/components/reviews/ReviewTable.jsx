@@ -262,7 +262,7 @@ const ReviewStatus = ({ review }) => {
     <span
       className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${
         review.isHidden
-          ? "border-rose-200 bg-rose-50 text-rose-700"
+          ? "border-red-200 bg-red-50 text-red-700"
           : "border-emerald-200 bg-emerald-50 text-emerald-700"
       }`}
     >
@@ -303,7 +303,7 @@ const ReviewActions = ({
       <button
         type="button"
         onClick={() => onDeleteReview(review)}
-        className="rounded-lg p-2 text-rose-600 transition hover:bg-rose-50 hover:text-rose-700"
+        className="rounded-lg p-2 text-red-600 transition hover:bg-red-50 hover:text-red-700"
         title="Delete Review"
       >
         <FaTrash size={15} />

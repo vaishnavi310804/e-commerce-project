@@ -5,10 +5,10 @@ const LowStockTable = ({ products = [] }) => {
   return (
     <div className="flex flex-col rounded-xl bg-white p-5 shadow">
       <div className="flex items-center justify-between border-b pb-3 mb-4">
-        <h3 className="text-base font-semibold text-rose-700 flex items-center gap-2">
+        <h3 className="text-base font-semibold text-red-700 flex items-center gap-2">
           <span className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
           </span>
           Low Stock Alerts
         </h3>
@@ -67,7 +67,7 @@ const LowStockTable = ({ products = [] }) => {
                       <span
                         className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${
                           isOutOfStock
-                            ? "bg-rose-100 text-rose-800"
+                            ? "bg-red-100 text-red-800"
                             : "bg-amber-100 text-amber-800"
                         }`}
                       >

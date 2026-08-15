@@ -17,7 +17,7 @@ const DeleteReviewModal = ({
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
         <div className="flex items-center justify-between border-b pb-4">
           <div className="flex items-center gap-3">
-            <div className="rounded-full bg-rose-100 p-2 text-rose-600">
+            <div className="rounded-full bg-red-100 p-2 text-red-600">
               <FaTrash size={18} />
             </div>
             <h2 className="text-lg font-semibold text-gray-800">
@@ -68,7 +68,7 @@ const DeleteReviewModal = ({
             type="button"
             disabled={loading}
             onClick={onConfirm}
-            className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-rose-700 disabled:opacity-50"
+            className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
           >
             {loading ? "Deleting..." : "Yes, Delete Permanently"}
           </button>

@@ -215,7 +215,7 @@ const CustomerTable = ({
                 onClick={() => onToggleStatus(cust)}
                 className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition ${
                   cust.isActive
-                    ? "bg-rose-50 text-rose-500 hover:bg-rose-100"
+                    ? "bg-red-50 text-red-500 hover:bg-red-100"
                     : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
                 }`}
               >
@@ -268,7 +268,7 @@ const StatusBadge = ({ customer }) => {
       className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${
         customer.isActive
           ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-          : "border-rose-200 bg-rose-50 text-rose-700"
+          : "border-red-200 bg-red-50 text-red-700"
       }`}
     >
       {customer.isActive ? "Active" : "Blocked"}
@@ -297,7 +297,7 @@ const CustomerActions = ({
         onClick={() => onToggleStatus(customer)}
         className={`rounded-lg p-2 transition ${
           customer.isActive
-            ? "text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+            ? "text-red-600 hover:bg-red-50 hover:text-red-700"
             : "text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
         }`}
         title={
