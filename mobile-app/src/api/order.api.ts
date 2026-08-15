@@ -38,6 +38,11 @@ export type OrderStatus =
   | "Delivered"
   | "Cancelled";
 
+  export type RefundStatus =
+  | "Not Applicable"
+  | "Pending"
+  | "Processed"
+  | "Failed";
 
   export interface ShippingAddress {
   fullName: string;
@@ -61,6 +66,9 @@ export interface OrderData {
   totalAmount: number;
   paymentMethod: string;
   paymentStatus: string;
+  refundStatus: RefundStatus;
+  refundAmount: number;
+  refundDate?: string;
   orderStatus: OrderStatus;
   shippingAddress: ShippingAddress;
   createdAt: string;

@@ -8,6 +8,8 @@ import {
   updatePaymentStatusService,
   getOrderStatsService,
   cancelOrderService,
+  getRefundOrdersService,
+  processRefundService,
 } from "./order.service.js";
 import { sendNotification } from "../../services/notification.service.js";
 
@@ -27,7 +29,7 @@ export const createOrder = async (req, res, next) => {
     } catch (notificationError) {
       console.error(
         "Failed to send order notification:",
-        notificationError.message
+        notificationError.message,
       );
     }
     return res.status(201).json({
@@ -147,6 +149,32 @@ export const cancelOrder = async (req, res, next) => {
       success: true,
       message: "Order cancelled successfully.",
       data: canceledOrder,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+export const getRefundOrders = async (req, res, next) => {
+  try {
+    const refunds = await getRefundOrdersService(req.query);
+
+    return res.status(200).json({
+      success: true,
+      count: refunds.length,
+      data: refunds,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+export const processRefund = async (req, res, next) => {
+  try {
+    const result = await processRefundService(req.params.id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Refund processed successfully.",
+      data: result,
     });
   } catch (error) {
     next(error);

@@ -1,7 +1,8 @@
 import Order from "./order.model.js";
 import Cart from "../cart/cart.model.js";
 import Address from "../address/address.model.js";
-import {refundPaymentService} from "../../modules/payment/payment.service.js"
+import { refundPaymentService, checkRefundStatusService } from "../../modules/payment/payment.service.js";
+import { sendNotification } from "../../services/notification.service.js";
 
 export const createOrderService = async (userId, payload) => {
   const { addressId, paymentMethod = "COD" } = payload;
@@ -165,6 +166,22 @@ export const updateOrderStatusService = async (orderId, orderStatus) => {
 
   order.orderStatus = orderStatus;
 
+  const itemStatuses = [
+    "Placed",
+    "Confirmed",
+    "Processing",
+    "Packed",
+    "Shipped",
+    "Delivered",
+    "Cancelled",
+  ];
+
+  if (itemStatuses.includes(orderStatus)) {
+    order.products.forEach((item) => {
+      item.itemStatus = orderStatus;
+    });
+  }
+
   if (orderStatus === "Delivered" && order.paymentMethod === "COD") {
     order.paymentStatus = "Paid";
   }
@@ -273,24 +290,97 @@ export const cancelOrderService = async (userId, orderId) => {
     throw error;
   }
   order.orderStatus = "Cancelled";
-    const cancellableItemStatus = [
-      "Placed",
-      "Confirmed",
-      "Processing",
-      "Packed",
-    ];
-order.products.forEach((item) => {
+  const cancellableItemStatus = ["Placed", "Confirmed", "Processing", "Packed"];
+  order.products.forEach((item) => {
     if (cancellableItemStatus.includes(item.itemStatus)) {
       item.itemStatus = "Cancelled";
     }
   });
 
   await order.save();
-  if (
-    order.paymentMethod === "RAZORPAY" &&
-    order.paymentStatus === "Paid"
-  ) {
+  if (order.paymentMethod === "RAZORPAY" && order.paymentStatus === "Paid") {
+    try {
     await refundPaymentService(order);
+  } catch (refundError) {
+    console.error(
+      "Refund failed after order cancellation:",
+      refundError.message
+    );
   }
+}
   return order;
+};
+
+export const getRefundOrdersService = async (query = {}) => {
+  const filter = {
+    refundStatus: {
+      $in: ["Pending", "Processed", "Failed"],
+    },
+  };
+
+  if (query.refundStatus) {
+    filter.refundStatus = query.refundStatus;
+  }
+
+  return await Order.find(filter)
+    .populate("user", "fullName email phoneNumber")
+    .populate("products.product", "name price productImage brand")
+    .sort({ updatedAt: -1 });
+};
+
+
+export const processRefundService = async (orderId) => {
+  const order = await Order.findById(orderId);
+
+  if (!order) {
+    const error = new Error("Order not found.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (order.paymentMethod !== "RAZORPAY") {
+    const error = new Error(
+      "Refund is only available for Razorpay payments.",
+    );
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (order.razorpayRefundId) {
+    const refund = await checkRefundStatusService(order);
+
+    const updatedOrder = await Order.findById(order._id)
+      .populate("user", "fullName email phoneNumber")
+      .populate(
+        "products.product",
+        "name price productImage brand",
+      );
+
+    return {
+      order: updatedOrder,
+      refund,
+    };
+  }
+
+  if (order.paymentStatus !== "Paid") {
+    const error = new Error(
+      "This payment is not eligible for a refund.",
+    );
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const refund = await refundPaymentService(order);
+
+  const updatedOrder = await Order.findById(order._id)
+    .populate("user", "fullName email phoneNumber")
+    .populate(
+      "products.product",
+      "name price productImage brand",
+    );
+
+  return {
+    order: updatedOrder,
+    refund,
+  };
 };

@@ -109,6 +109,9 @@ export const refundPaymentService = async (order) => {
   if (order.refundStatus === "Processed") {
     throw new Error("This order has already been refunded.");
   }
+  if (order.razorpayRefundId) {
+    throw new Error("A refund has already been initiated for this order.");
+  }
 
   const refundAmount = Math.round(order.totalAmount * 100);
 
@@ -118,17 +121,14 @@ export const refundPaymentService = async (order) => {
   await order.save();
 
   try {
-    const refund = await razorpay.payments.refund(
-      order.razorpayPaymentId,
-      {
-        amount: refundAmount,
-        speed: "normal",
-        receipt: `refund_${order.orderNumber}`,
-        notes: {
-          orderNumber: order.orderNumber,
-        },
+    const refund = await razorpay.payments.refund(order.razorpayPaymentId, {
+      amount: refundAmount,
+      speed: "normal",
+      receipt: `refund_${order.orderNumber}`,
+      notes: {
+        orderNumber: order.orderNumber,
       },
-    );
+    });
 
     order.razorpayRefundId = refund.id;
     order.refundStatus =
@@ -149,4 +149,26 @@ export const refundPaymentService = async (order) => {
 
     throw error;
   }
+};
+
+export const checkRefundStatusService = async (order) => {
+  if (!order.razorpayRefundId) {
+    throw new Error("Razorpay refund ID not found.");
+  }
+
+  const refund = await razorpay.refunds.fetch(order.razorpayRefundId);
+
+  if (refund.status === "processed") {
+    order.refundStatus = "Processed";
+    order.paymentStatus = "Refunded";
+    order.refundDate = new Date();
+  } else if (refund.status === "failed") {
+    order.refundStatus = "Failed";
+  } else {
+    order.refundStatus = "Pending";
+  }
+
+  await order.save();
+
+  return refund;
 };

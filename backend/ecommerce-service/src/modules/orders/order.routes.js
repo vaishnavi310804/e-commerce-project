@@ -16,7 +16,9 @@ import {
   updateOrderStatus,
   updatePaymentStatus,
   getOrderStats,
-  cancelOrder
+  cancelOrder,
+  getRefundOrders,
+  processRefund,
 } from "./order.controller.js";
 
 const router = express.Router();
@@ -24,7 +26,7 @@ const router = express.Router();
 router.post("/", protect, createOrderValidation, validate, createOrder);
 router.get("/my-orders", protect, getMyOrders);
 router.get("/my-orders/:id", protect, getMyOrderDetails);
-router.patch("/:id/cancel", protect, cancelOrder)
+router.patch("/:id/cancel", protect, cancelOrder);
 router.get("/stats", protect, authorize("ADMIN"), getOrderStats);
 
 router.patch(
@@ -46,34 +48,7 @@ router.patch(
 );
 
 router.patch(
-  "/admin/status/:id",
-  protect,
-  authorize("ADMIN"),
-  updateOrderStatusValidation,
-  validate,
-  updateOrderStatus,
-);
-
-router.patch(
-  "/admin/payment-status/:id",
-  protect,
-  authorize("ADMIN"),
-  updatePaymentStatusValidation,
-  validate,
-  updatePaymentStatus,
-);
-
-router.patch(
-  "/admin/:id/status",
-  protect,
-  authorize("ADMIN"),
-  updateOrderStatusValidation,
-  validate,
-  updateOrderStatus,
-);
-
-router.patch(
-  "/admin/:id/payment-status",
+  "/:id/payment-status",
   protect,
   authorize("ADMIN"),
   updatePaymentStatusValidation,
@@ -82,8 +57,9 @@ router.patch(
 );
 
 router.get("/", protect, authorize("ADMIN"), getAllOrders);
-router.get("/admin/all", protect, authorize("ADMIN"), getAllOrders);
-router.get("/admin/:id", protect, authorize("ADMIN"), getOrderDetails);
+router.get("/refunds", protect, authorize("ADMIN"), getRefundOrders);
+
+router.post("/:id/refund", protect, authorize("ADMIN"), processRefund);
 router.get("/:id", protect, authorize("ADMIN"), getOrderDetails);
 
 export default router;
