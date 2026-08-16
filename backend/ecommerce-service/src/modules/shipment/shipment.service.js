@@ -97,23 +97,35 @@ export const getAllShipmentsService = async (query = {}) => {
     filter.status = query.status;
   }
   return await Shipment.find(filter)
-    .populate(
-      "order",
-      "orderNumber orderStatus totalAmount paymentMethod paymentStatus shippingAddress user",
-    )
-    .populate("order.user", "fullName email name phoneNumber")
+    .populate({
+      path: "order",
+      select:
+        "orderNumber orderStatus totalAmount paymentMethod paymentStatus shippingAddress user",
+      populate: {
+        path: "user",
+        select: "fullName email name phoneNumber",
+      },
+    })
     .sort({ createdAt: -1 });
 };
 
 export const getShipmentDetailsService = async (shipmentId) => {
   const shipment = await Shipment.findById(shipmentId)
-    .populate(
-      "order",
+    .populate({
+    path: "order",
+    select:
       "orderNumber orderStatus totalAmount paymentMethod paymentStatus shippingAddress user products",
-    )
-    .populate("order.user", "fullName email name phoneNumber")
-    .populate("order.products.product", "name price productImage image brand");
-
+    populate: [
+      {
+        path: "user",
+        select: "fullName email name phoneNumber",
+      },
+      {
+        path: "products.product",
+        select: "name price productImage image brand",
+      },
+    ],
+  });
   if (!shipment) {
     const error = new Error("Shipment Details Not Found");
     throw error;
