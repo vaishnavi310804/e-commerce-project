@@ -12,6 +12,7 @@ import reviewRoutes from "./src/modules/reviews/review.routes.js";
 import customerRoutes from "./src/modules/customers/customer.routes.js";
 import dashboardRoutes from "./src/modules/dashboard/dashboard.routes.js";
 import PaymentRoutes from "./src/modules/payment/payment.routes.js"
+import shipmentRoutes from "./src/modules/shipment/shipment.routes.js"
 
 const app = express();
 
@@ -26,12 +27,12 @@ app.use("/api/v1/wishlist", wishlistRoutes);
 app.use("/api/v1/cart", cartRoutes);
 app.use("/api/v1/address", addressRoutes);
 app.use("/api/v1/order", orderRoutes);
-app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/reviews", reviewRoutes);
 app.use("/api/v1/customers", customerRoutes);
 app.use("/api/v1/customer", customerRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
 app.use("/api/v1/payment", PaymentRoutes);
+app.use("/api/v1/shipment", shipmentRoutes)
 
 app.get("/", (req, res) => {
   res.send("API running");
