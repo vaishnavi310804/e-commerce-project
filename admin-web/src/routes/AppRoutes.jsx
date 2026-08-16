@@ -11,6 +11,7 @@ import ForgotPassword from "../pages/auth/ForgotPassword";
 import VerifyOtp from "../pages/auth/VerifyOtp";
 import ResetPassword from "../pages/auth/ResetPassword";
 import Refunds from "../pages/refunds/Refunds";
+import Shipment from "../pages/shipments/Shipment";
 
 function AppRoutes() {
   return (
@@ -53,6 +54,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <Refunds />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/shipment"
+        element={
+          <ProtectedRoute>
+            <Shipment />
           </ProtectedRoute>
         }
       />

@@ -14,7 +14,8 @@ import {
   FaStar,
   FaCog,
   FaSignOutAlt,
-  FaUndoAlt
+  FaUndoAlt,
+  FaTruck,
 } from "react-icons/fa";
 
 const Sidebar = () => {
@@ -67,7 +68,7 @@ const Sidebar = () => {
               ShopEase
             </h1>
           </div>
-          <div className="flex flex-col items-center text-center my-10">
+          <div className="flex flex-col items-center text-center my-6">
             <div className="rounded-full border-2 border-[#8B5CF6] mb-2 shadow-sm">
               {profileImage && !imgError ? (
                 <img
@@ -107,10 +108,11 @@ const Sidebar = () => {
 
             <SidebarItem icon={FaUndoAlt} title="Refunds" path="/refund" />
 
+            <SidebarItem icon={FaTruck} title="Shipment" path="/shipment" />
+
             <SidebarItem icon={FaUsers} title="Customers" path="/customers" />
 
             <SidebarItem icon={FaStar} title="Reviews" path="/reviews" />
-
           </nav>
         </div>
 

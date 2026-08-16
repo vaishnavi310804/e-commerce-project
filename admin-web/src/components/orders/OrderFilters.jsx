@@ -23,7 +23,6 @@ const OrderFilters = ({
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        {/* Order Status Dropdown */}
         <select
           value={orderStatus}
           onChange={(e) => onOrderStatusChange(e.target.value)}
@@ -39,7 +38,6 @@ const OrderFilters = ({
           <option value="Cancelled">Cancelled</option>
         </select>
 
-        {/* Payment Status Dropdown */}
         <select
           value={paymentStatus}
           onChange={(e) => onPaymentStatusChange(e.target.value)}
@@ -52,7 +50,6 @@ const OrderFilters = ({
           <option value="Refunded">Refunded</option>
         </select>
 
-        {/* Date Filter */}
         <input
           type="date"
           value={dateFilter}
@@ -60,7 +57,6 @@ const OrderFilters = ({
           className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
         />
 
-        {/* Reset Filter Button */}
         {(searchTerm || orderStatus !== "All" || paymentStatus !== "All" || dateFilter) && (
           <button
             onClick={onReset}

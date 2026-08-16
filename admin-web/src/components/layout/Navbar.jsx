@@ -16,7 +16,8 @@ import {
   FaSignOutAlt,
   FaBars,
   FaTimes,
-  FaUndoAlt
+  FaUndoAlt,
+  FaTruck
 } from "react-icons/fa";
 
 const navigationItems = [
@@ -44,6 +45,11 @@ const navigationItems = [
     icon: FaUndoAlt,
     title: "Refunds",
     path: "/refund",
+  },
+  {
+    icon: FaTruck,
+    title: "Shipment",
+    path: "/shipment",
   },
   {
     icon: FaUsers,
