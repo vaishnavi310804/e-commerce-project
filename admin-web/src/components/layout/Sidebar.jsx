@@ -16,6 +16,7 @@ import {
   FaSignOutAlt,
   FaUndoAlt,
   FaTruck,
+  FaBan,
 } from "react-icons/fa";
 
 const Sidebar = () => {
@@ -109,6 +110,8 @@ const Sidebar = () => {
             <SidebarItem icon={FaUndoAlt} title="Refunds" path="/refund" />
 
             <SidebarItem icon={FaTruck} title="Shipment" path="/shipment" />
+
+            <SidebarItem icon={FaBan} title="Return" path="/return" />
 
             <SidebarItem icon={FaUsers} title="Customers" path="/customers" />
 

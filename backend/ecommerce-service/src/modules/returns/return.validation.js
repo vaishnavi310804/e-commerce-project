@@ -1,13 +1,5 @@
 import { body, param } from "express-validator";
 
-const returnStatuses = [
-  "Pending",
-  "Approved",
-  "Rejected",
-  "Picked Up",
-  "Completed",
-];
-
 export const createReturnValidation = [
   body("orderId")
     .notEmpty()
@@ -17,13 +9,7 @@ export const createReturnValidation = [
 
   body("items")
     .isArray({ min: 1 })
-    .withMessage("At least one item is required for return."),
-
-  body("items.*.orderItemId")
-    .notEmpty()
-    .withMessage("Order item ID is required.")
-    .isMongoId()
-    .withMessage("Invalid order item ID."),
+    .withMessage("At least one item is required for a return."),
 
   body("items.*.product")
     .notEmpty()
@@ -33,9 +19,9 @@ export const createReturnValidation = [
 
   body("items.*.quantity")
     .notEmpty()
-    .withMessage("Quantity is required.")
+    .withMessage("Item quantity is required.")
     .isInt({ min: 1 })
-    .withMessage("Quantity must be at least 1."),
+    .withMessage("Item quantity must be at least 1."),
 
   body("items.*.reason")
     .trim()
@@ -66,18 +52,22 @@ export const returnIdValidation = [
     .withMessage("Invalid return ID."),
 ];
 
-export const rejectReturnValidation = [
+export const updateReturnStatusValidation = [
   param("id")
     .notEmpty()
     .withMessage("Return ID is required.")
     .isMongoId()
     .withMessage("Invalid return ID."),
-];
 
-export const approveReturnValidation = [
-  param("id")
+  body("status")
     .notEmpty()
-    .withMessage("Return ID is required.")
-    .isMongoId()
-    .withMessage("Invalid return ID."),
+    .withMessage("Return status is required.")
+    .isIn([
+  "Pending",
+  "Approved",
+  "Rejected",
+  "Picked Up",
+  "Completed",
+])
+    .withMessage("Invalid return status."),
 ];

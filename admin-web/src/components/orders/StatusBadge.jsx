@@ -35,15 +35,23 @@ const shipmentStatusStyles = {
   Cancelled: "bg-gray-100 text-gray-700 border-gray-300",
 };
 
+const returnStatusStyles = {
+  Pending: "bg-amber-50 text-amber-700 border-amber-200",
+  Approved: "bg-blue-50 text-blue-700 border-blue-200",
+  Rejected: "bg-red-50 text-red-700 border-red-200",
+  "Picked Up": "bg-purple-50 text-purple-700 border-purple-200",
+  Completed: "bg-emerald-50 text-emerald-700 border-emerald-200",
+};
+
 const StatusBadge = ({ type = "order", status }) => {
   const stylesMap =
-    type === "payment"
-      ? paymentStatusStyles
-      : type === "refund"
-        ? refundStatusStyles
-        : type === "shipment"
-          ? shipmentStatusStyles
-          : orderStatusStyles;
+   type === "payment"
+    ? paymentStatusStyles
+    : type === "refund"
+      ? refundStatusStyles
+      : type === "return"
+        ? returnStatusStyles
+        : orderStatusStyles;
   const style =
     stylesMap[status] || "bg-gray-100 text-gray-700 border-gray-200";
 

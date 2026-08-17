@@ -2,11 +2,6 @@ import mongoose from "mongoose";
 
 const returnItemSchema = new mongoose.Schema(
   {
-    orderItemId: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-    },
-
     product: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Product",
@@ -30,12 +25,6 @@ const returnItemSchema = new mongoose.Schema(
 
 const returnSchema = new mongoose.Schema(
   {
-    returnNumber: {
-      type: String,
-      unique: true,
-      trim: true,
-    },
-
     order: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Order",
@@ -88,14 +77,17 @@ const returnSchema = new mongoose.Schema(
 
     approvedAt: {
       type: Date,
+      default: null,
     },
 
     rejectedAt: {
       type: Date,
+      default: null,
     },
 
     completedAt: {
       type: Date,
+      default: null,
     },
   },
   {
@@ -103,14 +95,5 @@ const returnSchema = new mongoose.Schema(
   },
 );
 
-returnSchema.pre("save", function () {
-  if (!this.returnNumber) {
-    this.returnNumber = `SE-RET-${Date.now()}-${Math.floor(
-      1000 + Math.random() * 9000,
-    )}`;
-  }
-});
-
 const Return = mongoose.model("Return", returnSchema);
-
 export default Return;

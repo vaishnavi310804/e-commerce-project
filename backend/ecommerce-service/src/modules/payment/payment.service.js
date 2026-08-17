@@ -172,3 +172,50 @@ export const checkRefundStatusService = async (order) => {
 
   return refund;
 };
+
+export const refundPartialPaymentService = async (order, amount) => {
+  if (order.paymentMethod !== "RAZORPAY") {
+    const error = new Error("Refund is only available for Razorpay payments.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (order.paymentStatus !== "Paid") {
+    const error = new Error("Payment is not eligible for refund.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (!order.razorpayPaymentId) {
+    const error = new Error("Razorpay payment ID not found.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (!amount || amount <= 0) {
+    const error = new Error("Invalid refund amount.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const refundAmount = Math.round(amount * 100);
+
+  try {
+    const refund = await razorpay.payments.refund(
+      order.razorpayPaymentId,
+      {
+        amount: refundAmount,
+        speed: "normal",
+        receipt: `return_refund_${order.orderNumber}_${Date.now()}`,
+        notes: {
+          orderNumber: order.orderNumber,
+          refundType: "Return",
+        },
+      },
+    );
+
+    return refund;
+  } catch (error) {
+    throw error;
+  }
+};

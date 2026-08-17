@@ -1,4 +1,12 @@
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Image, ActivityIndicator } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+  ActivityIndicator,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
@@ -133,11 +141,9 @@ const TrackOrderScreen = () => {
           </View>
 
           <View style={styles.emptyContainer}>
-
             <Text style={styles.emptyTitle}>
               Shipment information unavailable
             </Text>
-
           </View>
         </View>
       </ScreenWrapper>
@@ -186,9 +192,7 @@ const TrackOrderScreen = () => {
                 {product.product?.name || "Product"}
               </Text>
 
-              <Text style={styles.productMeta}>
-                Laptop • Qty: {product.quantity}
-              </Text>
+              <Text style={styles.productDetails}>Qty: {product.quantity}</Text>
 
               <Text style={styles.productPrice}>₹{product.price}</Text>
             </View>
@@ -200,7 +204,7 @@ const TrackOrderScreen = () => {
         <View style={styles.detailsCard}>
           <View style={styles.detailRow}>
             <View style={styles.iconCircle}>
-              <Ionicons name="car-outline" size={19} color={Colors.primary} />
+              <Ionicons name="cart-outline" size={19} color={Colors.primary} />
             </View>
 
             <View style={styles.detailContent}>
@@ -227,6 +231,22 @@ const TrackOrderScreen = () => {
               <Text style={styles.detailTitle}>Order ID</Text>
 
               <Text style={styles.detailValue}>{order.orderNumber}</Text>
+            </View>
+          </View>
+          <View style={styles.divider} />
+          <View style={styles.detailRow}>
+            <View style={styles.iconCircle}>
+              <Ionicons name="cube-outline" size={21} color={Colors.primary} />
+            </View>
+
+            <View style={{ flex: 1 }}>
+              <Text style={styles.courierLabel}>Courier</Text>
+
+              <Text style={styles.courierName}>{shipment.courier}</Text>
+
+              <Text style={styles.trackingId}>
+                Tracking ID: {shipment.trackingId}
+              </Text>
             </View>
           </View>
         </View>
@@ -299,22 +319,6 @@ const TrackOrderScreen = () => {
           })}
         </View>
 
-        <View style={styles.courierCard}>
-          <View style={styles.courierIcon}>
-            <Ionicons name="cube-outline" size={21} color={Colors.primary} />
-          </View>
-
-          <View style={{ flex: 1 }}>
-            <Text style={styles.courierLabel}>Courier</Text>
-
-            <Text style={styles.courierName}>{shipment.courier}</Text>
-
-            <Text style={styles.trackingId}>
-              Tracking ID: {shipment.trackingId}
-            </Text>
-          </View>
-        </View>
-
         {shipment.trackingUrl && (
           <TouchableOpacity
             style={styles.trackButton}
@@ -323,7 +327,7 @@ const TrackOrderScreen = () => {
               console.log("Tracking URL:", shipment.trackingUrl);
             }}
           >
-            <Text style={styles.trackButtonText}>Track Live Location</Text>
+            <Text style={styles.trackButtonText}>Live Tracking</Text>
           </TouchableOpacity>
         )}
       </ScrollView>
@@ -333,7 +337,8 @@ const TrackOrderScreen = () => {
 
 export default TrackOrderScreen;
 
-const styles = StyleSheet.create({container: {
+const styles = StyleSheet.create({
+  container: {
     padding: 20,
     paddingBottom: 40,
   },
@@ -355,7 +360,7 @@ const styles = StyleSheet.create({container: {
     backgroundColor: Colors.white,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#E8E8E8",
+    borderColor: "#E0E0E0",
     padding: 10,
     flexDirection: "row",
     marginBottom: 20,
@@ -389,7 +394,7 @@ const styles = StyleSheet.create({container: {
     marginBottom: 4,
   },
 
-  productMeta: {
+  productDetails: {
     fontSize: 11,
     fontFamily: Fonts.medium,
     color: Colors.gray,
@@ -404,7 +409,7 @@ const styles = StyleSheet.create({container: {
 
   sectionTitle: {
     fontSize: 15,
-    fontFamily: Fonts.semibold,
+    fontFamily: Fonts.bold,
     color: Colors.text,
     marginBottom: 9,
   },
@@ -413,7 +418,7 @@ const styles = StyleSheet.create({container: {
     backgroundColor: Colors.white,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#E8E8E8",
+    borderColor: "#E0E0E0",
     paddingHorizontal: 14,
     marginBottom: 20,
   },
@@ -428,7 +433,7 @@ const styles = StyleSheet.create({container: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#F2EEFF",
+    backgroundColor: Colors.white,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
@@ -503,7 +508,7 @@ const styles = StyleSheet.create({container: {
   timelineLine: {
     width: 2,
     flex: 1,
-    backgroundColor: "#DCDCDC",
+    backgroundColor: "#797979",
   },
 
   completedLine: {
@@ -519,7 +524,6 @@ const styles = StyleSheet.create({container: {
   timelineTitle: {
     fontSize: 12,
     fontFamily: Fonts.semibold,
-    color: Colors.text,
   },
 
   upcomingTitle: {
@@ -527,38 +531,17 @@ const styles = StyleSheet.create({container: {
   },
 
   timelineMessage: {
-    fontSize: 10,
+    fontSize: 12,
     fontFamily: Fonts.medium,
     color: Colors.gray,
     marginTop: 3,
   },
 
   timelineDate: {
-    fontSize: 9,
+    fontSize: 10,
     fontFamily: Fonts.medium,
     color: Colors.gray,
     marginTop: 3,
-  },
-
-  courierCard: {
-    backgroundColor: Colors.white,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#E8E8E8",
-    padding: 13,
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 15,
-  },
-
-  courierIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#F2EEFF",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 11,
   },
 
   courierLabel: {
@@ -576,7 +559,7 @@ const styles = StyleSheet.create({container: {
 
   trackingId: {
     fontSize: 10,
-    fontFamily: Fonts.medium,
+    fontFamily: Fonts.semibold,
     color: Colors.gray,
     marginTop: 3,
   },

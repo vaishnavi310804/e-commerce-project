@@ -13,6 +13,7 @@ import customerRoutes from "./src/modules/customers/customer.routes.js";
 import dashboardRoutes from "./src/modules/dashboard/dashboard.routes.js";
 import PaymentRoutes from "./src/modules/payment/payment.routes.js"
 import shipmentRoutes from "./src/modules/shipment/shipment.routes.js"
+import returnRoutes from "./src/modules/returns/return.routes.js"
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use("/api/v1/customer", customerRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
 app.use("/api/v1/payment", PaymentRoutes);
 app.use("/api/v1/shipment", shipmentRoutes)
+app.use("/api/v1/return", returnRoutes)
 
 app.get("/", (req, res) => {
   res.send("API running");
