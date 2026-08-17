@@ -297,7 +297,7 @@ const ReturnActions = ({
         <button
           type="button"
           onClick={() => onProcessRefund(returnItem)}
-          className="rounded-lg p-2 text-emerald-600 transition hover:bg-emerald-50 hover:text-emerald-700"
+          className="rounded-lg p-2 text-[#6547C9] transition hover:bg-purple-50 hover:text-purple-700"
           title="Process Refund"
         >
           <FaUndoAlt size={16} />

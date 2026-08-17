@@ -124,35 +124,35 @@ const Returns = () => {
     setSelectedReturn(null);
   };
 
-  const handleStatusUpdate = async (status) => {
-    if (!selectedReturn?._id) return;
+  const handleStatusUpdate = async () => {
+  setShowUpdateStatus(false);
+  setSelectedReturn(null);
 
-    try {
-      await updateReturnStatus(selectedReturn._id, status);
-
-      setShowUpdateStatus(false);
-      setSelectedReturn(null);
-
-      await fetchReturns();
-    } catch (error) {
-      console.error("Failed to update return status:", error);
-      throw error;
-    }
-  };
+  await fetchReturns();
+};
 
   const handleProcessRefund = async (returnItem) => {
-    try {
-      await processReturnRefund(returnItem._id);
+  const confirmed = window.confirm(
+    `Are you sure you want to process the refund for order ${
+      returnItem.order?.orderNumber || "this order"
+    }?`,
+  );
 
-      await fetchReturns();
-    } catch (error) {
-      console.error("Failed to process return refund:", error);
-      alert(
-        error.response?.data?.message ||
-          "Failed to process return refund.",
-      );
-    }
-  };
+  if (!confirmed) return;
+
+  try {
+    await processReturnRefund(returnItem._id);
+
+    await fetchReturns();
+  } catch (error) {
+    console.error("Failed to process return refund:", error);
+
+    alert(
+      error.response?.data?.message ||
+        "Failed to process return refund.",
+    );
+  }
+};
 
   return (
     <DashboardLayout>

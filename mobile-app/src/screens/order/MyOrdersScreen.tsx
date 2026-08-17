@@ -65,21 +65,75 @@ const MyOrdersScreen = () => {
         keyExtractor={(item: any) => item._id}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
-        renderItem={({ item }: any) => (
-          <OrderCard
-            order={item}
-            onPress={() =>
-              router.push({
-                pathname: "/order-details",
-                params: {
-                  orderId: item._id,
-                },
-              })
+        renderItem={({ item }: any) => {
+          const handlePrimaryAction = () => {
+            switch (item.orderStatus) {
+              case "Pending":
+              case "Placed":
+              case "Confirmed":
+              case "Processing":
+              case "Packed":
+              case "Shipped":
+                router.push(`/track-order/${item._id}`);
+                break;
+
+              case "Delivered":
+                router.push(`/receipt/${item._id}`);
+                break;
+
+              case "Cancelled":
+                console.log("Re-Order:", item._id);
+                break;
+
+              default:
+                break;
             }
-            onPrimaryAction={() => {}}
-            onSecondaryAction={() => {}}
-          />
-        )}
+          };
+
+          const handleSecondaryAction = () => {
+            switch (item.orderStatus) {
+              case "Pending":
+              case "Placed":
+              case "Confirmed":
+              case "Processing":
+              case "Packed":
+                router.push({
+                  pathname: "/order-details",
+                  params: {
+                    orderId: item._id,
+                  },
+                });
+                break;
+
+              case "Delivered":
+                router.push({
+                  pathname: "/product/review",
+                  params: {
+                    productId: item.products[0].product._id,
+                  },
+                });
+                break;
+
+              default:
+                break;
+            }
+          };
+          return (
+            <OrderCard
+              order={item}
+              onPress={() =>
+                router.push({
+                  pathname: "/order-details",
+                  params: {
+                    orderId: item._id,
+                  },
+                })
+              }
+              onPrimaryAction={handlePrimaryAction}
+              onSecondaryAction={handleSecondaryAction}
+            />
+          );
+        }}
         ListEmptyComponent={
           <View style={styles.empty}>
             <Ionicons name="bag-outline" size={70} color={Colors.gray} />

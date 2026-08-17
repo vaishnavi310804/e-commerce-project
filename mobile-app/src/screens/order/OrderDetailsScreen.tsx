@@ -99,18 +99,18 @@ const OrderDetailsScreen = () => {
         };
 
       case "Shipped":
-  return {
-    title: "Track Order",
-    onPress: () => {
-      router.push(`/track-order/${order._id}`);
-    },
-  };
+        return {
+          title: "Track Order",
+          onPress: () => {
+            router.push(`/track-order/${order._id}`);
+          },
+        };
 
       case "Delivered":
         return {
-          title: "Buy Again",
+          title: "Return Order",
           onPress: () => {
-            console.log("Buy Again");
+            router.push(`/return/${order._id}`);
           },
         };
 
@@ -160,6 +160,40 @@ const OrderDetailsScreen = () => {
 
   const productsList = order.products || [];
 
+  const getReturnStatusText = () => {
+    const returnStatuses = productsList
+      .map((item) => item.returnStatus)
+      .filter((status) => status && status !== "Not Requested");
+
+    if (returnStatuses.length === 0) {
+      return null;
+    }
+
+    if (returnStatuses.includes("Requested")) {
+      return "Return Initiated";
+    }
+
+    if (returnStatuses.includes("Approved")) {
+      return "Return Approved";
+    }
+
+    if (returnStatuses.includes("Picked Up")) {
+      return "Return Picked Up";
+    }
+
+    if (returnStatuses.includes("Refunded")) {
+      return "Refund Completed";
+    }
+
+    if (returnStatuses.includes("Rejected")) {
+      return "Return Rejected";
+    }
+
+    return null;
+  };
+
+  const returnStatusText = getReturnStatusText();
+
   return (
     <ScreenWrapper>
       <ScrollView
@@ -178,6 +212,13 @@ const OrderDetailsScreen = () => {
 
         <View style={styles.statusContainer}>
           <OrderStatus status={order.orderStatus} />
+
+          {returnStatusText && (
+            <View style={styles.returnStatusBadge}>
+
+              <Text style={styles.returnStatusText}>{returnStatusText}</Text>
+            </View>
+          )}
 
           <Text style={styles.date}>
             Placed on{" "}
@@ -277,6 +318,26 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontFamily: Fonts.bold,
     color: Colors.text,
+  },
+
+  returnStatusBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#E0E0E0",
+    padding:4,
+    borderRadius: 40,
+    borderWidth:1,
+    borderColor:Colors.primary,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    marginTop: 10,
+  },
+
+  returnStatusText: {
+    marginLeft: 6,
+    fontSize: 13,
+    fontFamily: Fonts.semibold,
+    color: Colors.primary,
   },
 
   statusContainer: {

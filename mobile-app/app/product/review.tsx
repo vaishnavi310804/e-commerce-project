@@ -1,5 +1,5 @@
 import ReviewScreen from "@/src/screens/review/ReviewScreen";
 
-export default function Payment() {
+export default function Review() {
   return <ReviewScreen />;
 }

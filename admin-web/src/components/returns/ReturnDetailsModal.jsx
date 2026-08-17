@@ -52,16 +52,14 @@ const ReturnDetailsModal = ({ open, returnItem, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl">
+      <div className="flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl">
         <div className="flex shrink-0 items-center justify-between border-b px-6 py-4">
           <div>
             <h2 className="text-xl font-semibold text-gray-800">
               Return Details
             </h2>
 
-            <p className="mt-1 text-sm text-gray-500">
-              Order #{orderNumber}
-            </p>
+            <p className="mt-1 text-sm text-gray-500">Order #{orderNumber}</p>
           </div>
 
           <button
@@ -76,18 +74,14 @@ const ReturnDetailsModal = ({ open, returnItem, onClose }) => {
         <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
           <div className="space-y-6">
             <section>
-              <div className="mb-3 flex items-center justify-between">
+              <div className="mb-2 flex items-center justify-between">
                 <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
                   Return Information
                 </h3>
 
-                <StatusBadge
-                  type="return"
-                  status={returnItem.status}
-                />
               </div>
 
-              <div className="grid grid-cols-1 gap-4 rounded-xl bg-gray-50 p-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 rounded-xl p-4 sm:grid-cols-2">
                 <div>
                   <p className="text-xs text-gray-400">Order ID</p>
                   <p className="mt-1 text-sm font-semibold text-gray-800">
@@ -112,21 +106,18 @@ const ReturnDetailsModal = ({ open, returnItem, onClose }) => {
                 <div>
                   <p className="text-xs text-gray-400">Status</p>
                   <div className="mt-1">
-                    <StatusBadge
-                      type="return"
-                      status={returnItem.status}
-                    />
+                    <StatusBadge type="return" status={returnItem.status} />
                   </div>
                 </div>
               </div>
             </section>
 
             <section>
-              <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
+              <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
                 Customer Information
               </h3>
 
-              <div className="grid grid-cols-1 gap-4 rounded-xl bg-gray-50 p-4 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 rounded-xl p-4 sm:grid-cols-2">
                 <div>
                   <p className="text-xs text-gray-400">Name</p>
                   <p className="mt-1 truncate text-sm font-semibold text-gray-800">
@@ -151,7 +142,7 @@ const ReturnDetailsModal = ({ open, returnItem, onClose }) => {
             </section>
 
             <section>
-              <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
+              <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
                 Returned Items
               </h3>
 
@@ -186,8 +177,7 @@ const ReturnDetailsModal = ({ open, returnItem, onClose }) => {
                           product?.price ||
                             returnItem.order?.products?.find(
                               (orderItem) =>
-                                orderItem.product?._id ===
-                                product?._id,
+                                orderItem.product?._id === product?._id,
                             )?.price ||
                             0,
                         );
@@ -198,12 +188,12 @@ const ReturnDetailsModal = ({ open, returnItem, onClose }) => {
                           <tr key={item.product?._id || index}>
                             <td className="px-4 py-4">
                               <div className="flex items-center gap-3">
-                                {product?.productImage ||
-                                product?.image ? (
+                                {product?.productImage || product?.image ? (
                                   <img
                                     src={
-                                      product.productImage ||
-                                      product.image
+                                      product.productImage?.url ||
+                                      product.image ||
+                                      ""
                                     }
                                     alt={product?.name || "Product"}
                                     className="h-12 w-12 rounded-lg object-cover"
@@ -249,19 +239,20 @@ const ReturnDetailsModal = ({ open, returnItem, onClose }) => {
             </section>
 
             <section>
-              <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
+              <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
                 Description
               </h3>
 
               <div className="rounded-xl bg-gray-50 p-4">
                 <p className="whitespace-pre-wrap text-sm leading-6 text-gray-700">
-                  {returnItem.description || "No additional description provided."}
+                  {returnItem.description ||
+                    "No additional description provided."}
                 </p>
               </div>
             </section>
 
             <section>
-              <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
+              <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
                 Return Timeline
               </h3>
 
