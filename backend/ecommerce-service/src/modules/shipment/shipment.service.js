@@ -180,7 +180,6 @@ export const updateShipmentStatusService = async (
     "In Transit": "Shipped",
     "Out for Delivery": "Shipped",
     Delivered: "Delivered",
-    Cancelled: "Cancelled",
   };
 
   const newOrderStatus = shipmentOrderStatusMap[status];
