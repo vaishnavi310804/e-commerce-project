@@ -40,8 +40,10 @@ export const getMyReturns = async (req, res, next) => {
 
 export const getReturnDetails = async (req, res, next) => {
   try {
+    const isAdmin = req.user.role === "ADMIN";
+
     const returnRequest = await getReturnDetailsService(
-      req.user._id,
+      isAdmin ? null : req.user._id,
       req.params.id,
     );
 
