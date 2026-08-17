@@ -99,12 +99,12 @@ const OrderDetailsScreen = () => {
         };
 
       case "Shipped":
-        return {
-          title: "Track Order",
-          onPress: () => {
-            console.log("Track Order");
-          },
-        };
+  return {
+    title: "Track Order",
+    onPress: () => {
+      router.push(`/track-order/${order._id}`);
+    },
+  };
 
       case "Delivered":
         return {

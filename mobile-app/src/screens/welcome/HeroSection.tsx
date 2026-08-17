@@ -3,7 +3,7 @@ import HeroGrid from "./HeroGrid";
 import HeroTag from "@/src/screens/welcome/HeroTag";
 import Colors from "@/src/constants/colors";
 
-export default function Heredction() {
+export default function HeroSection() {
   return (
     <View style={styles.container}>
       <HeroGrid />

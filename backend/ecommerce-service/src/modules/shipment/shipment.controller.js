@@ -2,6 +2,7 @@ import {
   createShipmentService,
   getAllShipmentsService,
   getShipmentDetailsService,
+  getShipmentByOrderService,
   updateShipmentStatusService,
 } from "./shipment.service.js";
 
@@ -45,12 +46,33 @@ export const getShipmentDetails = async (req, res, next) => {
 
 export const updateShipmentStatus = async (req, res, next) => {
   try {
-    const {status, message, location}=req.body
-    const updatedShipment = await updateShipmentStatusService(req.params.id, status, message, location);
+    const { status, message, location } = req.body;
+    const updatedShipment = await updateShipmentStatusService(
+      req.params.id,
+      status,
+      message,
+      location,
+    );
     return res.status(200).json({
       success: true,
-      message:"Shipment status updated",
+      message: "Shipment status updated",
       data: updatedShipment,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getShipmentByOrder = async (req, res, next) => {
+  try {
+    const shipment = await getShipmentByOrderService(
+      req.params.orderId,
+      req.user._id,
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: shipment,
     });
   } catch (error) {
     next(error);

@@ -260,3 +260,31 @@ export const updateShipmentStatusService = async (
   },
 });
 };
+
+export const getShipmentByOrderService = async (orderId, userId) => {
+  const order = await Order.findOne({
+    _id: orderId,
+    user: userId,
+  });
+
+  if (!order) {
+    const error = new Error("Order not found.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const shipment = await Shipment.findOne({
+    order: orderId,
+  });
+
+  if (!shipment) {
+    const error = new Error("Shipment not found for this order.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  return await Shipment.findById(shipment._id).populate(
+    "order",
+    "orderNumber orderStatus totalAmount paymentMethod paymentStatus shippingAddress products",
+  );
+};

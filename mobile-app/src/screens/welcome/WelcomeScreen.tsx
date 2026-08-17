@@ -5,7 +5,7 @@ import PrimaryButton from "@/src/components/common/PrimaryButton";
 import Colors from "@/src/constants/colors";
 import Fonts from "@/src/constants/fonts";
 import Spacing from "@/src/constants/spacing";
-import Heredction from "@/src/screens/welcome/Heredction";
+import HeroSection from "@/src/screens/welcome/HeroSection";
 
 
 export default function WelcomeScreen() {
@@ -13,7 +13,7 @@ export default function WelcomeScreen() {
     <ScreenWrapper>
       <View style={styles.container}>
         <View style={styles.hero}>
-          <Heredction />
+          <HeroSection />
         </View>
 
         <View style={styles.content}>

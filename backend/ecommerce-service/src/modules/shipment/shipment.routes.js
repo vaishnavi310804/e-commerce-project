@@ -7,6 +7,7 @@ import {
   getAllShipments,
   getShipmentDetails,
   updateShipmentStatus,
+  getShipmentByOrder
 } from "./shipment.controller.js";
 import {
   createShipmentValidation,
@@ -29,6 +30,11 @@ router.get(
   protect,
   authorize("ADMIN"),
   getAllShipments
+);
+
+router.get("/order/:orderId",
+  protect,
+  getShipmentByOrder
 );
 
 router.get(
