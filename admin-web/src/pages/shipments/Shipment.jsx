@@ -9,6 +9,8 @@ import {
   FaTruck,
   FaCog,
   FaPlus,
+  FaOpencart,
+  FaBoxOpen,
 } from "react-icons/fa";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import ShipmentTable from "../../components/shipments/ShipmentTable";
@@ -99,21 +101,25 @@ const Shipment = () => {
   }, [shipments, statusFilter]);
 
   const eligibleOrders = useMemo(() => {
-    const shipmentOrderIds = new Set(
-      shipments
-        .map((shipment) => shipment.order?._id)
-        .filter(Boolean)
-        .map((id) => id.toString()),
-    );
+  const activeShipmentOrderIds = new Set(
+    shipments
+      .filter(
+        (shipment) =>
+          !["Cancelled", "Failed"].includes(shipment.status),
+      )
+      .map((shipment) => shipment.order?._id)
+      .filter(Boolean)
+      .map((id) => id.toString()),
+  );
 
-    return orders.filter((order) => {
-      if (order.orderStatus === "Cancelled") {
-        return false;
-      }
+  return orders.filter((order) => {
+    if (order.orderStatus === "Cancelled") {
+      return false;
+    }
 
-      return !shipmentOrderIds.has(order._id?.toString());
-    });
-  }, [orders, shipments]);
+    return !activeShipmentOrderIds.has(order._id?.toString());
+  });
+}, [orders, shipments]);
 
   const totalPages = Math.ceil(filteredShipments.length / ITEMS_PER_PAGE) || 1;
   const paginatedShipments = filteredShipments.slice(
@@ -168,7 +174,7 @@ const Shipment = () => {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 xl:grid-cols-5">
           <div className="flex min-w-0 items-center gap-4 rounded-xl bg-white p-5 shadow">
             <div className="shrink-0 rounded-xl bg-indigo-50 p-3 text-indigo-600">
-              <FaBox size={22} />
+              <FaBoxOpen size={22} />
             </div>
 
             <div className="min-w-0">

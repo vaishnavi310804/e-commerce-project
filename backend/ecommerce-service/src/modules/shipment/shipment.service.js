@@ -49,15 +49,19 @@ export const createShipmentService = async ({
     throw error;
   }
 
-  const existingShipment = await Shipment.findOne({
+  const existingActiveShipment = await Shipment.findOne({
     order: orderId,
+    status: {
+      $nin: ["Cancelled", "Failed"],
+    },
   });
-  if (existingShipment) {
+
+  if (existingActiveShipment) {
     const error = new Error(
-      "A shipment already exists for this order.",
+      "An active shipment already exists for this order.",
     );
     throw error;
-}
+  }
   const existingTrackingId = await Shipment.findOne({
     trackingId,
   });
@@ -247,13 +251,13 @@ export const updateShipmentStatusService = async (
   if (order) {
     await order.save();
   }
-  return await Shipment.findById(shipment._id)
-    .populate(
-      "order",
-      "orderNumber orderStatus totalAmount paymentMethod paymentStatus shippingAddress user",
-    )
-    .populate(
-      "order.user",
-      "fullName email name phoneNumber",
-    );
+  return await Shipment.findById(shipment._id).populate({
+  path: "order",
+  select:
+    "orderNumber orderStatus totalAmount paymentMethod paymentStatus shippingAddress user",
+  populate: {
+    path: "user",
+    select: "fullName email name phoneNumber",
+  },
+});
 };
