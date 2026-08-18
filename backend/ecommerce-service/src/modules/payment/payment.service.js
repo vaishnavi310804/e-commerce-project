@@ -216,6 +216,15 @@ export const refundPartialPaymentService = async (order, amount) => {
 
     return refund;
   } catch (error) {
-    throw error;
-  }
+  const message =
+    error.error?.description ||
+    error.description ||
+    error.message ||
+    "Razorpay refund failed.";
+
+  const customError = new Error(message);
+  customError.statusCode = error.statusCode || 400;
+
+  throw customError;
+}
 };

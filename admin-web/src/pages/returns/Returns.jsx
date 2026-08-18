@@ -16,6 +16,7 @@ import {
 import ReturnTable from "../../components/returns/ReturnTable";
 import ReturnDetailsModal from "../../components/returns/ReturnDetailsModal";
 import UpdateReturnStatus from "../../components/returns/UpdateReturnStatus";
+import RefundProcessingModal from "../../components/returns/RefundProcessingModal";
 import {
   getAllReturns,
   getReturnDetails,
@@ -30,10 +31,12 @@ const Returns = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("All");
-
   const [selectedReturn, setSelectedReturn] = useState(null);
   const [showReturnDetails, setShowReturnDetails] = useState(false);
   const [showUpdateStatus, setShowUpdateStatus] = useState(false);
+  const [showRefundProcessing, setShowRefundProcessing] = useState(false);
+  const [refundReturn, setRefundReturn] = useState(null);
+  const [processingRefund, setProcessingRefund] = useState(false);
 
   const fetchReturns = useCallback(async () => {
     try {
@@ -81,13 +84,10 @@ const Returns = () => {
       return returns;
     }
 
-    return returns.filter(
-      (returnItem) => returnItem.status === statusFilter,
-    );
+    return returns.filter((returnItem) => returnItem.status === statusFilter);
   }, [returns, statusFilter]);
 
-  const totalPages =
-    Math.ceil(filteredReturns.length / ITEMS_PER_PAGE) || 1;
+  const totalPages = Math.ceil(filteredReturns.length / ITEMS_PER_PAGE) || 1;
 
   const paginatedReturns = filteredReturns.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -125,32 +125,44 @@ const Returns = () => {
   };
 
   const handleStatusUpdate = async () => {
-  setShowUpdateStatus(false);
-  setSelectedReturn(null);
+    setShowUpdateStatus(false);
+    setSelectedReturn(null);
 
-  await fetchReturns();
-};
+    await fetchReturns();
+  };
 
-  const handleProcessRefund = async (returnItem) => {
-  const confirmed = window.confirm(
-    `Are you sure you want to process the refund for order ${
-      returnItem.order?.orderNumber || "this order"
-    }?`,
-  );
+  const handleProcessRefund = (returnItem) => {
+    setRefundReturn(returnItem);
+    setShowRefundProcessing(true);
+  };
 
-  if (!confirmed) return;
-
+  const handleConfirmRefund = async (returnItem) => {
   try {
-    await processReturnRefund(returnItem._id);
+    setProcessingRefund(true);
+
+    const response = await processReturnRefund(returnItem._id);
+
+    console.log("REFUND RESPONSE:", response);
+    console.log("REFUND DATA:", response?.data);
+
+    setShowRefundProcessing(false);
+    setRefundReturn(null);
 
     await fetchReturns();
   } catch (error) {
-    console.error("Failed to process return refund:", error);
+  console.error("FAILED REFUND:", error);
 
-    alert(
-      error.response?.data?.message ||
-        "Failed to process return refund.",
-    );
+  console.error(
+    "REFUND ERROR RESPONSE:",
+    JSON.stringify(error.response?.data, null, 2),
+  );
+
+  alert(
+    error.response?.data?.message ||
+      "Failed to process return refund.",
+  );
+  } finally {
+    setProcessingRefund(false);
   }
 };
 
@@ -192,9 +204,7 @@ const Returns = () => {
             </div>
 
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-gray-500">
-                Pending
-              </p>
+              <p className="text-xs font-semibold text-gray-500">Pending</p>
 
               <h3 className="text-2xl font-bold text-gray-800">
                 {pendingReturns}
@@ -208,9 +218,7 @@ const Returns = () => {
             </div>
 
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-gray-500">
-                Approved
-              </p>
+              <p className="text-xs font-semibold text-gray-500">Approved</p>
 
               <h3 className="text-2xl font-bold text-gray-800">
                 {approvedReturns}
@@ -224,9 +232,7 @@ const Returns = () => {
             </div>
 
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-gray-500">
-                Rejected
-              </p>
+              <p className="text-xs font-semibold text-gray-500">Rejected</p>
 
               <h3 className="text-2xl font-bold text-gray-800">
                 {rejectedReturns}
@@ -240,9 +246,7 @@ const Returns = () => {
             </div>
 
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-gray-500">
-                Picked Up
-              </p>
+              <p className="text-xs font-semibold text-gray-500">Picked Up</p>
 
               <h3 className="text-2xl font-bold text-gray-800">
                 {pickedUpReturns}
@@ -256,9 +260,7 @@ const Returns = () => {
             </div>
 
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-gray-500">
-                Completed
-              </p>
+              <p className="text-xs font-semibold text-gray-500">Completed</p>
 
               <h3 className="text-2xl font-bold text-gray-800">
                 {completedReturns}
@@ -308,10 +310,7 @@ const Returns = () => {
               </span>{" "}
               to{" "}
               <span className="font-semibold text-gray-900">
-                {Math.min(
-                  currentPage * ITEMS_PER_PAGE,
-                  filteredReturns.length,
-                )}
+                {Math.min(currentPage * ITEMS_PER_PAGE, filteredReturns.length)}
               </span>{" "}
               of{" "}
               <span className="font-semibold text-gray-900">
@@ -323,9 +322,7 @@ const Returns = () => {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() =>
-                  setCurrentPage((prev) => Math.max(prev - 1, 1))
-                }
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
                 className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
               >
@@ -339,9 +336,7 @@ const Returns = () => {
               <button
                 type="button"
                 onClick={() =>
-                  setCurrentPage((prev) =>
-                    Math.min(prev + 1, totalPages),
-                  )
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }
                 disabled={currentPage === totalPages}
                 className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
@@ -363,6 +358,19 @@ const Returns = () => {
           returnItem={selectedReturn}
           onClose={handleCloseUpdateStatus}
           onSuccess={handleStatusUpdate}
+        />
+
+        <RefundProcessingModal
+          open={showRefundProcessing}
+          returnItem={refundReturn}
+          processing={processingRefund}
+          onClose={() => {
+            if (processingRefund) return;
+
+            setShowRefundProcessing(false);
+            setRefundReturn(null);
+          }}
+          onConfirm={handleConfirmRefund}
         />
       </div>
     </DashboardLayout>
