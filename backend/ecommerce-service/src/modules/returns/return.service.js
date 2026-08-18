@@ -2,6 +2,7 @@ import Return from "./return.model.js";
 import Order from "../orders/order.model.js";
 import { refundPartialPaymentService } from "../payment/payment.service.js";
 import razorpay from "../../config/razorpay.js";
+import { sendNotification } from "../../services/notification.service.js";
 
 export const createReturnService = async (userId, payload) => {
   const { orderId, items, reason, description } = payload;
@@ -111,6 +112,24 @@ export const createReturnService = async (userId, payload) => {
   });
 
   await order.save();
+
+  try {
+  await sendNotification({
+    userId,
+    title: "Return Request Initiated",
+    body: `Your return request for Order #${order.orderNumber} has been initiated successfully.`,
+    type: "RETURN_REQUESTED",
+    data: {
+      orderId: order._id,
+      returnId: returnRequest._id,
+    },
+  });
+} catch (notificationError) {
+  console.error(
+    "Failed to send return notification:",
+    notificationError.message,
+  );
+}
 
   return await Return.findById(returnRequest._id)
     .populate("user", "fullName email phoneNumber")
