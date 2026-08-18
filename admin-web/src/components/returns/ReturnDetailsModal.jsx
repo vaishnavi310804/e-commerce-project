@@ -1,8 +1,8 @@
 import React from "react";
-import { FaTimes, FaUndoAlt } from "react-icons/fa";
+import { FaTimes, FaUndoAlt, FaSync, FaClock } from "react-icons/fa";
 import StatusBadge from "../orders/StatusBadge";
 
-const ReturnDetailsModal = ({ open, returnItem, onClose }) => {
+const ReturnDetailsModal = ({ open, returnItem, onClose, onCheckRefundStatus }) => {
   if (!open || !returnItem) return null;
 
   const formatDate = (dateString) => {
@@ -71,7 +71,7 @@ const ReturnDetailsModal = ({ open, returnItem, onClose }) => {
       case "Pending":
         return (
           <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
-            Pending
+            Pending (Processing...)
           </span>
         );
 
@@ -84,7 +84,10 @@ const ReturnDetailsModal = ({ open, returnItem, onClose }) => {
     }
   };
 
-  const isRejected = Boolean(returnItem.rejectedAt) || returnItem.status === "Rejected";
+  const isRejected =
+    Boolean(returnItem.rejectedAt) || returnItem.status === "Rejected";
+
+  const isPendingRefund = returnItem.refundStatus === "Pending";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -109,6 +112,35 @@ const ReturnDetailsModal = ({ open, returnItem, onClose }) => {
 
         <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
           <div className="space-y-6">
+            {isPendingRefund && (
+              <div className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <div className="flex items-center gap-3 text-amber-800">
+                  <FaClock className="shrink-0 text-amber-600" size={18} />
+
+                  <div>
+                    <p className="text-sm font-semibold">
+                      Refund is being processed
+                    </p>
+
+                    <p className="text-xs text-amber-700">
+                      The payment gateway has received the request. Click below to verify latest status.
+                    </p>
+                  </div>
+                </div>
+
+                {onCheckRefundStatus && (
+                  <button
+                    type="button"
+                    onClick={() => onCheckRefundStatus(returnItem)}
+                    className="flex shrink-0 items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-amber-700"
+                  >
+                    <FaSync size={12} />
+                    Check Status
+                  </button>
+                )}
+              </div>
+            )}
+
             <section>
               <div className="mb-2 flex items-center justify-between">
                 <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
@@ -372,7 +404,20 @@ const ReturnDetailsModal = ({ open, returnItem, onClose }) => {
           </div>
         </div>
 
-        <div className="flex shrink-0 justify-end border-t bg-white px-6 py-4">
+        <div className="flex shrink-0 items-center justify-between border-t bg-white px-6 py-4">
+          <div>
+            {isPendingRefund && onCheckRefundStatus && (
+              <button
+                type="button"
+                onClick={() => onCheckRefundStatus(returnItem)}
+                className="flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-800 transition hover:bg-amber-100"
+              >
+                <FaSync size={14} />
+                Check Refund Status
+              </button>
+            )}
+          </div>
+
           <button
             type="button"
             onClick={onClose}

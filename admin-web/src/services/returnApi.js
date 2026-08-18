@@ -26,3 +26,11 @@ export const processReturnRefund = async (returnId) => {
 
   return data;
 };
+
+export const checkReturnRefundStatus = async (returnId) => {
+  const { data } = await ecommerceApi.patch(
+    `/return/${returnId}/refund/status`,
+  );
+
+  return data;
+};

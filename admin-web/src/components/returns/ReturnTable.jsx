@@ -1,5 +1,5 @@
 import React from "react";
-import { FaEye, FaExchangeAlt, FaUndoAlt } from "react-icons/fa";
+import { FaEye, FaExchangeAlt, FaUndoAlt, FaSync } from "react-icons/fa";
 import StatusBadge from "../orders/StatusBadge";
 
 const ReturnTable = ({
@@ -8,6 +8,7 @@ const ReturnTable = ({
   onViewReturn,
   onUpdateStatus,
   onProcessRefund,
+  onCheckRefundStatus,
 }) => {
   if (loading) {
     return (
@@ -101,6 +102,8 @@ const ReturnTable = ({
                   returnItem.refundStatus === "Processed" &&
                   returnItem.status === "Completed";
 
+                const isRefundPending = returnItem.refundStatus === "Pending";
+
                 return (
                   <tr
                     key={returnItem._id}
@@ -149,6 +152,12 @@ const ReturnTable = ({
                             Refunded
                           </span>
                         )}
+
+                        {isRefundPending && (
+                          <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+                            Refund Pending
+                          </span>
+                        )}
                       </div>
                     </td>
 
@@ -158,6 +167,7 @@ const ReturnTable = ({
                         onViewReturn={onViewReturn}
                         onUpdateStatus={onUpdateStatus}
                         onProcessRefund={onProcessRefund}
+                        onCheckRefundStatus={onCheckRefundStatus}
                       />
                     </td>
                   </tr>
@@ -177,6 +187,8 @@ const ReturnTable = ({
           const isRefunded =
             returnItem.refundStatus === "Processed" &&
             returnItem.status === "Completed";
+
+          const isRefundPending = returnItem.refundStatus === "Pending";
 
           return (
             <div
@@ -198,6 +210,12 @@ const ReturnTable = ({
                   {isRefunded && (
                     <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
                       Refunded
+                    </span>
+                  )}
+
+                  {isRefundPending && (
+                    <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+                      Refund Pending
                     </span>
                   )}
                 </div>
@@ -251,6 +269,7 @@ const ReturnTable = ({
                   onViewReturn={onViewReturn}
                   onUpdateStatus={onUpdateStatus}
                   onProcessRefund={onProcessRefund}
+                  onCheckRefundStatus={onCheckRefundStatus}
                 />
               </div>
             </div>
@@ -266,14 +285,21 @@ const ReturnActions = ({
   onViewReturn,
   onUpdateStatus,
   onProcessRefund,
+  onCheckRefundStatus,
 }) => {
   const canUpdateStatus = ["Pending", "Approved", "Picked Up"].includes(
     returnItem.status,
   );
 
-  const canProcessRefund =
-    returnItem.status === "Picked Up" &&
-    returnItem.refundStatus !== "Processed";
+  const isPickedUp = returnItem.status === "Picked Up";
+  const isRefundPending = returnItem.refundStatus === "Pending";
+  const isRefundNotProcessedOrFailed =
+    !returnItem.refundStatus ||
+    returnItem.refundStatus === "Not Processed" ||
+    returnItem.refundStatus === "Failed";
+
+  const canProcessRefund = isPickedUp && isRefundNotProcessedOrFailed;
+  const canCheckRefundStatus = isPickedUp && isRefundPending;
 
   return (
     <div className="flex shrink-0 items-center gap-1">
@@ -296,6 +322,17 @@ const ReturnActions = ({
           title="Update Return Status"
         >
           <FaExchangeAlt size={16} />
+        </button>
+      )}
+
+      {canCheckRefundStatus && onCheckRefundStatus && (
+        <button
+          type="button"
+          onClick={() => onCheckRefundStatus(returnItem)}
+          className="rounded-lg p-2 text-amber-600 transition hover:bg-amber-50 hover:text-amber-700"
+          title="Check Refund Status"
+        >
+          <FaSync size={16} />
         </button>
       )}
 

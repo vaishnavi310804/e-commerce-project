@@ -8,7 +8,8 @@ import {
   getMyReturns,
   getReturnDetails,
   updateReturnStatus,
-  processReturnRefund
+  processReturnRefund,
+  checkReturnRefundStatus,
 } from "./return.controller.js";
 import {
   createReturnValidation,
@@ -47,7 +48,6 @@ router.get(
   getReturnDetails,
 );
 
-
 router.patch(
   "/:id/status",
   protect,
@@ -64,6 +64,15 @@ router.patch(
   returnIdValidation,
   validate,
   processReturnRefund,
+);
+
+router.patch(
+  "/:id/refund/status",
+  protect,
+  authorize("ADMIN"),
+  returnIdValidation,
+  validate,
+  checkReturnRefundStatus,
 );
 
 export default router;

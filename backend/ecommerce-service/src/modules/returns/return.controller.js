@@ -4,7 +4,8 @@ import {
   getReturnDetailsService,
   getAllReturnsService,
   updateReturnStatusService,
-  processReturnRefundService
+  processReturnRefundService,
+  checkReturnRefundStatusService,
 } from "./return.service.js";
 
 export const createReturn = async (req, res, next) => {
@@ -91,14 +92,30 @@ export const updateReturnStatus = async (req, res, next) => {
 
 export const processReturnRefund = async (req, res, next) => {
   try {
-    const returnRequest = await processReturnRefundService(
+    const result = await processReturnRefundService(
       req.params.id,
     );
 
     return res.status(200).json({
       success: true,
-      message: "Return refund processed successfully.",
-      data: returnRequest,
+      message: result.message,
+      data: result.data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const checkReturnRefundStatus = async (req, res, next) => {
+  try {
+    const result = await checkReturnRefundStatusService(
+      req.params.id,
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: result.message,
+      data: result.data,
     });
   } catch (error) {
     next(error);

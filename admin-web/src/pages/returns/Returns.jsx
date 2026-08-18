@@ -22,6 +22,7 @@ import {
   getReturnDetails,
   updateReturnStatus,
   processReturnRefund,
+  checkReturnRefundStatus,
 } from "../../services/returnApi";
 
 const ITEMS_PER_PAGE = 10;
@@ -137,34 +138,52 @@ const Returns = () => {
   };
 
   const handleConfirmRefund = async (returnItem) => {
-  try {
-    setProcessingRefund(true);
+    try {
+      setProcessingRefund(true);
 
-    const response = await processReturnRefund(returnItem._id);
+      const response = await processReturnRefund(returnItem._id);
 
-    console.log("REFUND RESPONSE:", response);
-    console.log("REFUND DATA:", response?.data);
+      setShowRefundProcessing(false);
+      setRefundReturn(null);
 
-    setShowRefundProcessing(false);
-    setRefundReturn(null);
+      alert(
+        response?.message ||
+          "Refund request initiated successfully. The refund is still being processed.",
+      );
 
-    await fetchReturns();
-  } catch (error) {
-  console.error("FAILED REFUND:", error);
+      await fetchReturns();
+    } catch (error) {
+      console.error("FAILED REFUND:", error);
 
-  console.error(
-    "REFUND ERROR RESPONSE:",
-    JSON.stringify(error.response?.data, null, 2),
-  );
+      alert(
+        error.response?.data?.message ||
+          "Failed to process return refund.",
+      );
+    } finally {
+      setProcessingRefund(false);
+    }
+  };
 
-  alert(
-    error.response?.data?.message ||
-      "Failed to process return refund.",
-  );
-  } finally {
-    setProcessingRefund(false);
-  }
-};
+  const handleCheckRefundStatus = async (returnItem) => {
+    try {
+      const response = await checkReturnRefundStatus(returnItem._id);
+
+      alert(response?.message || "Refund status checked successfully.");
+
+      if (selectedReturn && selectedReturn._id === returnItem._id) {
+        setSelectedReturn(response.data);
+      }
+
+      await fetchReturns();
+    } catch (error) {
+      console.error("Failed to check refund status:", error);
+
+      alert(
+        error.response?.data?.message ||
+          "Failed to check refund status.",
+      );
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -299,6 +318,7 @@ const Returns = () => {
           onViewReturn={handleViewReturn}
           onUpdateStatus={handleUpdateStatus}
           onProcessRefund={handleProcessRefund}
+          onCheckRefundStatus={handleCheckRefundStatus}
         />
 
         {!loading && filteredReturns.length > 0 && (
@@ -351,6 +371,7 @@ const Returns = () => {
           open={showReturnDetails}
           returnItem={selectedReturn}
           onClose={handleCloseReturnDetails}
+          onCheckRefundStatus={handleCheckRefundStatus}
         />
 
         <UpdateReturnStatus

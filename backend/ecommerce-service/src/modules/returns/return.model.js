@@ -81,6 +81,10 @@ const returnSchema = new mongoose.Schema(
       default: 0,
     },
 
+    razorpayRefundId: {
+      type: String,
+    },
+
     requestedAt: {
       type: Date,
       default: Date.now,
