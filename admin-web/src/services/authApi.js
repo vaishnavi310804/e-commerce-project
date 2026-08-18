@@ -27,5 +27,6 @@ export const resetPassword = async (data) => {
 
 export const getAllAdmins = async () => {
   const response = await api.get("/admins");
-  return response.data;
+
+  return response.data?.data || [];
 };

@@ -20,9 +20,9 @@ const AssignTicketModal = ({
       try {
         setLoadingAdmins(true);
 
-        const response = await getAllAdmins();
+        const adminsData = await getAllAdmins();
 
-        setAdmins(response?.data || []);
+setAdmins(Array.isArray(adminsData) ? adminsData : []);
 
         if (ticket?.assignedTo?._id) {
           setSelectedAdmin(ticket.assignedTo._id);
@@ -184,8 +184,6 @@ const AssignTicketModal = ({
             disabled={!selectedAdmin || processing || loadingAdmins}
             className="flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <FaCheck size={13} />
-
             {processing ? "Assigning..." : "Assign Ticket"}
           </button>
         </div>
