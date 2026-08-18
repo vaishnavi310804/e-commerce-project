@@ -267,7 +267,7 @@ const ReturnActions = ({
   );
 
   const canProcessRefund =
-    returnItem.status === "Approved";
+  returnItem.status === "Picked Up";
 
   return (
     <div className="flex shrink-0 items-center gap-1">

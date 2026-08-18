@@ -17,14 +17,44 @@ const RefundProcessingModal = ({
 }) => {
   const [confirmed, setConfirmed] = useState(false);
 
+  const getProductId = (product) => {
+    if (!product) return null;
+
+    if (typeof product === "object") {
+      return product._id;
+    }
+
+    return product;
+  };
+
+  const getOrderItem = (returnProduct) => {
+    const returnedProductId = getProductId(returnProduct?.product);
+
+    return returnItem?.order?.products?.find((orderItem) => {
+      const orderProductId = getProductId(orderItem?.product);
+
+      return (
+        returnedProductId &&
+        orderProductId &&
+        String(returnedProductId) === String(orderProductId)
+      );
+    });
+  };
+
   const refundAmount = useMemo(() => {
-    if (!returnItem?.items?.length) {
+    if (!returnItem?.items?.length || !returnItem?.order?.products?.length) {
       return 0;
     }
 
-    return returnItem.items.reduce((total, item) => {
-      const price = Number(item.product?.price || 0);
-      const quantity = Number(item.quantity || 0);
+    return returnItem.items.reduce((total, returnProduct) => {
+      const orderItem = getOrderItem(returnProduct);
+
+      if (!orderItem) {
+        return total;
+      }
+
+      const price = Number(orderItem.price || 0);
+      const quantity = Number(returnProduct.quantity || 0);
 
       return total + price * quantity;
     }, 0);
@@ -128,9 +158,10 @@ const RefundProcessingModal = ({
               <div className="overflow-hidden rounded-xl border border-gray-200">
                 {returnItem.items?.map((item, index) => {
                   const product = item.product;
+                  const orderItem = getOrderItem(item);
 
-                  const itemPrice = Number(product?.price || 0);
-                  const itemAmount = itemPrice * item.quantity;
+                  const itemPrice = Number(orderItem?.price || 0);
+                  const itemAmount = itemPrice * Number(item.quantity || 0);
 
                   return (
                     <div
@@ -194,7 +225,8 @@ const RefundProcessingModal = ({
               />
 
               <span className="text-sm text-gray-700">
-                I have reviewed the return details properly...
+                I have reviewed the return details properly and confirm that the
+                refund should be processed.
               </span>
             </label>
           </div>

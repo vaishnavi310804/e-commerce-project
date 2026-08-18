@@ -2,7 +2,6 @@ import Return from "./return.model.js";
 import Order from "../orders/order.model.js";
 import { refundPartialPaymentService } from "../payment/payment.service.js";
 
-
 export const createReturnService = async (userId, payload) => {
   const { orderId, items, reason, description } = payload;
 
@@ -142,7 +141,7 @@ export const getReturnDetailsService = async (userId, returnId) => {
     .populate("user", "fullName email phoneNumber")
     .populate(
       "order",
-      "orderNumber orderStatus totalAmount paymentMethod paymentStatus shippingAddress",
+      "orderNumber orderStatus totalAmount paymentMethod paymentStatus shippingAddress products",
     )
     .populate("items.product", "name price productImage image brand");
 
@@ -166,7 +165,7 @@ export const getAllReturnsService = async (query = {}) => {
     .populate("user", "fullName email phoneNumber")
     .populate(
       "order",
-      "orderNumber orderStatus totalAmount paymentMethod paymentStatus",
+      "orderNumber orderStatus totalAmount paymentMethod paymentStatus products",
     )
     .populate("items.product", "name price productImage image brand")
     .sort({ createdAt: -1 });
@@ -274,10 +273,9 @@ export const processReturnRefundService = async (returnId) => {
     error.statusCode = 404;
     throw error;
   }
-
-  if (returnRequest.status !== "Approved") {
+  if (returnRequest.status !== "Picked Up") {
     const error = new Error(
-      "Refund can only be processed for an approved return.",
+      "Refund can only be processed after the return has been picked up.",
     );
     error.statusCode = 400;
     throw error;
@@ -292,17 +290,13 @@ export const processReturnRefundService = async (returnId) => {
   }
 
   if (order.paymentMethod !== "RAZORPAY") {
-    const error = new Error(
-      "Refund is only available for Razorpay payments.",
-    );
+    const error = new Error("Refund is only available for Razorpay payments.");
     error.statusCode = 400;
     throw error;
   }
 
   if (order.paymentStatus !== "Paid") {
-    const error = new Error(
-      "This order payment is not eligible for refund.",
-    );
+    const error = new Error("This order payment is not eligible for refund.");
     error.statusCode = 400;
     throw error;
   }
@@ -340,10 +334,7 @@ export const processReturnRefundService = async (returnId) => {
     throw error;
   }
 
-  const refund = await refundPartialPaymentService(
-    order,
-    refundAmount,
-  );
+  const refund = await refundPartialPaymentService(order, refundAmount);
 
   if (!refund) {
     const error = new Error("Refund could not be processed.");
@@ -351,8 +342,7 @@ export const processReturnRefundService = async (returnId) => {
     throw error;
   }
 
-  order.refundStatus =
-    refund.status === "processed" ? "Processed" : "Pending";
+  order.refundStatus = refund.status === "processed" ? "Processed" : "Pending";
 
   order.refundAmount = refundAmount;
   order.razorpayRefundId = refund.id;
@@ -388,8 +378,5 @@ export const processReturnRefundService = async (returnId) => {
       "order",
       "orderNumber orderStatus totalAmount paymentMethod paymentStatus refundStatus refundAmount razorpayRefundId refundDate",
     )
-    .populate(
-      "items.product",
-      "name price productImage image brand",
-    );
+    .populate("items.product", "name price productImage image brand");
 };
