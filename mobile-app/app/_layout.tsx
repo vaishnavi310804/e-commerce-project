@@ -3,21 +3,21 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import * as Notifications from "expo-notifications";
 import { useEffect } from "react";
-
 import {
   getMessaging,
   onMessage,
   setAutoInitEnabled,
   onNotificationOpenedApp,
   getInitialNotification,
+  onTokenRefresh,
 } from "@react-native-firebase/messaging";
+
+import {
+  syncFcmTokenValue,
+} from "@/src/services/notification.service";
 
 SplashScreen.preventAutoHideAsync();
 
-/**
- * Tell Expo Notifications to display notifications
- * when the app is in the foreground.
- */
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowBanner: true,
@@ -44,7 +44,33 @@ export default function RootLayout() {
   // Initialize Firebase Notification Service
   useEffect(() => {
     const messaging = getMessaging();
+
     setAutoInitEnabled(messaging, true);
+  }, []);
+
+  // FCM Token Refresh Handler
+  useEffect(() => {
+    const messaging = getMessaging();
+
+    const unsubscribe = onTokenRefresh(
+      messaging,
+      async (newToken) => {
+        try {
+          console.log("FCM Token refreshed:", newToken);
+
+          await syncFcmTokenValue(newToken);
+
+          console.log("Refreshed FCM token synced successfully.");
+        } catch (error) {
+          console.log(
+            "Failed to sync refreshed FCM token:",
+            error,
+          );
+        }
+      },
+    );
+
+    return () => unsubscribe();
   }, []);
 
   // Notification Interaction Handlers
@@ -57,9 +83,9 @@ export default function RootLayout() {
       (remoteMessage) => {
         console.log(
           "App opened from background via notification tap:",
-          JSON.stringify(remoteMessage, null, 2)
+          JSON.stringify(remoteMessage, null, 2),
         );
-      }
+      },
     );
 
     // Handle notification tap when app was launched from quit state
@@ -67,7 +93,7 @@ export default function RootLayout() {
       if (remoteMessage) {
         console.log(
           "App launched from quit state via notification tap:",
-          JSON.stringify(remoteMessage, null, 2)
+          JSON.stringify(remoteMessage, null, 2),
         );
       }
     });
@@ -82,17 +108,17 @@ export default function RootLayout() {
       async (remoteMessage) => {
         console.log(
           "Foreground Notification Title:",
-          remoteMessage.notification?.title
+          remoteMessage.notification?.title,
         );
 
         console.log(
           "Foreground Notification Body:",
-          remoteMessage.notification?.body
+          remoteMessage.notification?.body,
         );
 
         console.log(
           "Foreground Notification Data Payload:",
-          remoteMessage.data
+          remoteMessage.data,
         );
 
         // Display the FCM notification visibly while app is open
@@ -102,7 +128,8 @@ export default function RootLayout() {
         ) {
           await Notifications.scheduleNotificationAsync({
             content: {
-              title: remoteMessage.notification?.title || "ShopEase",
+              title:
+                remoteMessage.notification?.title || "ShopEase",
               body: remoteMessage.notification?.body || "",
               data: remoteMessage.data || {},
               sound: "default",
@@ -110,7 +137,7 @@ export default function RootLayout() {
             trigger: null,
           });
         }
-      }
+      },
     );
 
     return () => unsubscribe();

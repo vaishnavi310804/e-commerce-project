@@ -23,6 +23,7 @@ import ScreenWrapper from "@/src/components/common/ScreenWrapper";
 import Input from "@/src/components/common/Input";
 import PrimaryButton from "@/src/components/common/PrimaryButton";
 import { login, setAuthToken } from "@/src/api/auth.api";
+import { syncFcmToken } from "@/src/services/notification.service";
 
 type ApiErrorResponse = {
   message?: string;
@@ -79,7 +80,9 @@ export default function LoginScreen() {
         );
 
         if (hasNotificationPermission) {
-          // Permission already granted → skip permission screen
+          // Permission already granted → sync the current FCM token
+          await syncFcmToken();
+
           router.replace("/(tabs)");
           return;
         }
