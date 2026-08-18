@@ -14,6 +14,7 @@ import dashboardRoutes from "./src/modules/dashboard/dashboard.routes.js";
 import PaymentRoutes from "./src/modules/payment/payment.routes.js"
 import shipmentRoutes from "./src/modules/shipment/shipment.routes.js"
 import returnRoutes from "./src/modules/returns/return.routes.js"
+import ticketRoutes from "./src/modules/tickets/ticket.routes.js"
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.use("/api/v1/dashboard", dashboardRoutes);
 app.use("/api/v1/payment", PaymentRoutes);
 app.use("/api/v1/shipment", shipmentRoutes)
 app.use("/api/v1/return", returnRoutes)
+app.use("/api/v1/ticket", ticketRoutes)
 
 app.get("/", (req, res) => {
   res.send("API running");
