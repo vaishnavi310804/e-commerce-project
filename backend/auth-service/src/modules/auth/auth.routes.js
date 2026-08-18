@@ -32,7 +32,7 @@ import {
 import validate from "../../middleware/validate.js";
 import { protect } from "../../middleware/auth.middleware.js";
 import upload from "../../middleware/upload.middleware.js";
-
+import { authorize } from "../../../../ecommerce-service/src/middleware/role.middleware.js";
 const router = express.Router();
 
 router.post("/register", registerValidation, validate, registerUser);
