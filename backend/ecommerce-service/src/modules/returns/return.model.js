@@ -70,6 +70,17 @@ const returnSchema = new mongoose.Schema(
       default: "Pending",
     },
 
+    refundStatus: {
+      type: String,
+      enum: ["Not Processed", "Pending", "Processed", "Failed"],
+      default: "Not Processed",
+    },
+
+    refundAmount: {
+      type: Number,
+      default: 0,
+    },
+
     requestedAt: {
       type: Date,
       default: Date.now,
@@ -81,6 +92,16 @@ const returnSchema = new mongoose.Schema(
     },
 
     rejectedAt: {
+      type: Date,
+      default: null,
+    },
+
+    pickedUpAt: {
+      type: Date,
+      default: null,
+    },
+
+    refundedAt: {
       type: Date,
       default: null,
     },

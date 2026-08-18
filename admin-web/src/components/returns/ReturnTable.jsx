@@ -30,9 +30,7 @@ const ReturnTable = ({
 
     const date = new Date(dateString);
 
-    return isNaN(date.getTime())
-      ? "—"
-      : date.toLocaleDateString();
+    return isNaN(date.getTime()) ? "—" : date.toLocaleDateString();
   };
 
   const getCustomerName = (returnItem) => {
@@ -99,6 +97,10 @@ const ReturnTable = ({
                 const customerName = getCustomerName(returnItem);
                 const orderNumber = getOrderNumber(returnItem);
 
+                const isRefunded =
+                  returnItem.refundStatus === "Processed" &&
+                  returnItem.status === "Completed";
+
                 return (
                   <tr
                     key={returnItem._id}
@@ -121,9 +123,7 @@ const ReturnTable = ({
                     <td className="whitespace-nowrap px-6 py-4 text-gray-700">
                       <span className="rounded bg-gray-100 px-2 py-1 text-xs font-medium">
                         {getItemCount(returnItem)}{" "}
-                        {getItemCount(returnItem) === 1
-                          ? "item"
-                          : "items"}
+                        {getItemCount(returnItem) === 1 ? "item" : "items"}
                       </span>
                     </td>
 
@@ -141,10 +141,15 @@ const ReturnTable = ({
                     </td>
 
                     <td className="whitespace-nowrap px-6 py-4">
-                      <StatusBadge
-                        type="return"
-                        status={returnItem.status}
-                      />
+                      <div className="flex flex-col items-start gap-1">
+                        <StatusBadge type="return" status={returnItem.status} />
+
+                        {isRefunded && (
+                          <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                            Refunded
+                          </span>
+                        )}
+                      </div>
                     </td>
 
                     <td className="whitespace-nowrap px-6 py-4 text-center">
@@ -169,6 +174,10 @@ const ReturnTable = ({
           const orderNumber = getOrderNumber(returnItem);
           const itemCount = getItemCount(returnItem);
 
+          const isRefunded =
+            returnItem.refundStatus === "Processed" &&
+            returnItem.status === "Completed";
+
           return (
             <div
               key={returnItem._id}
@@ -176,19 +185,22 @@ const ReturnTable = ({
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-xs font-medium text-gray-400">
-                    Order ID
-                  </p>
+                  <p className="text-xs font-medium text-gray-400">Order ID</p>
 
                   <h3 className="mt-0.5 truncate text-sm font-bold text-gray-900">
                     {orderNumber}
                   </h3>
                 </div>
 
-                <StatusBadge
-                  type="return"
-                  status={returnItem.status}
-                />
+                <div className="flex flex-col items-start gap-1">
+                  <StatusBadge type="return" status={returnItem.status} />
+
+                  {isRefunded && (
+                    <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                      Refunded
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div className="mt-3">
@@ -208,20 +220,15 @@ const ReturnTable = ({
               <div className="mt-3 rounded-lg bg-gray-50/50 p-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <p className="text-xs text-gray-400">
-                      Items
-                    </p>
+                    <p className="text-xs text-gray-400">Items</p>
 
                     <p className="mt-1 text-sm font-semibold text-gray-800">
-                      {itemCount}{" "}
-                      {itemCount === 1 ? "item" : "items"}
+                      {itemCount} {itemCount === 1 ? "item" : "items"}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-xs text-gray-400">
-                      Requested
-                    </p>
+                    <p className="text-xs text-gray-400">Requested</p>
 
                     <p className="mt-1 text-sm font-medium text-gray-700">
                       {formatDate(returnItem.requestedAt)}
@@ -229,9 +236,7 @@ const ReturnTable = ({
                   </div>
 
                   <div className="col-span-2">
-                    <p className="text-xs text-gray-400">
-                      Reason
-                    </p>
+                    <p className="text-xs text-gray-400">Reason</p>
 
                     <p className="mt-1 line-clamp-2 text-sm font-medium text-gray-800">
                       {returnItem.reason || "—"}
@@ -267,7 +272,8 @@ const ReturnActions = ({
   );
 
   const canProcessRefund =
-  returnItem.status === "Picked Up";
+    returnItem.status === "Picked Up" &&
+    returnItem.refundStatus !== "Processed";
 
   return (
     <div className="flex shrink-0 items-center gap-1">
@@ -298,7 +304,11 @@ const ReturnActions = ({
           type="button"
           onClick={() => onProcessRefund(returnItem)}
           className="rounded-lg p-2 text-[#6547C9] transition hover:bg-purple-50 hover:text-purple-700"
-          title="Process Refund"
+          title={
+            returnItem.refundStatus === "Failed"
+              ? "Retry Refund"
+              : "Process Refund"
+          }
         >
           <FaUndoAlt size={16} />
         </button>

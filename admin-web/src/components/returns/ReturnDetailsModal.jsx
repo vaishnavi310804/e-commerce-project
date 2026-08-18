@@ -50,6 +50,42 @@ const ReturnDetailsModal = ({ open, returnItem, onClose }) => {
 
   const orderNumber = returnItem.order?.orderNumber || "—";
 
+  const getRefundBadge = () => {
+    const status = returnItem.refundStatus || "Not Processed";
+
+    switch (status) {
+      case "Processed":
+        return (
+          <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+            Refunded
+          </span>
+        );
+
+      case "Failed":
+        return (
+          <span className="inline-flex items-center rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700">
+            Failed
+          </span>
+        );
+
+      case "Pending":
+        return (
+          <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
+            Pending
+          </span>
+        );
+
+      default:
+        return (
+          <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700">
+            Not Processed
+          </span>
+        );
+    }
+  };
+
+  const isRejected = Boolean(returnItem.rejectedAt) || returnItem.status === "Rejected";
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl">
@@ -78,12 +114,12 @@ const ReturnDetailsModal = ({ open, returnItem, onClose }) => {
                 <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
                   Return Information
                 </h3>
-
               </div>
 
-              <div className="grid grid-cols-1 gap-4 rounded-xl p-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 rounded-xl border border-gray-100 p-4 sm:grid-cols-2">
                 <div>
                   <p className="text-xs text-gray-400">Order ID</p>
+
                   <p className="mt-1 text-sm font-semibold text-gray-800">
                     {orderNumber}
                   </p>
@@ -91,6 +127,7 @@ const ReturnDetailsModal = ({ open, returnItem, onClose }) => {
 
                 <div>
                   <p className="text-xs text-gray-400">Requested At</p>
+
                   <p className="mt-1 text-sm font-medium text-gray-700">
                     {formatDateTime(returnItem.requestedAt)}
                   </p>
@@ -98,16 +135,32 @@ const ReturnDetailsModal = ({ open, returnItem, onClose }) => {
 
                 <div>
                   <p className="text-xs text-gray-400">Reason</p>
+
                   <p className="mt-1 text-sm font-medium text-gray-800">
                     {returnItem.reason || "—"}
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-xs text-gray-400">Status</p>
+                  <p className="text-xs text-gray-400">Return Status</p>
+
                   <div className="mt-1">
                     <StatusBadge type="return" status={returnItem.status} />
                   </div>
+                </div>
+
+                <div>
+                  <p className="text-xs text-gray-400">Refund Status</p>
+
+                  <div className="mt-1">{getRefundBadge()}</div>
+                </div>
+
+                <div>
+                  <p className="text-xs text-gray-400">Refund Amount</p>
+
+                  <p className="mt-1 text-sm font-bold text-gray-900">
+                    ₹{Number(returnItem.refundAmount || 0).toFixed(2)}
+                  </p>
                 </div>
               </div>
             </section>
@@ -117,9 +170,10 @@ const ReturnDetailsModal = ({ open, returnItem, onClose }) => {
                 Customer Information
               </h3>
 
-              <div className="grid grid-cols-1 gap-4 rounded-xl p-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 rounded-xl border border-gray-100 p-4 sm:grid-cols-2">
                 <div>
                   <p className="text-xs text-gray-400">Name</p>
+
                   <p className="mt-1 truncate text-sm font-semibold text-gray-800">
                     {customerName}
                   </p>
@@ -127,6 +181,7 @@ const ReturnDetailsModal = ({ open, returnItem, onClose }) => {
 
                 <div>
                   <p className="text-xs text-gray-400">Email</p>
+
                   <p className="mt-1 truncate text-sm font-medium text-gray-700">
                     {customerEmail}
                   </p>
@@ -134,6 +189,7 @@ const ReturnDetailsModal = ({ open, returnItem, onClose }) => {
 
                 <div>
                   <p className="text-xs text-gray-400">Phone</p>
+
                   <p className="mt-1 text-sm font-medium text-gray-700">
                     {customerPhone}
                   </p>
@@ -173,14 +229,21 @@ const ReturnDetailsModal = ({ open, returnItem, onClose }) => {
                       {returnItem.items?.map((item, index) => {
                         const product = item.product;
 
-                        const price = Number(
-                          product?.price ||
-                            returnItem.order?.products?.find(
-                              (orderItem) =>
-                                orderItem.product?._id === product?._id,
-                            )?.price ||
-                            0,
+                        const returnedProductId = product?._id || product;
+
+                        const orderItem = returnItem.order?.products?.find(
+                          (orderItem) => {
+                            const orderProductId =
+                              orderItem.product?._id || orderItem.product;
+
+                            return (
+                              String(orderProductId) ===
+                              String(returnedProductId)
+                            );
+                          },
                         );
+
+                        const price = Number(orderItem?.price || 0);
 
                         const amount = price * Number(item.quantity || 0);
 
@@ -264,23 +327,45 @@ const ReturnDetailsModal = ({ open, returnItem, onClose }) => {
                     active
                   />
 
-                  <TimelineItem
-                    label="Approved"
-                    date={returnItem.approvedAt}
-                    active={Boolean(returnItem.approvedAt)}
-                  />
+                  {isRejected ? (
+                    <TimelineItem
+                      label="Rejected"
+                      date={returnItem.rejectedAt}
+                      active={Boolean(returnItem.rejectedAt)}
+                    />
+                  ) : (
+                    <>
+                      <TimelineItem
+                        label="Approved"
+                        date={returnItem.approvedAt}
+                        active={Boolean(returnItem.approvedAt)}
+                      />
 
-                  <TimelineItem
-                    label="Rejected"
-                    date={returnItem.rejectedAt}
-                    active={Boolean(returnItem.rejectedAt)}
-                  />
+                      <TimelineItem
+                        label="Picked Up"
+                        date={returnItem.pickedUpAt}
+                        active={Boolean(returnItem.pickedUpAt)}
+                      />
 
-                  <TimelineItem
-                    label="Completed"
-                    date={returnItem.completedAt}
-                    active={Boolean(returnItem.completedAt)}
-                  />
+                      <TimelineItem
+                        label="Refunded"
+                        date={returnItem.refundedAt}
+                        active={Boolean(
+                          returnItem.refundedAt ||
+                            returnItem.refundStatus === "Processed",
+                        )}
+                      />
+
+                      <TimelineItem
+                        label="Completed"
+                        date={returnItem.completedAt}
+                        active={Boolean(
+                          returnItem.completedAt ||
+                            returnItem.status === "Completed",
+                        )}
+                      />
+                    </>
+                  )}
                 </div>
               </div>
             </section>

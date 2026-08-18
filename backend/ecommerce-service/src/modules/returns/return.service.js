@@ -93,8 +93,10 @@ export const createReturnService = async (userId, payload) => {
     reason,
     description,
     status: "Pending",
+    refundStatus: "Not Processed",
     requestedAt: new Date(),
   });
+
   returnItems.forEach((returnItem) => {
     const orderItem = order.products.find(
       (item) =>
@@ -108,11 +110,12 @@ export const createReturnService = async (userId, payload) => {
   });
 
   await order.save();
+
   return await Return.findById(returnRequest._id)
     .populate("user", "fullName email phoneNumber")
     .populate(
       "order",
-      "orderNumber orderStatus totalAmount paymentMethod paymentStatus",
+      "orderNumber orderStatus totalAmount paymentMethod paymentStatus products",
     )
     .populate("items.product", "name price productImage image brand");
 };
@@ -121,7 +124,7 @@ export const getMyReturnsService = async (userId) => {
   return await Return.find({ user: userId })
     .populate(
       "order",
-      "orderNumber orderStatus totalAmount paymentMethod paymentStatus",
+      "orderNumber orderStatus totalAmount paymentMethod paymentStatus products",
     )
     .populate("items.product", "name price productImage image brand")
     .sort({ createdAt: -1 });
@@ -220,6 +223,10 @@ export const updateReturnStatusService = async (returnId, status) => {
     returnRequest.rejectedAt = new Date();
   }
 
+  if (status === "Picked Up") {
+    returnRequest.pickedUpAt = new Date();
+  }
+
   if (status === "Completed") {
     returnRequest.completedAt = new Date();
   }
@@ -260,7 +267,7 @@ export const updateReturnStatusService = async (returnId, status) => {
     .populate("user", "fullName email phoneNumber")
     .populate(
       "order",
-      "orderNumber orderStatus totalAmount paymentMethod paymentStatus",
+      "orderNumber orderStatus totalAmount paymentMethod paymentStatus products",
     )
     .populate("items.product", "name price productImage image brand");
 };
@@ -273,6 +280,7 @@ export const processReturnRefundService = async (returnId) => {
     error.statusCode = 404;
     throw error;
   }
+
   if (returnRequest.status !== "Picked Up") {
     const error = new Error(
       "Refund can only be processed after the return has been picked up.",
@@ -290,16 +298,21 @@ export const processReturnRefundService = async (returnId) => {
   }
 
   if (order.paymentMethod !== "RAZORPAY") {
-    const error = new Error("Refund is only available for Razorpay payments.");
+    const error = new Error(
+      "Refund is only available for Razorpay payments.",
+    );
     error.statusCode = 400;
     throw error;
   }
 
   if (order.paymentStatus !== "Paid") {
-    const error = new Error("This order payment is not eligible for refund.");
+    const error = new Error(
+      "This order payment is not eligible for refund.",
+    );
     error.statusCode = 400;
     throw error;
   }
+
   let refundAmount = 0;
 
   for (const returnItem of returnRequest.items) {
@@ -334,39 +347,55 @@ export const processReturnRefundService = async (returnId) => {
     throw error;
   }
 
-  const refund = await refundPartialPaymentService(order, refundAmount);
+  returnRequest.refundStatus = "Pending";
+  await returnRequest.save();
+
+  let refund;
+  try {
+    refund = await refundPartialPaymentService(order, refundAmount);
+  } catch (refundError) {
+    returnRequest.refundStatus = "Failed";
+    await returnRequest.save();
+    throw refundError;
+  }
 
   if (!refund) {
+    returnRequest.refundStatus = "Failed";
+    await returnRequest.save();
     const error = new Error("Refund could not be processed.");
     error.statusCode = 500;
     throw error;
   }
 
-  order.refundStatus = refund.status === "processed" ? "Processed" : "Pending";
-
-  order.refundAmount = refundAmount;
-  order.razorpayRefundId = refund.id;
-
   if (refund.status === "processed") {
-    order.paymentStatus = "Refunded";
-    order.refundDate = new Date();
-  }
-
-  returnRequest.items.forEach((returnItem) => {
-    const orderItem = order.products.find(
-      (item) =>
-        item.product &&
-        item.product.toString() === returnItem.product.toString(),
-    );
-
-    if (orderItem && refund.status === "processed") {
-      orderItem.returnStatus = "Refunded";
-    }
-  });
-
-  if (refund.status === "processed") {
+    returnRequest.refundStatus = "Processed";
+    returnRequest.refundAmount = refundAmount;
+    returnRequest.refundedAt = new Date();
     returnRequest.status = "Completed";
     returnRequest.completedAt = new Date();
+
+    order.refundStatus = "Processed";
+    order.refundAmount = refundAmount;
+    order.razorpayRefundId = refund.id;
+    order.paymentStatus = "Refunded";
+    order.refundDate = new Date();
+
+    returnRequest.items.forEach((returnItem) => {
+      const orderItem = order.products.find(
+        (item) =>
+          item.product &&
+          item.product.toString() === returnItem.product.toString(),
+      );
+
+      if (orderItem) {
+        orderItem.returnStatus = "Refunded";
+      }
+    });
+  } else {
+    returnRequest.refundStatus = "Pending";
+    order.refundStatus = "Pending";
+    order.refundAmount = refundAmount;
+    order.razorpayRefundId = refund.id;
   }
 
   await order.save();
@@ -376,7 +405,7 @@ export const processReturnRefundService = async (returnId) => {
     .populate("user", "fullName email phoneNumber")
     .populate(
       "order",
-      "orderNumber orderStatus totalAmount paymentMethod paymentStatus refundStatus refundAmount razorpayRefundId refundDate",
+      "orderNumber orderStatus totalAmount paymentMethod paymentStatus refundStatus refundAmount razorpayRefundId refundDate products",
     )
     .populate("items.product", "name price productImage image brand");
 };

@@ -147,7 +147,14 @@ export const refundPaymentService = async (order) => {
 
     await order.save();
 
-    throw error;
+    const message =
+      error.error?.description ||
+      error.description ||
+      error.message ||
+      "Razorpay refund failed.";
+    const customError = new Error(message);
+    customError.statusCode = error.statusCode || 400;
+    throw customError;
   }
 };
 
@@ -216,15 +223,13 @@ export const refundPartialPaymentService = async (order, amount) => {
 
     return refund;
   } catch (error) {
-  const message =
-    error.error?.description ||
-    error.description ||
-    error.message ||
-    "Razorpay refund failed.";
-
-  const customError = new Error(message);
-  customError.statusCode = error.statusCode || 400;
-
-  throw customError;
-}
+    const message =
+      error.error?.description ||
+      error.description ||
+      error.message ||
+      "Razorpay refund failed.";
+    const customError = new Error(message);
+    customError.statusCode = error.statusCode || 400;
+    throw customError;
+  }
 };
