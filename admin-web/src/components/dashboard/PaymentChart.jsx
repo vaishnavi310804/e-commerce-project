@@ -9,11 +9,11 @@ import {
 } from "recharts";
 import ChartCard from "./ChartCard";
 
-const COLORS = ["#10b981", "#3b82f6", "#8b5cf6", "#f59e0b", "#ec4899"];
+const COLORS = [ "#3b82f6", "#8b5cf6", "#ec4899"];
 
 const PaymentChart = ({ data = [] }) => {
   return (
-    <ChartCard title="Payment Methods" subtitle="Orders breakdown by payment method">
+    <ChartCard title="Payment Methods" subtitle="Orders payment method">
       <ResponsiveContainer width="100%" height={280}>
         <PieChart>
           <Pie

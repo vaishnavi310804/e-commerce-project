@@ -5,7 +5,7 @@ import ChartCard from "./ChartCard";
 
 const CategoryChart = ({ data = [] }) => {
   return (
-    <ChartCard title="Product Categories" subtitle="Products distribution by category">
+    <ChartCard title="Product Categories" subtitle="Products per category">
       <ResponsiveContainer width="100%" height={280}>
         <PieChart>
           <Pie

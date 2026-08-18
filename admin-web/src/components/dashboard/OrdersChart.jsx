@@ -4,7 +4,7 @@ import ChartCard from "./ChartCard";
 
 const OrdersChart = ({ data = [] }) => {
   return (
-    <ChartCard title="Monthly Orders Volume" subtitle="Total orders processed per month">
+    <ChartCard title="Monthly Orders" subtitle="Total orders per month">
       <ResponsiveContainer width="100%" height={280}>
         <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />

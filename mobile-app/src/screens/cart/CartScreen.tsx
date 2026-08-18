@@ -187,8 +187,7 @@ const CartScreen = () => {
         )}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Ionicons name="cart-outline" size={70} color={Colors.gray} />
-            <Text style={styles.emptyText}>Your cart is empty</Text>
+            <Text style={styles.emptyText}>Your cart is empty!!</Text>
           </View>
         }
         ListFooterComponent={

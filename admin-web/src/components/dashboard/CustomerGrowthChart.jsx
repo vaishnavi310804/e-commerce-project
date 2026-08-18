@@ -4,21 +4,15 @@ import ChartCard from "./ChartCard";
 
 const CustomerGrowthChart = ({ data = [] }) => {
   return (
-    <ChartCard title="Customer Growth" subtitle="New customer signups per month">
+    <ChartCard title="Customer Growth" subtitle="New customer per month">
       <ResponsiveContainer width="100%" height={280}>
         <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-          <defs>
-            <linearGradient id="colorCustomers" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
-            </linearGradient>
-          </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-          <XAxis dataKey="month" tick={{ fontSize: 12, fill: "#64748b" }} />
-          <YAxis tick={{ fontSize: 12, fill: "#64748b" }} />
+          <XAxis dataKey="month" tick={{ fontSize: 12, fill: "#797979" }} />
+          <YAxis tick={{ fontSize: 12, fill: "#797979" }} />
           <Tooltip
             formatter={(val) => [`${val} customers`, "New Customers"]}
-            contentStyle={{ backgroundColor: "#1e293b", borderRadius: "8px", color: "#fff", border: "none" }}
+            contentStyle={{ backgroundColor: "#6547C9", borderRadius: "8px", color: "#fff", border: "none" }}
           />
           <Area
             type="monotone"
