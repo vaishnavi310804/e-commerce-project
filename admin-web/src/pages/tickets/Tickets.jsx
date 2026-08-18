@@ -9,7 +9,7 @@ import {
 } from "react-icons/fa";
 import TicketTable from "../../components/tickets/TicketTable";
 import TicketDetailsModal from "../../components/tickets/TicketDetailsModal";
-import { getAllTickets } from "../../services/ticketApi";
+import { getAllTickets, assignTicket } from "../../services/ticketApi";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -102,6 +102,22 @@ const Tickets = () => {
   const handleViewTicket = (ticket) => {
     setSelectedTicket(ticket);
     setShowDetailsModal(true);
+  };
+
+  const handleAssignTicket = async (ticket, assignedTo) => {
+    try {
+      const response = await assignTicket(ticket._id, assignedTo);
+
+      if (selectedTicket && selectedTicket._id === ticket._id) {
+        setSelectedTicket(response.data);
+      }
+
+      await fetchTickets();
+    } catch (error) {
+      console.error("FAILED TO ASSIGN TICKET:", error);
+
+      alert(error.response?.data?.message || "Failed to assign ticket.");
+    }
   };
 
   return (
@@ -291,6 +307,7 @@ const Tickets = () => {
             setShowDetailsModal(false);
             setSelectedTicket(null);
           }}
+          onAssign={handleAssignTicket}
         />
       </div>
     </DashboardLayout>

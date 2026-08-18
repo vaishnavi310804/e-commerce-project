@@ -16,7 +16,7 @@ export const getTicketDetails = async (ticketId) => {
 
 export const assignTicket = async (ticketId, assignedTo) => {
   const response = await ecommerceApi.patch(
-    `/tickets/admin/${ticketId}/assign`,
+    `/ticket/admin/${ticketId}/assign`,
     {
       assignedTo,
     },

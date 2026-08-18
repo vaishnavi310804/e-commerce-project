@@ -22,7 +22,7 @@ const AssignTicketModal = ({
 
         const adminsData = await getAllAdmins();
 
-setAdmins(Array.isArray(adminsData) ? adminsData : []);
+        setAdmins(Array.isArray(adminsData) ? adminsData : []);
 
         if (ticket?.assignedTo?._id) {
           setSelectedAdmin(ticket.assignedTo._id);
@@ -91,9 +91,7 @@ setAdmins(Array.isArray(adminsData) ? adminsData : []);
 
         <div className="space-y-5 px-6 py-6">
           <div className="rounded-xl bg-gray-50 p-4">
-            <p className="text-xs font-semibold text-gray-400">
-              Ticket
-            </p>
+            <p className="text-xs font-semibold text-gray-400">Ticket</p>
 
             <p className="mt-1 font-semibold text-gray-800">
               {ticket.ticketNumber || ticket._id}

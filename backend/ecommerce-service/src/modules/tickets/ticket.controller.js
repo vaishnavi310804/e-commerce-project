@@ -104,7 +104,6 @@ export const assignTicket = async (req, res, next) => {
       req.params.id,
       req.body.assignedTo,
     );
-
     return res.status(200).json({
       success: true,
       message: "Ticket assigned successfully.",
