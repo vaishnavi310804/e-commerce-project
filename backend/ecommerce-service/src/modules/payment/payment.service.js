@@ -98,7 +98,7 @@ export const refundPaymentService = async (order) => {
     return null;
   }
 
-  if (order.paymentStatus !== "Paid") {
+  if (order.paymentStatus !== "Paid" && order.paymentStatus !== "Refunded") {
     throw new Error("Payment is not eligible for refund.");
   }
 
@@ -106,11 +106,11 @@ export const refundPaymentService = async (order) => {
     throw new Error("Razorpay payment ID not found.");
   }
 
-  if (order.refundStatus === "Processed") {
-    throw new Error("This order has already been refunded.");
+  if (order.refundStatus === "Processed" && order.refundAmount >= order.totalAmount) {
+    throw new Error("This order has already been fully refunded.");
   }
-  if (order.razorpayRefundId) {
-    throw new Error("A refund has already been initiated for this order.");
+  if (order.razorpayRefundId && order.refundStatus === "Pending") {
+    throw new Error("A refund is currently pending for this order.");
   }
 
   const refundAmount = Math.round(order.totalAmount * 100);
@@ -187,7 +187,7 @@ export const refundPartialPaymentService = async (order, amount) => {
     throw error;
   }
 
-  if (order.paymentStatus !== "Paid") {
+  if (order.paymentStatus !== "Paid" && order.paymentStatus !== "Refunded") {
     const error = new Error("Payment is not eligible for refund.");
     error.statusCode = 400;
     throw error;

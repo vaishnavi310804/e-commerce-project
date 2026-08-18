@@ -273,6 +273,7 @@ export const updateReturnStatusService = async (returnId, status) => {
 };
 
 export const processReturnRefundService = async (returnId) => {
+  // STEP 1 — LOAD AND VALIDATE RETURN
   const returnRequest = await Return.findById(returnId);
 
   if (!returnRequest) {
@@ -289,6 +290,14 @@ export const processReturnRefundService = async (returnId) => {
     throw error;
   }
 
+  // STEP 2 — PREVENT DUPLICATE REFUND OF SAME RETURN
+  if (returnRequest.refundStatus === "Processed") {
+    const error = new Error("This return has already been refunded.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  // STEP 3 — LOAD ORDER
   const order = await Order.findById(returnRequest.order);
 
   if (!order) {
@@ -305,7 +314,7 @@ export const processReturnRefundService = async (returnId) => {
     throw error;
   }
 
-  if (order.paymentStatus !== "Paid") {
+  if (order.paymentStatus !== "Paid" && order.paymentStatus !== "Refunded") {
     const error = new Error(
       "This order payment is not eligible for refund.",
     );
@@ -313,7 +322,14 @@ export const processReturnRefundService = async (returnId) => {
     throw error;
   }
 
-  let refundAmount = 0;
+  if (!order.razorpayPaymentId) {
+    const error = new Error("Razorpay payment ID not found.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  // STEP 4 — CALCULATE CURRENT RETURN AMOUNT
+  let requestedRefundAmount = 0;
 
   for (const returnItem of returnRequest.items) {
     const orderItem = order.products.find(
@@ -330,6 +346,12 @@ export const processReturnRefundService = async (returnId) => {
       throw error;
     }
 
+    if (!returnItem.quantity || returnItem.quantity < 1) {
+      const error = new Error("Return quantity must be at least 1.");
+      error.statusCode = 400;
+      throw error;
+    }
+
     if (returnItem.quantity > orderItem.quantity) {
       const error = new Error(
         "Return quantity cannot exceed the ordered quantity.",
@@ -338,25 +360,73 @@ export const processReturnRefundService = async (returnId) => {
       throw error;
     }
 
-    refundAmount += orderItem.price * returnItem.quantity;
+    requestedRefundAmount += orderItem.price * returnItem.quantity;
   }
 
-  if (refundAmount <= 0) {
+  if (requestedRefundAmount <= 0) {
     const error = new Error("Refund amount must be greater than zero.");
     error.statusCode = 400;
     throw error;
   }
 
+  // STEP 5 — CALCULATE CUMULATIVE REFUNDS FROM PROCESSED RETURNS
+  const processedReturns = await Return.find({
+    order: returnRequest.order,
+    refundStatus: "Processed",
+    _id: { $ne: returnRequest._id },
+  });
+
+  const alreadyRefunded = processedReturns.reduce(
+    (sum, ret) => sum + (Number(ret.refundAmount) || 0),
+    0,
+  );
+
+  // STEP 6 & 7 — CALCULATE REMAINING BALANCE AND VALIDATE
+  const remainingRefundableBalance = Math.max(
+    0,
+    (Number(order.totalAmount) || 0) - alreadyRefunded,
+  );
+
+  if (remainingRefundableBalance <= 0) {
+    const error = new Error("This order has no remaining refundable balance.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (requestedRefundAmount > remainingRefundableBalance) {
+    const error = new Error(
+      `Requested refund of ₹${requestedRefundAmount.toFixed(
+        2,
+      )} exceeds the remaining refundable balance of ₹${remainingRefundableBalance.toFixed(
+        2,
+      )} for this order.`,
+    );
+    error.statusCode = 400;
+    throw error;
+  }
+
+  // STEP 8 — MARK RETURN REFUND AS PENDING BEFORE CALLING RAZORPAY
   returnRequest.refundStatus = "Pending";
+  returnRequest.refundAmount = requestedRefundAmount;
   await returnRequest.save();
 
+  // STEP 9 — CALL RAZORPAY
   let refund;
   try {
-    refund = await refundPartialPaymentService(order, refundAmount);
+    refund = await refundPartialPaymentService(order, requestedRefundAmount);
   } catch (refundError) {
+    // STEP 10 — HANDLE RAZORPAY FAILURE
     returnRequest.refundStatus = "Failed";
     await returnRequest.save();
-    throw refundError;
+
+    const message =
+      refundError.error?.description ||
+      refundError.description ||
+      refundError.message ||
+      "Razorpay refund failed.";
+    const customError = new Error(message);
+    customError.statusCode = refundError.statusCode || 400;
+    throw customError;
   }
 
   if (!refund) {
@@ -367,19 +437,26 @@ export const processReturnRefundService = async (returnId) => {
     throw error;
   }
 
+  // STEP 11 — HANDLE RAZORPAY SUCCESS
   if (refund.status === "processed") {
     returnRequest.refundStatus = "Processed";
-    returnRequest.refundAmount = refundAmount;
+    returnRequest.refundAmount = requestedRefundAmount;
     returnRequest.refundedAt = new Date();
     returnRequest.status = "Completed";
     returnRequest.completedAt = new Date();
 
-    order.refundStatus = "Processed";
-    order.refundAmount = refundAmount;
+    // STEP 12 — UPDATE ORDER REFUND ACCOUNTING
+    const newCumulativeRefund = alreadyRefunded + requestedRefundAmount;
+    order.refundAmount = newCumulativeRefund;
     order.razorpayRefundId = refund.id;
-    order.paymentStatus = "Refunded";
+    order.refundStatus = "Processed";
     order.refundDate = new Date();
 
+    if (newCumulativeRefund >= order.totalAmount) {
+      order.paymentStatus = "Refunded";
+    }
+
+    // STEP 13 — UPDATE RETURNED ORDER ITEMS
     returnRequest.items.forEach((returnItem) => {
       const orderItem = order.products.find(
         (item) =>
@@ -391,16 +468,21 @@ export const processReturnRefundService = async (returnId) => {
         orderItem.returnStatus = "Refunded";
       }
     });
+
+    await order.save();
+    await returnRequest.save();
   } else {
+    // Pending Razorpay refund status
     returnRequest.refundStatus = "Pending";
     order.refundStatus = "Pending";
-    order.refundAmount = refundAmount;
+    order.refundAmount = alreadyRefunded + requestedRefundAmount;
     order.razorpayRefundId = refund.id;
+
+    await order.save();
+    await returnRequest.save();
   }
 
-  await order.save();
-  await returnRequest.save();
-
+  // STEP 14 — RETURN POPULATED RESPONSE
   return await Return.findById(returnRequest._id)
     .populate("user", "fullName email phoneNumber")
     .populate(
