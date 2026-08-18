@@ -7,8 +7,11 @@ export const sendNotificationToUser = async ({
   body,
   data = {},
 }) => {
+  let fcmToken = null;
+
   try {
     const user = await User.findById(userId);
+
     if (!user) {
       throw new Error("User not found.");
     }
@@ -18,8 +21,10 @@ export const sendNotificationToUser = async ({
       return;
     }
 
+    fcmToken = user.fcmToken;
+
     const message = {
-      token: user.fcmToken,
+      token: fcmToken,
       notification: {
         title,
         body,
@@ -29,11 +34,36 @@ export const sendNotificationToUser = async ({
         return acc;
       }, {}),
     };
+
     const response = await messaging.send(message);
+
     console.log("Notification sent:", response);
+
     return response;
   } catch (error) {
     console.error("Notification Error:", error);
+
+    if (
+      error?.code === "messaging/registration-token-not-registered" ||
+      error?.message?.includes("NotRegistered")
+    ) {
+      console.log(`Clearing invalid FCM token for user: ${userId}`);
+
+      await User.findOneAndUpdate(
+        {
+          _id: userId,
+          fcmToken: fcmToken,
+        },
+        {
+          $unset: {
+            fcmToken: "",
+          },
+        },
+      );
+
+      console.log("Invalid FCM token cleared.");
+    }
+
     throw error;
   }
 };
