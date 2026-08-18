@@ -13,7 +13,8 @@ import {
   verifyEmailChangeOtp,
   verifyRegistrationOtp,
   updateFcmToken,
-  updateCurrentLocation
+  updateCurrentLocation,
+  getAllAdmins
 } from "./auth.controller.js";
 import {
   registerValidation,
@@ -36,6 +37,12 @@ const router = express.Router();
 
 router.post("/register", registerValidation, validate, registerUser);
 router.post("/admin/login", adminLoginValidation, validate, adminLogin);
+router.get(
+  "/admins",
+  protect,
+  authorize("ADMIN"),
+  getAllAdmins,
+);
 router.post("/login", loginValidation, validate, loginUser);
 router.get("/me", protect, getCurrentUser);
 router.post("/logout", protect, logoutUser);

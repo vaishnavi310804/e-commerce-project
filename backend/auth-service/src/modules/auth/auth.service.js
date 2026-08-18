@@ -464,3 +464,10 @@ export const updateCurrentLocationService = async (
 
   return user;
 };
+
+export const getAllAdminsService = async () => {
+  return await User.find(
+    { role: "ADMIN" },
+    "fullName email _id"
+  ).sort({ fullName: 1 });
+};

@@ -13,6 +13,7 @@ import ResetPassword from "../pages/auth/ResetPassword";
 import Refunds from "../pages/refunds/Refunds";
 import Shipment from "../pages/shipments/Shipment";
 import Returns from "../pages/returns/Returns";
+import Tickets from "../pages/tickets/Tickets";
 
 function AppRoutes() {
   return (
@@ -87,6 +88,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <Reviews />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/tickets"
+        element={
+          <ProtectedRoute>
+            <Tickets />
           </ProtectedRoute>
         }
       />

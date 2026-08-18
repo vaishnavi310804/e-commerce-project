@@ -11,7 +11,8 @@ import {
   verifyEmailChangeOTPService,
   verifyRegistrationOTPService,
   updateFcmTokenService,
-  updateCurrentLocationService
+  updateCurrentLocationService,
+  getAllAdminsService
 } from "./auth.service.js";
 
 export const registerUser = async (req, res, next) => {
@@ -266,6 +267,19 @@ export const updateCurrentLocation = async (req, res, next) => {
       success: true,
       message: "Current location updated successfully.",
       data: user.currentLocation,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getAllAdmins = async (req, res, next) => {
+  try {
+    const admins = await getAllAdminsService();
+
+    return res.status(200).json({
+      success: true,
+      data: admins,
     });
   } catch (error) {
     next(error);

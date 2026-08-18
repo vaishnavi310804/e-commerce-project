@@ -17,6 +17,7 @@ import {
   FaUndoAlt,
   FaTruck,
   FaBan,
+  FaTicketAlt,
 } from "react-icons/fa";
 
 const Sidebar = () => {
@@ -116,6 +117,8 @@ const Sidebar = () => {
             <SidebarItem icon={FaUsers} title="Customers" path="/customers" />
 
             <SidebarItem icon={FaStar} title="Reviews" path="/reviews" />
+
+            <SidebarItem icon={FaTicketAlt} title="Tickets" path="/tickets" />
           </nav>
         </div>
 

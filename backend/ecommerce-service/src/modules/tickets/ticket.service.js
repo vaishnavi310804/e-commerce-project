@@ -217,14 +217,17 @@ export const assignTicketService = async (
   }
 
   const admin = await Ticket.db
-    .model("User")
-    .findById(assignedTo);
+  .model("User")
+  .findOne({
+    _id: assignedTo,
+    role: "ADMIN",
+  });
 
-  if (!admin) {
-    const error = new Error("Assigned admin not found.");
-    error.statusCode = 404;
-    throw error;
-  }
+if (!admin) {
+  const error = new Error("Assigned user must be an admin.");
+  error.statusCode = 400;
+  throw error;
+}
 
   ticket.assignedTo = assignedTo;
 
