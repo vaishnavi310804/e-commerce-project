@@ -211,12 +211,6 @@ const Tickets = () => {
               </h3>
             </div>
           </div>
-
-          <div className="flex min-w-0 items-center gap-4 rounded-xl bg-white p-5 shadow">
-            <div className="shrink-0 rounded-xl bg-purple-50 p-3 text-purple-600">
-              <FaExclamationTriangle size={22} />
-            </div>
-          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 rounded-xl bg-white p-4 shadow">

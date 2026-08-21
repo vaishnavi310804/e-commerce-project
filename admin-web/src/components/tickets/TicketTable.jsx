@@ -133,15 +133,13 @@ const TicketTable = ({
                       />
                     </td>
 
-                    <td className="whitespace-nowrap px-6 py-4">
+                    <td className="whitespace-nowrap px-4 py-4">
                       {ticket.slaBreached ? (
                         <div className="flex items-center gap-1.5 text-xs font-semibold text-red-600">
-                          <FaExclamationTriangle size={12} />
                           Breached
                         </div>
                       ) : (
                         <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-600">
-                          <FaClock size={12} />
                           Within SLA
                         </div>
                       )}
