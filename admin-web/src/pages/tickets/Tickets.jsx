@@ -216,16 +216,6 @@ const Tickets = () => {
             <div className="shrink-0 rounded-xl bg-purple-50 p-3 text-purple-600">
               <FaExclamationTriangle size={22} />
             </div>
-
-            <div className="min-w-0">
-              <p className="text-xs font-semibold text-gray-500">
-                SLA Breached
-              </p>
-
-              <h3 className="text-2xl font-bold text-gray-800">
-                {breachedTickets}
-              </h3>
-            </div>
           </div>
         </div>
 

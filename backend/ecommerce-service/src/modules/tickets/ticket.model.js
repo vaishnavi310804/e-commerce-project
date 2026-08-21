@@ -1,47 +1,5 @@
 import mongoose from "mongoose";
 
-const ticketMessageSchema = new mongoose.Schema(
-  {
-    sender: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-
-    senderRole: {
-      type: String,
-      enum: ["CUSTOMER", "ADMIN"],
-      required: true,
-    },
-
-    message: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    attachments: [
-      {
-        url: {
-          type: String,
-          trim: true,
-        },
-        publicId: {
-          type: String,
-          trim: true,
-        },
-        fileName: {
-          type: String,
-          trim: true,
-        },
-      },
-    ],
-  },
-  {
-    timestamps: true,
-  },
-);
-
 const ticketSchema = new mongoose.Schema(
   {
     ticketNumber: {
@@ -91,23 +49,6 @@ const ticketSchema = new mongoose.Schema(
       trim: true,
     },
 
-    attachments: [
-      {
-        url: {
-          type: String,
-          trim: true,
-        },
-        publicId: {
-          type: String,
-          trim: true,
-        },
-        fileName: {
-          type: String,
-          trim: true,
-        },
-      },
-    ],
-
     priority: {
       type: String,
       enum: ["Low", "Medium", "High", "Critical"],
@@ -145,8 +86,6 @@ const ticketSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-
-    messages: [ticketMessageSchema],
 
     resolution: {
       type: String,

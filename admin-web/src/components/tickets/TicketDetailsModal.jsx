@@ -333,48 +333,6 @@ const TicketDetailsModal = ({ open, ticket, onClose, onAssign }) => {
                   )}
                 </div>
               )}
-
-              {/* {ticket.messages?.length > 0 && (
-                <div className="rounded-xl border border-gray-200 p-5">
-                  <h3 className="mb-4 text-sm font-semibold text-gray-700">
-                    Conversation
-                  </h3>
-
-                  <div className="space-y-4">
-                    {ticket.messages.map((message, index) => (
-                      <div
-                        key={message._id || index}
-                        className={`rounded-xl p-4 ${
-                          message.senderRole === "ADMIN"
-                            ? "ml-6 bg-indigo-50"
-                            : "mr-6 bg-gray-50"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between gap-3">
-                          <div>
-                            <p className="text-sm font-semibold text-gray-800">
-                              {message.sender?.fullName ||
-                                message.senderRole}
-                            </p>
-
-                            <p className="text-xs text-gray-400">
-                              {message.senderRole}
-                            </p>
-                          </div>
-
-                          <p className="shrink-0 text-xs text-gray-400">
-                            {formatDate(message.createdAt)}
-                          </p>
-                        </div>
-
-                        <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-gray-700">
-                          {message.message}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )} */}
             </div>
           </div>
 

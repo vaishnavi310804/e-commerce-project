@@ -87,7 +87,6 @@ export const getMyTicketDetailsService = async (userId, ticketId) => {
       "orderNumber orderStatus paymentMethod paymentStatus totalAmount",
     )
     .populate("assignedTo", "fullName email")
-    .populate("messages.sender", "fullName email");
 
   if (!ticket) {
     const error = new Error("Ticket not found.");
@@ -135,7 +134,6 @@ export const getTicketDetailsService = async (ticketId) => {
       "orderNumber orderStatus paymentMethod paymentStatus totalAmount",
     )
     .populate("assignedTo", "fullName email")
-    .populate("messages.sender", "fullName email");
 
   if (!ticket) {
     const error = new Error("Ticket not found.");
@@ -144,64 +142,6 @@ export const getTicketDetailsService = async (ticketId) => {
   }
 
   return ticket;
-};
-
-export const addTicketMessageService = async (
-  userId,
-  userRole,
-  ticketId,
-  payload,
-) => {
-  const { message, attachments = [] } = payload;
-
-  const ticket = await Ticket.findById(ticketId);
-
-  if (!ticket) {
-    const error = new Error("Ticket not found.");
-    error.statusCode = 404;
-    throw error;
-  }
-
-  if (userRole === "CUSTOMER") {
-  if (ticket.user.toString() !== userId.toString()) {
-    const error = new Error(
-      "You are not authorized to access this ticket.",
-    );
-    error.statusCode = 403;
-    throw error;
-  }
-}
-
-  if (ticket.status === "Closed") {
-    const error = new Error("Closed tickets cannot receive new messages.");
-    error.statusCode = 400;
-    throw error;
-  }
-
-  ticket.messages.push({
-    sender: userId,
-    senderRole: userRole,
-    message,
-    attachments,
-  });
-
-  if (
-    userRole === "ADMIN" &&
-    ticket.status === "Open"
-  ) {
-    ticket.status = "In Progress";
-  }
-
-  await ticket.save();
-
-  return await Ticket.findById(ticket._id)
-    .populate("user", "fullName email phoneNumber")
-    .populate(
-      "order",
-      "orderNumber orderStatus paymentMethod paymentStatus totalAmount",
-    )
-    .populate("assignedTo", "fullName email")
-    .populate("messages.sender", "fullName email");
 };
 
 export const assignTicketService = async (
@@ -346,7 +286,6 @@ export const updateTicketStatusService = async (
       "orderNumber orderStatus paymentMethod paymentStatus totalAmount",
     )
     .populate("assignedTo", "fullName email")
-    .populate("messages.sender", "fullName email");
 };
 
 export const checkTicketSlaService = async () => {

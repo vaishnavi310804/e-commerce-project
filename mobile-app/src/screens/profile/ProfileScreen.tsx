@@ -43,6 +43,11 @@ const menuItems: MenuItem[] = [
     route: "/wishlist",
   },
   {
+    title: "Tickets",
+    icon: <Ionicons name="ticket-outline" size={22} color={Colors.primary} />,
+    route: "/ticket-details",
+  },
+  {
     title: "Settings",
     icon: <Feather name="settings" size={22} color={Colors.primary} />,
     route: "/settings",

@@ -4,7 +4,6 @@ import {
   getMyTicketDetailsService,
   getAllTicketsService,
   getTicketDetailsService,
-  addTicketMessageService,
   assignTicketService,
   updateTicketPriorityService,
   escalateTicketService,
@@ -70,27 +69,6 @@ export const getTicketDetails = async (req, res, next) => {
 
     return res.status(200).json({
       success: true,
-      data: ticket,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const addTicketMessage = async (req, res, next) => {
-  try {
-    const userRole = req.user.role === "ADMIN" ? "ADMIN" : "CUSTOMER";
-
-    const ticket = await addTicketMessageService(
-      req.user._id,
-      userRole,
-      req.params.id,
-      req.body,
-    );
-
-    return res.status(200).json({
-      success: true,
-      message: "Message added successfully.",
       data: ticket,
     });
   } catch (error) {

@@ -49,22 +49,6 @@ export const ticketIdValidation = [
     .withMessage("Invalid ticket ID."),
 ];
 
-export const addTicketMessageValidation = [
-  param("id")
-    .isMongoId()
-    .withMessage("Invalid ticket ID."),
-
-  body("message")
-    .trim()
-    .notEmpty()
-    .withMessage("Message is required."),
-
-  body("attachments")
-    .optional()
-    .isArray()
-    .withMessage("Attachments must be an array."),
-];
-
 export const updateTicketStatusValidation = [
   param("id")
     .isMongoId()

@@ -5,7 +5,6 @@ import {
   getMyTicketDetails,
   getAllTickets,
   getTicketDetails,
-  addTicketMessage,
   assignTicket,
   updateTicketPriority,
   escalateTicket,
@@ -14,7 +13,6 @@ import {
 import {
   createTicketValidation,
   ticketIdValidation,
-  addTicketMessageValidation,
   updateTicketStatusValidation,
   updateTicketPriorityValidation,
   escalateTicketValidation,
@@ -50,13 +48,6 @@ router.get(
   getMyTicketDetails,
 );
 
-router.post(
-  "/:id/messages",
-  protect,
-  authorize("CUSTOMER"),
-  addTicketMessageValidation,
-  addTicketMessage,
-);
 
 router.get(
   "/",
@@ -72,14 +63,6 @@ router.get(
   authorize("ADMIN"),
   ticketIdValidation,
   getTicketDetails,
-);
-
-router.post(
-  "/admin/:id/messages",
-  protect,
-  authorize("ADMIN"),
-  addTicketMessageValidation,
-  addTicketMessage,
 );
 
 router.patch(
