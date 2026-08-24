@@ -40,3 +40,11 @@ export const updateTicketStatus = async (
 
   return response.data;
 };
+
+export const escalateTicket = async (ticketId) => {
+  const response = await ecommerceApi.patch(
+    `/ticket/admin/${ticketId}/escalate`,
+  );
+
+  return response.data;
+};

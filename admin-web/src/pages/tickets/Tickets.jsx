@@ -435,6 +435,8 @@ const Tickets = () => {
           ticket={selectedTicket}
           onClose={handleCloseDetailsModal}
           onAssign={handleAssignTicket}
+          onUpdated={handleTicketStatusUpdated}
+          onEscalated={handleTicketStatusUpdated}
         />
 
         <UpdateTicketStatusModal
