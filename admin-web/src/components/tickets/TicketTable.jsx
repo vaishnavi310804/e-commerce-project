@@ -1,6 +1,11 @@
-import React from 'react'
-import StatusBadge from '../orders/StatusBadge';
-import { FaEye, FaExclamationTriangle, FaClock } from "react-icons/fa";
+import React from "react";
+import StatusBadge from "../orders/StatusBadge";
+import {
+  FaEye,
+  FaExclamationTriangle,
+  FaClock,
+  FaEdit,
+} from "react-icons/fa";
 
 const priorityStyles = {
   Low: "bg-green-100 text-green-700 border-green-200",
@@ -13,8 +18,9 @@ const TicketTable = ({
   tickets,
   loading,
   onViewTicket,
+  onUpdateTicket,
 }) => {
-    if (loading) {
+  if (loading) {
     return (
       <div className="rounded-xl bg-white p-6 text-center text-gray-500 shadow">
         Loading tickets...
@@ -29,6 +35,7 @@ const TicketTable = ({
       </div>
     );
   }
+
   return (
     <>
       <div className="hidden overflow-hidden rounded-xl bg-white shadow md:block">
@@ -87,7 +94,8 @@ const TicketTable = ({
                     className="transition hover:bg-gray-50/80"
                   >
                     <td className="whitespace-nowrap px-6 py-4 font-medium text-gray-800">
-                      {ticket.ticketNumber || ticket._id?.substring(18)}
+                      {ticket.ticketNumber ||
+                        ticket._id?.substring(18)}
                     </td>
 
                     <td className="whitespace-nowrap px-6 py-4 text-gray-700">
@@ -136,10 +144,12 @@ const TicketTable = ({
                     <td className="whitespace-nowrap px-4 py-4">
                       {ticket.slaBreached ? (
                         <div className="flex items-center gap-1.5 text-xs font-semibold text-red-600">
+                          <FaExclamationTriangle size={11} />
                           Breached
                         </div>
                       ) : (
                         <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-600">
+                          <FaClock size={11} />
                           Within SLA
                         </div>
                       )}
@@ -147,7 +157,9 @@ const TicketTable = ({
 
                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
                       {ticket.createdAt
-                        ? new Date(ticket.createdAt).toLocaleDateString()
+                        ? new Date(
+                            ticket.createdAt,
+                          ).toLocaleDateString()
                         : "—"}
                     </td>
 
@@ -155,6 +167,7 @@ const TicketTable = ({
                       <TicketActions
                         ticket={ticket}
                         onViewTicket={onViewTicket}
+                        onUpdateTicket={onUpdateTicket}
                       />
                     </td>
                   </tr>
@@ -184,13 +197,15 @@ const TicketTable = ({
                   </p>
 
                   <h3 className="mt-1 truncate text-sm font-bold text-gray-900">
-                    {ticket.ticketNumber || ticket._id?.substring(18)}
+                    {ticket.ticketNumber ||
+                      ticket._id?.substring(18)}
                   </h3>
                 </div>
 
                 <TicketActions
                   ticket={ticket}
                   onViewTicket={onViewTicket}
+                  onUpdateTicket={onUpdateTicket}
                 />
               </div>
 
@@ -219,7 +234,9 @@ const TicketTable = ({
               <div className="mt-4 rounded-lg p-3">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs text-gray-400">Category</p>
+                    <p className="text-xs text-gray-400">
+                      Category
+                    </p>
 
                     <p className="mt-1 text-sm font-medium text-gray-700">
                       {ticket.category || "—"}
@@ -227,7 +244,9 @@ const TicketTable = ({
                   </div>
 
                   <div>
-                    <p className="text-xs text-gray-400">Priority</p>
+                    <p className="text-xs text-gray-400">
+                      Priority
+                    </p>
 
                     <span
                       className={`mt-1 inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${
@@ -240,7 +259,9 @@ const TicketTable = ({
                   </div>
 
                   <div>
-                    <p className="text-xs text-gray-400">SLA</p>
+                    <p className="text-xs text-gray-400">
+                      SLA
+                    </p>
 
                     {ticket.slaBreached ? (
                       <div className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-red-600">
@@ -256,7 +277,9 @@ const TicketTable = ({
                   </div>
 
                   <div>
-                    <p className="text-xs text-gray-400">Created</p>
+                    <p className="text-xs text-gray-400">
+                      Created
+                    </p>
 
                     <p className="mt-1 text-sm font-medium text-gray-700">
                       {ticket.createdAt
@@ -268,6 +291,7 @@ const TicketTable = ({
                   </div>
                 </div>
               </div>
+
               <div className="mt-4 border-gray-100 pt-3">
                 <p className="mb-1 text-xs text-gray-400">
                   Status
@@ -296,6 +320,7 @@ const TicketTable = ({
 const TicketActions = ({
   ticket,
   onViewTicket,
+  onUpdateTicket,
 }) => {
   return (
     <div className="flex shrink-0 items-center gap-1">
@@ -307,8 +332,19 @@ const TicketActions = ({
       >
         <FaEye size={16} />
       </button>
+
+      {ticket.status !== "Closed" && (
+        <button
+          type="button"
+          onClick={() => onUpdateTicket(ticket)}
+          className="rounded-lg p-2 text-purple-600 transition hover:bg-purple-50 hover:text-purple-700"
+          title="Update Status"
+        >
+          <FaEdit size={16} />
+        </button>
+      )}
     </div>
   );
 };
 
-export default TicketTable
+export default TicketTable;

@@ -98,7 +98,7 @@ const OrderDetailsModal = ({ open, onClose, order, onSuccess }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="flex max-h-[90vh] w-full max-w-4xl flex-col rounded-2xl bg-white shadow-xl">
-        <div className="flex items-center justify-between border-b px-6 py-4">
+        <div className="flex items-center justify-between px-6 py-4">
           <div>
             <h2 className="text-xl font-semibold text-gray-800">
               Order Details - {order.orderNumber || order._id}
@@ -321,7 +321,7 @@ const OrderDetailsModal = ({ open, onClose, order, onSuccess }) => {
           </div>
         </div>
 
-        <div className="flex justify-end border-t px-6 py-4">
+        <div className="flex justify-end px-6 py-4">
           <button
             onClick={onClose}
             className="rounded-lg border border-gray-300 px-5 py-2 text-gray-700 hover:bg-gray-100"

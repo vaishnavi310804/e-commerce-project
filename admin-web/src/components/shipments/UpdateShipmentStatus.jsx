@@ -83,7 +83,7 @@ const UpdateShipmentStatus = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
   <div className="flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl">
 
-    <div className="flex shrink-0 items-center justify-between border-b px-6 py-4">
+    <div className="flex shrink-0 items-center justify-between px-6 py-4">
       <div>
         <h2 className="text-2xl font-semibold text-gray-800">
           Update Shipment Status

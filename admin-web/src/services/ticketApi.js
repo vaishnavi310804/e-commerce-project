@@ -24,3 +24,19 @@ export const assignTicket = async (ticketId, assignedTo) => {
 
   return response.data;
 };
+
+export const updateTicketStatus = async (
+  ticketId,
+  status,
+  resolution = "",
+) => {
+  const response = await ecommerceApi.patch(
+    `/ticket/admin/${ticketId}/status`,
+    {
+      status,
+      resolution,
+    },
+  );
+
+  return response.data;
+};

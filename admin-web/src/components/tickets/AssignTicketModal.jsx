@@ -64,7 +64,7 @@ const AssignTicketModal = ({
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl">
-        <div className="flex items-center justify-between border-b px-6 py-4">
+        <div className="flex items-center justify-between px-6 py-4">
           <div>
             <div className="flex items-center gap-2">
               <FaUserTie className="text-indigo-600" />
@@ -90,7 +90,7 @@ const AssignTicketModal = ({
         </div>
 
         <div className="space-y-5 px-6 py-6">
-          <div className="rounded-xl bg-gray-50 p-4">
+          <div className="rounded-xl p-4">
             <p className="text-xs font-semibold text-gray-400">Ticket</p>
 
             <p className="mt-1 font-semibold text-gray-800">
@@ -166,7 +166,7 @@ const AssignTicketModal = ({
           )}
         </div>
 
-        <div className="flex justify-end gap-3 border-t bg-white px-6 py-4">
+        <div className="flex justify-end gap-3 bg-white px-6 py-4">
           <button
             type="button"
             onClick={handleClose}

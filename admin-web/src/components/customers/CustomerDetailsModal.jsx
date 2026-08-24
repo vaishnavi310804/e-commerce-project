@@ -42,7 +42,7 @@ const CustomerDetailsModal = ({ open, onClose, customerId }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="flex max-h-[90vh] w-full max-w-3xl flex-col rounded-2xl bg-white shadow-xl">
-        <div className="flex items-center justify-between border-b px-6 py-4">
+        <div className="flex items-center justify-between px-6 py-4">
           <h2 className="text-xl font-semibold text-gray-800">
             Customer Profile & History
           </h2>
@@ -183,7 +183,7 @@ const CustomerDetailsModal = ({ open, onClose, customerId }) => {
               ) : (
                 <div className="overflow-hidden rounded-xl border border-gray-200">
                   <table className="w-full text-left text-sm">
-                    <thead className="bg-gray-50 border-b border-gray-200 text-gray-600">
+                    <thead className="bg-gray-50 border-gray-200 text-gray-600">
                       <tr>
                         <th className="px-4 py-2.5">Order ID</th>
                         <th className="px-4 py-2.5">Date</th>
@@ -216,7 +216,7 @@ const CustomerDetailsModal = ({ open, onClose, customerId }) => {
           </div>
         )}
 
-        <div className="flex justify-end border-t px-6 py-4">
+        <div className="flex justify-end px-6 py-4">
           <button
             onClick={onClose}
             className="rounded-lg border border-gray-300 px-5 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"

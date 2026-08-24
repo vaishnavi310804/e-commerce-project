@@ -125,7 +125,7 @@ const Sidebar = () => {
         <div className="pt-2 border-t border-slate-100">
           <button
             onClick={() => setOpenLogout(true)}
-            className="w-full px-3 py-1.5 rounded-lg flex items-center gap-2.5 text-red-600 hover:bg-red-50 text-sm font-medium transition-colors cursor-pointer"
+            className="w-full px-3 py-1.5 rounded-lg flex items-center gap-2.5 text-red-700 hover:bg-red-50 text-sm font-medium transition-colors cursor-pointer"
           >
             <FaSignOutAlt className="text-base shrink-0" />
             Logout

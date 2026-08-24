@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
 
   footerText: {
     fontFamily: Fonts.regular,
-    color: Colors.textSecondary,
+    color: "#797979",
   },
 
   signIn: {

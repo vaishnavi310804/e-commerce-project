@@ -89,7 +89,7 @@ const RefundProcessingModal = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl">
-        <div className="flex shrink-0 items-center justify-between border-b px-6 py-4">
+        <div className="flex shrink-0 items-center justify-between px-6 py-4">
           <div>
             <h2 className="text-xl font-semibold text-gray-800">
               Process Refund
@@ -166,7 +166,7 @@ const RefundProcessingModal = ({
                   return (
                     <div
                       key={`${product?._id || index}-${index}`}
-                      className="flex items-center justify-between gap-4 border-b border-gray-100 p-4 last:border-b-0"
+                      className="flex items-center justify-between gap-4 border-gray-100 p-4 last:border-b-0"
                     >
                       <div className="min-w-0">
                         <p className="truncate font-medium text-gray-800">
@@ -232,7 +232,7 @@ const RefundProcessingModal = ({
           </div>
         </div>
 
-        <div className="flex shrink-0 justify-end gap-3 border-t bg-white px-6 py-4">
+        <div className="flex shrink-0 justify-end gap-3 bg-white px-6 py-4">
           <button
             type="button"
             onClick={handleClose}

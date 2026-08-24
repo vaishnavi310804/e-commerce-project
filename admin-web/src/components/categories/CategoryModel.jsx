@@ -95,7 +95,7 @@ const CategoryModel = ({ open, onClose, category, onSuccess }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-xl">
-        <div className="flex items-center justify-between border-b px-6 py-4">
+        <div className="flex items-center justify-between px-6 py-4">
           <h2 className="text-xl font-semibold">
             {category ? "Edit Category" : "Add Category"}
           </h2>
@@ -182,7 +182,7 @@ const CategoryModel = ({ open, onClose, category, onSuccess }) => {
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 border-t px-6 py-4">
+          <div className="flex justify-end gap-3 px-6 py-4">
             <button
               type="button"
               onClick={handleClose}

@@ -68,7 +68,7 @@ const UpdateReturnStatus = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl">
-        <div className="flex items-center justify-between border-b px-6 py-4">
+        <div className="flex items-center justify-between px-6 py-4">
           <div>
             <h2 className="text-xl font-semibold text-gray-800">
               Update Return Status
@@ -144,7 +144,7 @@ const UpdateReturnStatus = ({
             )}
           </div>
 
-          <div className="flex justify-end gap-3 border-t bg-white px-6 py-4">
+          <div className="flex justify-end gap-3 bg-white px-6 py-4">
             <button
               type="button"
               onClick={handleClose}

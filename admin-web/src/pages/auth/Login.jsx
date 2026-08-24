@@ -8,9 +8,8 @@ const Login = () => {
 
       <div className="hidden lg:flex w-1/2 bg-[#8B5CF6] relative overflow-hidden">
 
-
-        <div className="absolute -top-24 -left-24 w-72 h-72 bg-white/10 rounded-full"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/10 rounded-full"></div>
+        {/* <div className="absolute -top-24 -left-24 w-72 h-72 bg-white/10 rounded-full"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/10 rounded-full"></div> */}
 
         <div className="relative z-10 flex flex-col justify-center px-20 text-white">
           <img
