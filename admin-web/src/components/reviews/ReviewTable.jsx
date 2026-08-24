@@ -293,8 +293,8 @@ const ReviewActions = ({
         onClick={() => onToggleHide(review)}
         className={`rounded-lg p-2 transition ${
           review.isHidden
-            ? "text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
-            : "text-amber-600 hover:bg-amber-50 hover:text-amber-700"
+            ? "text-green-600 hover:bg-green-50 hover:text-green-700"
+            : "text-blue-600 hover:bg-blue-50 hover:text-blue-700"
         }`}
         title={review.isHidden ? "Unhide Review" : "Hide Review"}
       >

@@ -15,7 +15,7 @@ const DeleteReviewModal = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-        <div className="flex items-center justify-between border-b pb-4">
+        <div className="flex items-center justify-between pb-4">
           <div className="flex items-center gap-3">
             <div className="rounded-full bg-red-100 p-2 text-red-600">
               <FaTrash size={18} />
@@ -56,7 +56,7 @@ const DeleteReviewModal = ({
           )}
         </div>
 
-        <div className="flex justify-end gap-3 border-t pt-4">
+        <div className="flex justify-end gap-3 pt-4">
           <button
             type="button"
             onClick={onClose}

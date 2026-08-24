@@ -163,9 +163,6 @@ const Reviews = () => {
     if (selectedIds.length === 0) return;
     try {
       await bulkHideReviews(selectedIds, isHidden);
-      showToast(
-        `Selected reviews ${isHidden ? "hidden" : "visible"} successfully.`
-      );
       setSelectedIds([]);
       await fetchReviewData();
     } catch (error) {

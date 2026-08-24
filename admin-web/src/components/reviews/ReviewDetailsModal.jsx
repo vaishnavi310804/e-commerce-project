@@ -17,7 +17,7 @@ const ReviewDetailsModal = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl bg-white shadow-xl">
+      <div className="flex max-h-[90vh] w-full max-w-xl flex-col rounded-2xl bg-white shadow-xl">
         <div className="flex items-center justify-between px-6 py-4">
           <h2 className="text-xl font-semibold text-gray-800">
             Review Details
