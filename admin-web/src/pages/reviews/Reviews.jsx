@@ -219,7 +219,7 @@ const Reviews = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-4">
         {toastMessage && (
           <div className="fixed top-5 right-5 z-50 rounded-xl bg-gray-900 px-5 py-3 text-sm font-medium text-white shadow-2xl transition">
             {toastMessage}
@@ -228,7 +228,10 @@ const Reviews = () => {
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">Reviews Dashboard</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Reviews Dashboard</h1>
+            <p className="mt-1 text-gray-500">
+              Manage all the customer reviews.
+            </p>
           </div>
         </div>
 

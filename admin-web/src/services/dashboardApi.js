@@ -25,8 +25,8 @@ export const getRecentOrders = async () => {
   return response.data;
 };
 
-export const getTopProducts = async () => {
-  const response = await ecommerceApi.get("/dashboard/top-products");
+export const getTopProducts = async (params = {}) => {
+  const response = await ecommerceApi.get("/dashboard/top-products", { params });
   return response.data;
 };
 

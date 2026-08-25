@@ -10,7 +10,6 @@ const getDateRange = (range, startDate, endDate) => {
   let prevStart = new Date();
   let prevEnd = new Date();
 
-  
   if (range === "today") {
     start.setHours(0, 0, 0, 0);
     prevStart.setDate(start.getDate() - 1);
@@ -21,6 +20,10 @@ const getDateRange = (range, startDate, endDate) => {
     start.setDate(now.getDate() - 7);
     prevStart.setDate(now.getDate() - 14);
     prevEnd.setDate(now.getDate() - 7);
+  } else if (range === "30days") {
+    start.setDate(now.getDate() - 30);
+    prevStart.setDate(now.getDate() - 60);
+    prevEnd.setDate(now.getDate() - 30);
   } else if (range === "90days") {
     start.setDate(now.getDate() - 90);
     prevStart.setDate(now.getDate() - 180);
@@ -34,10 +37,12 @@ const getDateRange = (range, startDate, endDate) => {
     prevEnd.setHours(23, 59, 59, 999);
   } else if (range === "custom" && startDate && endDate) {
     start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
     const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
     const diff = end.getTime() - start.getTime();
     prevStart = new Date(start.getTime() - diff);
-    prevEnd = new Date(start.getTime());
+    prevEnd = new Date(start.getTime() - 1);
     return { start, end, prevStart, prevEnd };
   } else {
     start.setDate(now.getDate() - 30);
@@ -94,7 +99,7 @@ export const getDashboardStatsService = async (query = {}) => {
       .filter((o) => o.orderStatus !== "Cancelled")
       .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
 
-  const totalRevenue = calculateRevenue(allOrders);
+  const totalRevenue = calculateRevenue(currentPeriodOrders);
   const todayRevenue = calculateRevenue(todayOrders);
   const monthlyRevenue = calculateRevenue(monthOrders);
   const currentPeriodRevenue = calculateRevenue(currentPeriodOrders);
@@ -105,10 +110,10 @@ export const getDashboardStatsService = async (query = {}) => {
       ? Number((((currentPeriodRevenue - prevPeriodRevenue) / prevPeriodRevenue) * 100).toFixed(1))
       : 100;
 
-  const totalOrders = allOrders.length;
-  const pendingOrders = allOrders.filter((o) => o.orderStatus === "Pending" || o.orderStatus === "Placed").length;
-  const completedOrders = allOrders.filter((o) => o.orderStatus === "Delivered").length;
-  const cancelledOrders = allOrders.filter((o) => o.orderStatus === "Cancelled").length;
+  const totalOrders = currentPeriodOrders.length;
+  const pendingOrders = currentPeriodOrders.filter((o) => o.orderStatus === "Pending" || o.orderStatus === "Placed").length;
+  const completedOrders = currentPeriodOrders.filter((o) => o.orderStatus === "Delivered").length;
+  const cancelledOrders = currentPeriodOrders.filter((o) => o.orderStatus === "Cancelled").length;
 
   const prevOrdersCount = prevPeriodOrders.length;
   const currentOrdersCount = currentPeriodOrders.length;
@@ -164,17 +169,85 @@ export const getDashboardStatsService = async (query = {}) => {
 };
 
 export const getDashboardRevenueService = async (query = {}) => {
+  const { range = "30days", startDate, endDate } = query;
+  const { start, end } = getDateRange(range, startDate, endDate);
+
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  const currentYear = new Date().getFullYear();
+
+  const timeDiffMs = end.getTime() - start.getTime();
+  const daysDiff = Math.ceil(timeDiffMs / (1000 * 60 * 60 * 24));
+
+  if (range === "today" || daysDiff <= 1) {
+    const hourlyAgg = await Order.aggregate([
+      {
+        $match: {
+          orderStatus: { $ne: "Cancelled" },
+          createdAt: { $gte: start, $lte: end },
+        },
+      },
+      {
+        $group: {
+          _id: { $hour: "$createdAt" },
+          revenue: { $sum: "$totalAmount" },
+          orders: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const result = [];
+    for (let h = 0; h < 24; h += 3) {
+      const found = hourlyAgg.filter((item) => item._id >= h && item._id < h + 3);
+      const rev = found.reduce((s, f) => s + (f.revenue || 0), 0);
+      const ord = found.reduce((s, f) => s + (f.orders || 0), 0);
+      const label = `${String(h).padStart(2, "0")}:00`;
+      result.push({ month: label, revenue: rev, orders: ord });
+    }
+    return result;
+  }
+
+  if (range === "7days" || range === "30days" || (range === "custom" && daysDiff <= 60)) {
+    const dailyAgg = await Order.aggregate([
+      {
+        $match: {
+          orderStatus: { $ne: "Cancelled" },
+          createdAt: { $gte: start, $lte: end },
+        },
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          revenue: { $sum: "$totalAmount" },
+          orders: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const dailyMap = {};
+    dailyAgg.forEach((item) => {
+      dailyMap[item._id] = item;
+    });
+
+    const result = [];
+    const cur = new Date(start);
+    while (cur <= end) {
+      const dateStr = cur.toISOString().split("T")[0];
+      const monthDayStr = cur.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      const found = dailyMap[dateStr];
+      result.push({
+        month: monthDayStr,
+        revenue: found ? found.revenue : 0,
+        orders: found ? found.orders : 0,
+      });
+      cur.setDate(cur.getDate() + 1);
+    }
+    return result;
+  }
 
   const monthlyAgg = await Order.aggregate([
     {
       $match: {
         orderStatus: { $ne: "Cancelled" },
-        createdAt: {
-          $gte: new Date(currentYear, 0, 1),
-          $lte: new Date(currentYear, 11, 31, 23, 59, 59),
-        },
+        createdAt: { $gte: start, $lte: end },
       },
     },
     {
@@ -186,7 +259,7 @@ export const getDashboardRevenueService = async (query = {}) => {
     },
   ]);
 
-  const monthlyData = months.map((name, idx) => {
+  return months.map((name, idx) => {
     const monthNum = idx + 1;
     const found = monthlyAgg.find((m) => m._id === monthNum);
     return {
@@ -195,12 +268,18 @@ export const getDashboardRevenueService = async (query = {}) => {
       orders: found ? found.orders : 0,
     };
   });
-
-  return monthlyData;
 };
 
 export const getDashboardOrdersService = async (query = {}) => {
+  const { range = "30days", startDate, endDate } = query;
+  const { start, end } = getDateRange(range, startDate, endDate);
+
   const statusCounts = await Order.aggregate([
+    {
+      $match: {
+        createdAt: { $gte: start, $lte: end },
+      },
+    },
     {
       $group: {
         _id: "$orderStatus",
@@ -235,6 +314,9 @@ export const getDashboardOrdersService = async (query = {}) => {
 };
 
 export const getDashboardSalesService = async (query = {}) => {
+  const { range = "30days", startDate, endDate } = query;
+  const { start, end } = getDateRange(range, startDate, endDate);
+
   const categoryAgg = await Product.aggregate([
     {
       $group: {
@@ -266,6 +348,11 @@ export const getDashboardSalesService = async (query = {}) => {
 
   const paymentAgg = await Order.aggregate([
     {
+      $match: {
+        createdAt: { $gte: start, $lte: end },
+      },
+    },
+    {
       $group: {
         _id: "$paymentMethod",
         value: { $sum: 1 },
@@ -291,9 +378,17 @@ export const getRecentOrdersService = async () => {
     .populate("user", "fullName email name");
 };
 
-export const getTopProductsService = async () => {
+export const getTopProductsService = async (query = {}) => {
+  const { range = "30days", startDate, endDate } = query;
+  const { start, end } = getDateRange(range, startDate, endDate);
+
   const topAgg = await Order.aggregate([
-    { $match: { orderStatus: { $ne: "Cancelled" } } },
+    {
+      $match: {
+        orderStatus: { $ne: "Cancelled" },
+        createdAt: { $gte: start, $lte: end },
+      },
+    },
     { $unwind: "$products" },
     {
       $group: {

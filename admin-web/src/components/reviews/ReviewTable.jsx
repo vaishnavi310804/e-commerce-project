@@ -36,7 +36,7 @@ const ReviewTable = ({
       <div className="hidden overflow-hidden rounded-xl bg-white shadow md:block">
         <div className="overflow-x-auto">
           <table className="min-w-[1100px] w-full border-collapse">
-            <thead className="bg-gray-100">
+            <thead className="bg-[#E0E0E0]">
               <tr>
                 <th className="px-4 py-4 text-center">
                   <input

@@ -23,7 +23,7 @@ const ProductTable = ({ products, loading, onEdit, onToggleStatus }) => {
       <div className="hidden overflow-hidden rounded-xl bg-white shadow md:block">
         <div className="overflow-x-auto">
           <table className="min-w-[1300px] w-full border-collapse">
-            <thead className="bg-gray-100">
+            <thead className="bg-[#E0E0E0]">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Image</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Name</th>

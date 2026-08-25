@@ -61,7 +61,7 @@ const ReturnTable = ({
       <div className="hidden overflow-hidden rounded-xl bg-white shadow md:block">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[1100px] border-collapse">
-            <thead className="bg-gray-100">
+            <thead className="bg-[#E0E0E0]">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                   Order ID

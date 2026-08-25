@@ -53,14 +53,28 @@ const Dashboard = () => {
   const [activeFilter, setActiveFilter] = useState("30days");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [appliedCustomDates, setAppliedCustomDates] = useState({
+    startDate: "",
+    endDate: "",
+  });
 
   const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
+
+      const isCustom = activeFilter === "custom";
+      const customStart = isCustom ? appliedCustomDates.startDate : undefined;
+      const customEnd = isCustom ? appliedCustomDates.endDate : undefined;
+
+      if (isCustom && (!customStart || !customEnd)) {
+        setLoading(false);
+        return;
+      }
+
       const params = {
         range: activeFilter,
-        startDate: activeFilter === "custom" ? startDate : undefined,
-        endDate: activeFilter === "custom" ? endDate : undefined,
+        startDate: customStart,
+        endDate: customEnd,
       };
 
       const [
@@ -79,7 +93,7 @@ const Dashboard = () => {
         getDashboardOrders(params),
         getDashboardSales(params),
         getRecentOrders(),
-        getTopProducts(),
+        getTopProducts(params),
         getLowStockProducts(),
         getRecentReviews(),
         getCustomerGrowth(),
@@ -101,7 +115,7 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [activeFilter, startDate, endDate]);
+  }, [activeFilter, appliedCustomDates]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -113,6 +127,19 @@ const Dashboard = () => {
     }, 60000);
     return () => clearInterval(interval);
   }, [fetchDashboardData]);
+
+  const handleFilterChange = (filterId) => {
+    setActiveFilter(filterId);
+  };
+
+  const handleApplyCustom = () => {
+    if (startDate && endDate) {
+      setAppliedCustomDates({ startDate, endDate });
+      if (activeFilter !== "custom") {
+        setActiveFilter("custom");
+      }
+    }
+  };
 
   const handleExportPDF = () => {
     window.print();
@@ -155,12 +182,12 @@ const Dashboard = () => {
         />
         <DashboardFilters
           activeFilter={activeFilter}
-          onFilterChange={setActiveFilter}
+          onFilterChange={handleFilterChange}
           startDate={startDate}
           endDate={endDate}
           onStartDateChange={setStartDate}
           onEndDateChange={setEndDate}
-          onApplyCustom={fetchDashboardData}
+          onApplyCustom={handleApplyCustom}
         />
         
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

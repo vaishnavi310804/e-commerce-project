@@ -77,7 +77,7 @@ export const getRecentOrders = async (req, res, next) => {
 
 export const getTopProducts = async (req, res, next) => {
   try {
-    const products = await getTopProductsService();
+    const products = await getTopProductsService(req.query);
     return res.status(200).json({
       success: true,
       message: "Top selling products fetched successfully.",
