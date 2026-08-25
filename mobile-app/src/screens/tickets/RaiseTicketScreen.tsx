@@ -227,7 +227,7 @@ const RaiseTicketScreen = () => {
                 >
                   {selectedOrder
                     ? `Order #${selectedOrder.orderNumber}`
-                    : "Select an order (optional)"}
+                    : "Select order for which the ticket is to be raised"}
                 </Text>
               )}
 
@@ -297,7 +297,7 @@ const RaiseTicketScreen = () => {
 
             <TextInput
               style={styles.input}
-              placeholder="e.g. My shipment is delayed"
+              placeholder="Mention the issue you are facing"
               placeholderTextColor="#A0A0A0"
               value={subject}
               onChangeText={setSubject}
@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: "F6F6F6",
   },
 
   header: {
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
     minHeight: 54,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#E5E5E5",
+    borderColor: "#E0E0E0",
     backgroundColor: "#FFFFFF",
     paddingHorizontal: 16,
     flexDirection: "row",
@@ -443,7 +443,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     marginTop: 6,
     borderWidth: 1,
-    borderColor: "#E5E5E5",
+    borderColor: "#E0E0E0",
     overflow: "hidden",
   },
 
@@ -478,7 +478,7 @@ const styles = StyleSheet.create({
     minHeight: 54,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#E5E5E5",
+    borderColor: "#E0E0E0",
     backgroundColor: "#FFFFFF",
     paddingHorizontal: 16,
     fontSize: 14,

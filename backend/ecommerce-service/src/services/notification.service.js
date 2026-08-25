@@ -2,7 +2,7 @@ import axios from "axios";
 
 const authService = axios.create({
   baseURL: process.env.AUTH_SERVICE_URL,
-  timeout: 10000,
+  timeout: 45000,
   headers: {
     "x-service-key": process.env.INTERNAL_SERVICE_KEY,
   },
@@ -16,8 +16,16 @@ export const sendNotification = async ({
   image = "",
   data = {},
 }) => {
+  console.log("========== SEND NOTIFICATION ==========");
+  console.log("userId:", userId);
+  console.log("title:", title);
+  console.log("type:", type);
+  console.log("AUTH_SERVICE_URL:", process.env.AUTH_SERVICE_URL);
+
   try {
-    await authService.post("/notification/send", {
+    console.log("Calling auth-service notification endpoint...");
+
+    const response = await authService.post("/notification/send", {
       userId,
       title,
       body,
@@ -25,10 +33,19 @@ export const sendNotification = async ({
       image,
       data,
     });
-  } catch (error) {
-    console.error(
-      "Notification Service Error:",
-      error.response?.data || error.message
+
+    console.log(
+      "AUTH SERVICE NOTIFICATION RESPONSE:",
+      response.status,
+      response.data
     );
+
+    console.log("========== NOTIFICATION REQUEST SUCCESS ==========");
+  } catch (error) {
+    console.error("========== NOTIFICATION REQUEST FAILED ==========");
+    console.error("Error message:", error.message);
+    console.error("Error code:", error.code);
+    console.error("Response:", error.response?.data);
+    console.error("Status:", error.response?.status);
   }
 };

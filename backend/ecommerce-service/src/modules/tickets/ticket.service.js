@@ -1,5 +1,6 @@
 import Ticket from "./ticket.model.js";
 import Order from "../orders/order.model.js";
+import { sendNotification } from "../../services/notification.service.js";
 
 const SLA_HOURS = {
   Low: 72,
@@ -86,7 +87,7 @@ export const getMyTicketDetailsService = async (userId, ticketId) => {
       "order",
       "orderNumber orderStatus paymentMethod paymentStatus totalAmount",
     )
-    .populate("assignedTo", "fullName email")
+    .populate("assignedTo", "fullName email");
 
   if (!ticket) {
     const error = new Error("Ticket not found.");
@@ -133,7 +134,7 @@ export const getTicketDetailsService = async (ticketId) => {
       "order",
       "orderNumber orderStatus paymentMethod paymentStatus totalAmount",
     )
-    .populate("assignedTo", "fullName email")
+    .populate("assignedTo", "fullName email");
 
   if (!ticket) {
     const error = new Error("Ticket not found.");
@@ -144,10 +145,7 @@ export const getTicketDetailsService = async (ticketId) => {
   return ticket;
 };
 
-export const assignTicketService = async (
-  ticketId,
-  assignedTo,
-) => {
+export const assignTicketService = async (ticketId, assignedTo) => {
   const ticket = await Ticket.findById(ticketId);
 
   if (!ticket) {
@@ -156,18 +154,16 @@ export const assignTicketService = async (
     throw error;
   }
 
-  const admin = await Ticket.db
-  .model("User")
-  .findOne({
+  const admin = await Ticket.db.model("User").findOne({
     _id: assignedTo,
     role: "ADMIN",
   });
 
-if (!admin) {
-  const error = new Error("Assigned user must be an admin.");
-  error.statusCode = 400;
-  throw error;
-}
+  if (!admin) {
+    const error = new Error("Assigned user must be an admin.");
+    error.statusCode = 400;
+    throw error;
+  }
 
   ticket.assignedTo = assignedTo;
 
@@ -182,10 +178,7 @@ if (!admin) {
     .populate("assignedTo", "fullName email");
 };
 
-export const updateTicketPriorityService = async (
-  ticketId,
-  priority,
-) => {
+export const updateTicketPriorityService = async (ticketId, priority) => {
   const ticket = await Ticket.findById(ticketId);
 
   if (!ticket) {
@@ -230,6 +223,23 @@ export const escalateTicketService = async (ticketId) => {
 
   await ticket.save();
 
+  console.log("TICKET ESCALATED IN DB");
+  console.log("ABOUT TO SEND NOTIFICATION");
+  console.log("User ID:", ticket.user);
+  console.log("Ticket ID:", ticket._id);
+
+  await sendNotification({
+    userId: ticket.user,
+    title: "Ticket Escalated",
+    body: `Your support ticket ${ticket.ticketNumber} has been escalated.`,
+    type: "TICKET_ESCALATED",
+    data: {
+      ticketId: ticket._id,
+    },
+  });
+
+  console.log("SEND NOTIFICATION FUNCTION COMPLETED");
+
   return await Ticket.findById(ticket._id)
     .populate("user", "fullName email phoneNumber")
     .populate(
@@ -258,6 +268,8 @@ export const updateTicketStatusService = async (
     throw error;
   }
 
+  const previousStatus = ticket.status;
+
   ticket.status = status;
 
   if (status === "Resolved") {
@@ -279,13 +291,25 @@ export const updateTicketStatusService = async (
 
   await ticket.save();
 
+  if (previousStatus !== "Resolved" && status === "Resolved") {
+    await sendNotification({
+      userId: ticket.user,
+      title: "Ticket Resolved",
+      body: `Your support ticket ${ticket.ticketNumber} has been resolved.`,
+      type: "TICKET_RESOLVED",
+      data: {
+        ticketId: ticket._id,
+      },
+    });
+  }
+
   return await Ticket.findById(ticket._id)
     .populate("user", "fullName email phoneNumber")
     .populate(
       "order",
       "orderNumber orderStatus paymentMethod paymentStatus totalAmount",
     )
-    .populate("assignedTo", "fullName email")
+    .populate("assignedTo", "fullName email");
 };
 
 export const checkTicketSlaService = async () => {
