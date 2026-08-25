@@ -458,6 +458,8 @@ export const processReturnRefundService = async (returnId) => {
 
   returnRequest.razorpayRefundId = refund.id;
 
+  const previousRefundStatus = returnRequest.refundStatus;
+
   let message =
     "Refund request initiated successfully. The refund is still being processed.";
 
@@ -494,6 +496,37 @@ export const processReturnRefundService = async (returnId) => {
     await returnRequest.save();
 
     message = "Refund processed successfully.";
+
+    if (
+      previousRefundStatus !== "Processed" &&
+      returnRequest.refundStatus === "Processed"
+    ) {
+      console.log("========== REFUND NOTIFICATION ==========");
+      console.log("REFUND PROCESSED");
+      console.log(`User ID: ${returnRequest.user}`);
+      console.log(`Order ID: ${order._id}`);
+      console.log(`Order Number: ${order.orderNumber}`);
+      console.log("Notification Type: REFUND_PROCESSED");
+
+      try {
+        await sendNotification({
+          userId: returnRequest.user,
+          title: "Refund Processed",
+          body: `Your refund for order ${order.orderNumber} has been processed successfully.`,
+          type: "REFUND_PROCESSED",
+          data: {
+            orderId: order._id,
+          },
+        });
+      } catch (notificationError) {
+        console.error(
+          "Failed to send refund notification:",
+          notificationError.message,
+        );
+      }
+
+      console.log("REFUND NOTIFICATION REQUEST COMPLETED");
+    }
   } else if (refund.status === "failed") {
     returnRequest.refundStatus = "Failed";
     await returnRequest.save();
@@ -582,6 +615,8 @@ export const checkReturnRefundStatusService = async (returnId) => {
     throw customError;
   }
 
+  const previousRefundStatus = returnRequest.refundStatus;
+
   let message = "Refund is still being processed.";
 
   if (refund.status === "processed") {
@@ -629,6 +664,37 @@ export const checkReturnRefundStatusService = async (returnId) => {
     await returnRequest.save();
 
     message = "Refund processed successfully.";
+
+    if (
+      previousRefundStatus !== "Processed" &&
+      returnRequest.refundStatus === "Processed"
+    ) {
+      console.log("========== REFUND NOTIFICATION ==========");
+      console.log("REFUND PROCESSED");
+      console.log(`User ID: ${returnRequest.user}`);
+      console.log(`Order ID: ${order._id}`);
+      console.log(`Order Number: ${order.orderNumber}`);
+      console.log("Notification Type: REFUND_PROCESSED");
+
+      try {
+        await sendNotification({
+          userId: returnRequest.user,
+          title: "Refund Processed",
+          body: `Your refund for order ${order.orderNumber} has been processed successfully.`,
+          type: "REFUND_PROCESSED",
+          data: {
+            orderId: order._id,
+          },
+        });
+      } catch (notificationError) {
+        console.error(
+          "Failed to send refund notification:",
+          notificationError.message,
+        );
+      }
+
+      console.log("REFUND NOTIFICATION REQUEST COMPLETED");
+    }
   } else if (refund.status === "failed") {
     returnRequest.refundStatus = "Failed";
     await returnRequest.save();
