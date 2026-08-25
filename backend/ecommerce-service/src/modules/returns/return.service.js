@@ -901,6 +901,30 @@ export const processReturnReplacementService = async (returnId) => {
     throw error;
   }
 
+  if (returnRequest.replacementOrder) {
+    const populatedExisting = await Return.findById(returnRequest._id)
+      .populate("user", "fullName email phoneNumber")
+      .populate("replacementOrder", "orderNumber orderStatus totalAmount products")
+      .populate(
+        "order",
+        "orderNumber orderStatus totalAmount paymentMethod paymentStatus products",
+      )
+      .populate("items.product", "name price productImage image brand");
+
+    return {
+      message: "Replacement order already exists.",
+      data: populatedExisting,
+    };
+  }
+
+  if (returnRequest.status !== "Picked Up") {
+    const error = new Error(
+      "Replacement order can only be created after the return has been picked up.",
+    );
+    error.statusCode = 400;
+    throw error;
+  }
+
   const order = await Order.findById(returnRequest.order);
 
   if (!order) {
@@ -916,7 +940,7 @@ export const processReturnReplacementService = async (returnId) => {
       _id: returnId,
       returnType: "REPLACEMENT",
       replacementOrder: null,
-      status: { $in: ["Approved", "Picked Up"] },
+      status: "Picked Up",
     },
     {
       $set: { replacementOrder: tempLockId },

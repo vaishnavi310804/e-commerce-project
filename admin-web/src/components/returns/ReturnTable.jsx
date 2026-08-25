@@ -159,6 +159,18 @@ const ReturnTable = ({
                             Refund Pending
                           </span>
                         )}
+
+                        {returnItem.returnType === "REPLACEMENT" && returnItem.replacementOrder && (
+                          <span className="rounded-full bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700">
+                            Replacement Created
+                          </span>
+                        )}
+
+                        {returnItem.returnType === "REPLACEMENT" && !returnItem.replacementOrder && returnItem.status === "Approved" && (
+                          <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-600">
+                            Replacement after pickup
+                          </span>
+                        )}
                       </div>
                     </td>
 
@@ -218,6 +230,18 @@ const ReturnTable = ({
                   {isRefundPending && (
                     <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
                       Refund Pending
+                    </span>
+                  )}
+
+                  {returnItem.returnType === "REPLACEMENT" && returnItem.replacementOrder && (
+                    <span className="rounded-full bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700">
+                      Replacement Created
+                    </span>
+                  )}
+
+                  {returnItem.returnType === "REPLACEMENT" && !returnItem.replacementOrder && returnItem.status === "Approved" && (
+                    <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-600">
+                      Replacement after pickup
                     </span>
                   )}
                 </div>
@@ -314,7 +338,7 @@ const ReturnActions = ({
   const canProcessReplacement =
     returnItem.returnType === "REPLACEMENT" &&
     !returnItem.replacementOrder &&
-    ["Approved", "Picked Up"].includes(returnItem.status);
+    returnItem.status === "Picked Up";
 
   return (
     <div className="flex shrink-0 items-center gap-1">
