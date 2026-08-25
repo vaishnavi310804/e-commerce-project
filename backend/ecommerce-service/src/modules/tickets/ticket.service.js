@@ -224,9 +224,6 @@ export const escalateTicketService = async (ticketId) => {
   await ticket.save();
 
   console.log("TICKET ESCALATED IN DB");
-  console.log("ABOUT TO SEND NOTIFICATION");
-  console.log("User ID:", ticket.user);
-  console.log("Ticket ID:", ticket._id);
 
   await sendNotification({
     userId: ticket.user,
@@ -237,8 +234,6 @@ export const escalateTicketService = async (ticketId) => {
       ticketId: ticket._id,
     },
   });
-
-  console.log("SEND NOTIFICATION FUNCTION COMPLETED");
 
   return await Ticket.findById(ticket._id)
     .populate("user", "fullName email phoneNumber")

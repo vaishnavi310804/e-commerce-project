@@ -17,13 +17,8 @@ export const sendNotification = async ({
   data = {},
 }) => {
   console.log("========== SEND NOTIFICATION ==========");
-  console.log("userId:", userId);
-  console.log("title:", title);
-  console.log("type:", type);
-  console.log("AUTH_SERVICE_URL:", process.env.AUTH_SERVICE_URL);
 
   try {
-    console.log("Calling auth-service notification endpoint...");
 
     const response = await authService.post("/notification/send", {
       userId,
@@ -40,9 +35,9 @@ export const sendNotification = async ({
       response.data
     );
 
-    console.log("========== NOTIFICATION REQUEST SUCCESS ==========");
+    console.log("NOTIFICATION REQUEST SUCCESS");
   } catch (error) {
-    console.error("========== NOTIFICATION REQUEST FAILED ==========");
+    console.error("NOTIFICATION REQUEST FAILED");
     console.error("Error message:", error.message);
     console.error("Error code:", error.code);
     console.error("Response:", error.response?.data);
