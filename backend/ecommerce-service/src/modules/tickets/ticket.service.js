@@ -287,15 +287,31 @@ export const updateTicketStatusService = async (
   await ticket.save();
 
   if (previousStatus !== "Resolved" && status === "Resolved") {
-    await sendNotification({
-      userId: ticket.user,
-      title: "Ticket Resolved",
-      body: `Your support ticket ${ticket.ticketNumber} has been resolved.`,
-      type: "TICKET_RESOLVED",
-      data: {
-        ticketId: ticket._id,
-      },
-    });
+    console.log("========== TICKET RESOLVED NOTIFICATION ==========");
+    console.log("TICKET RESOLVED");
+    console.log("User ID:", ticket.user);
+    console.log("Ticket ID:", ticket._id);
+    console.log("Ticket Number:", ticket.ticketNumber);
+    console.log("Notification Type:", "TICKET_RESOLVED");
+
+    try {
+      await sendNotification({
+        userId: ticket.user,
+        title: "Ticket Resolved",
+        body: `Your support ticket ${ticket.ticketNumber} has been resolved.`,
+        type: "TICKET_RESOLVED",
+        data: {
+          ticketId: ticket._id,
+        },
+      });
+    } catch (notificationError) {
+      console.error(
+        "Failed to send ticket resolved notification:",
+        notificationError.message,
+      );
+    }
+
+    console.log("TICKET RESOLVED NOTIFICATION REQUEST COMPLETED");
   }
 
   return await Ticket.findById(ticket._id)
