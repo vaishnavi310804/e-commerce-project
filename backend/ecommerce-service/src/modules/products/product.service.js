@@ -193,3 +193,62 @@ export const updateProductService = async (productId, productData, file) => {
 
   return updatedProduct;
 };
+
+export const deductProductStock = async (items) => {
+  const deducted = [];
+
+  try {
+    for (const item of items) {
+      const productId = item.product?._id || item.product;
+      const quantity = Number(item.quantity || 0);
+
+      if (!productId || quantity <= 0) continue;
+
+      const updatedProduct = await Product.findOneAndUpdate(
+        {
+          _id: productId,
+          stock: { $gte: quantity },
+        },
+        {
+          $inc: { stock: -quantity },
+        },
+        { new: true }
+      );
+
+      if (!updatedProduct) {
+        const p = await Product.findById(productId);
+        const productName = p ? p.name : "Product";
+        const availableStock = p ? p.stock : 0;
+        const error = new Error(
+          `Insufficient stock for "${productName}". Available: ${availableStock}, Requested: ${quantity}`
+        );
+        error.statusCode = 400;
+        throw error;
+      }
+
+      deducted.push({ productId, quantity });
+    }
+  } catch (error) {
+    for (const item of deducted) {
+      await Product.updateOne(
+        { _id: item.productId },
+        { $inc: { stock: item.quantity } }
+      );
+    }
+    throw error;
+  }
+};
+
+export const restoreProductStock = async (items) => {
+  for (const item of items) {
+    const productId = item.product?._id || item.product;
+    const quantity = Number(item.quantity || 0);
+
+    if (productId && quantity > 0) {
+      await Product.updateOne(
+        { _id: productId },
+        { $inc: { stock: quantity } }
+      );
+    }
+  }
+};

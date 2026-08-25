@@ -12,7 +12,7 @@ const LowStockTable = ({ products = [] }) => {
           </span>
           Low Stock Alerts
         </h3>
-        <Link to="/products" className="text-xs font-semibold text-indigo-600 hover:text-indigo-800">
+        <Link to="/products" className="text-xs font-semibold text-[#6547C9] hover:text-indigo-800">
           Manage Inventory →
         </Link>
       </div>

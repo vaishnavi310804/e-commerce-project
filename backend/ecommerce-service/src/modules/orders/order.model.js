@@ -135,6 +135,11 @@ const orderSchema = new mongoose.Schema(
       default: "Pending",
     },
 
+    isStockDeducted: {
+      type: Boolean,
+      default: false,
+    },
+
     shippingAddress: {
       fullName: String,
       phoneNumber: String,

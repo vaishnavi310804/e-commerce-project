@@ -65,12 +65,12 @@ const Sidebar = () => {
     <>
       <aside className="fixed left-0 top-0 hidden h-screen w-65 flex-col justify-between overflow-y-auto border-r border-slate-200 bg-white p-4 lg:flex">
         <div>
-          <div className="flex justify-center mb-5">
-            <h1 className="text-3xl font-extrabold tracking-tight text-[#6547C9]">
+          <div className="flex justify-center mb-4">
+            <h1 className="text-2xl font-bold tracking-tight text-[#6547C9]">
               ShopEase
             </h1>
           </div>
-          <div className="flex flex-col items-center text-center my-6">
+          <div className="flex flex-col items-center text-center my-4">
             <div className="rounded-full border-2 border-[#8B5CF6] mb-2 shadow-sm">
               {profileImage && !imgError ? (
                 <img

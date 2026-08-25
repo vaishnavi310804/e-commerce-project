@@ -1,5 +1,6 @@
 import Shipment from "./shipment.model.js";
 import Order from "../orders/order.model.js";
+import { restoreProductStock } from "../products/product.service.js";
 
 const getDefaultTimelineMessage = (status) => {
   switch (status) {
@@ -220,6 +221,7 @@ export const updateShipmentStatusService = async (
   });
 
   if (order && newOrderStatus) {
+    const previousOrderStatus = order.orderStatus;
     order.orderStatus = newOrderStatus;
 
     const itemStatusesToUpdate = [
@@ -242,6 +244,15 @@ export const updateShipmentStatusService = async (
       order.paymentMethod === "COD"
     ) {
       order.paymentStatus = "Paid";
+    }
+
+    if (
+      newOrderStatus === "Cancelled" &&
+      previousOrderStatus !== "Cancelled" &&
+      order.isStockDeducted
+    ) {
+      await restoreProductStock(order.products);
+      order.isStockDeducted = false;
     }
   }
 

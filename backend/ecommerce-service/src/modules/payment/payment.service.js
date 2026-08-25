@@ -4,6 +4,7 @@ import Order from "../orders/order.model.js";
 import Cart from "../cart/cart.model.js";
 import razorpay from "../../config/razorpay.js";
 import { sendNotification } from "../../services/notification.service.js";
+import { deductProductStock } from "../products/product.service.js";
 
 export const createRazorpayOrderService = async (
   amount,
@@ -50,6 +51,11 @@ export const verifyPaymentService = async (
     const error = new Error("Payment has already been verified.");
     error.statusCode = 400;
     throw error;
+  }
+
+  if (!order.isStockDeducted) {
+    await deductProductStock(order.products);
+    order.isStockDeducted = true;
   }
 
   order.paymentStatus = "Paid";

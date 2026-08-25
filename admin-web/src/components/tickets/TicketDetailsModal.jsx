@@ -96,12 +96,9 @@ const TicketDetailsModal = ({
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
         <div className="flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-          <div className="flex items-start justify-between border-b px-6 py-5">
+          <div className="flex items-start justify-between px-6 py-5">
             <div>
               <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-indigo-50 p-3 text-indigo-600">
-                  <FaTicketAlt size={20} />
-                </div>
 
                 <div>
                   <h2 className="text-xl font-bold text-gray-800">
@@ -329,7 +326,7 @@ const TicketDetailsModal = ({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-end gap-3 border-t bg-gray-50 px-6 py-4">
+          <div className="flex flex-wrap items-center justify-end gap-3 bg-gray-50 px-6 py-4">
             {ticket.status !== "Closed" && (
               <button
                 type="button"

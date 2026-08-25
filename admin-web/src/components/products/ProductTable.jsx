@@ -85,7 +85,6 @@ const ProductTable = ({ products, loading, onEdit, onToggleStatus }) => {
                       {product.brand || "—"}
                     </td>
 
-                    {/* Price */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       ₹{Number(product.price || 0).toFixed(2)}
                     </td>
@@ -189,7 +188,7 @@ const ProductTable = ({ products, loading, onEdit, onToggleStatus }) => {
 
                   <div>
                     <p className="text-xs text-gray-400">Final Price</p>
-                    <p className="mt-1 text-sm font-bold text-indigo-600">
+                    <p className="mt-1 text-sm font-bold text-[#6547C9]">
                       ₹{finalPrice.toFixed(2)}
                     </p>
                   </div>

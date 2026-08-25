@@ -3,6 +3,7 @@ import Cart from "../cart/cart.model.js";
 import Address from "../address/address.model.js";
 import { refundPaymentService, checkRefundStatusService } from "../../modules/payment/payment.service.js";
 import { sendNotification } from "../../services/notification.service.js";
+import { deductProductStock, restoreProductStock } from "../products/product.service.js";
 
 export const createOrderService = async (userId, payload) => {
   const { addressId, paymentMethod = "COD" } = payload;
@@ -23,15 +24,28 @@ export const createOrderService = async (userId, payload) => {
     throw error;
   }
 
+  // Stock validation before processing
+  for (const item of cart.items) {
+    const product = item.product;
+    if (!product || !product.isActive) {
+      const error = new Error("One or more products in your cart are unavailable.");
+      error.statusCode = 400;
+      throw error;
+    }
+    if (product.stock < item.quantity) {
+      const error = new Error(
+        `Insufficient stock for "${product.name}". Available: ${product.stock}, Requested: ${item.quantity}`
+      );
+      error.statusCode = 400;
+      throw error;
+    }
+  }
+
   let rawSubtotal = 0;
   let rawDiscount = 0;
 
   const orderProducts = cart.items.map((item) => {
     const product = item.product;
-
-    if (!product) {
-      throw new Error("One or more products in your cart are unavailable.");
-    }
 
     const price = product.price || 0;
 
@@ -72,6 +86,13 @@ export const createOrderService = async (userId, payload) => {
     postalCode: addressDoc.postalCode,
     country: addressDoc.country,
   };
+
+  let isStockDeducted = false;
+  if (paymentMethod === "COD") {
+    await deductProductStock(cart.items);
+    isStockDeducted = true;
+  }
+
   const order = await Order.create({
     user: userId,
     products: orderProducts,
@@ -83,6 +104,7 @@ export const createOrderService = async (userId, payload) => {
     paymentMethod,
     paymentStatus: "Pending",
     orderStatus: paymentMethod === "COD" ? "Placed" : "Pending",
+    isStockDeducted,
     shippingAddress: shippingAddressSnapshot,
     address: addressDoc._id,
   });
@@ -164,6 +186,7 @@ export const updateOrderStatusService = async (orderId, orderStatus) => {
     throw error;
   }
 
+  const previousOrderStatus = order.orderStatus;
   order.orderStatus = orderStatus;
 
   const itemStatuses = [
@@ -184,6 +207,15 @@ export const updateOrderStatusService = async (orderId, orderStatus) => {
 
   if (orderStatus === "Delivered" && order.paymentMethod === "COD") {
     order.paymentStatus = "Paid";
+  }
+
+  if (
+    orderStatus === "Cancelled" &&
+    previousOrderStatus !== "Cancelled" &&
+    order.isStockDeducted
+  ) {
+    await restoreProductStock(order.products);
+    order.isStockDeducted = false;
   }
 
   await order.save();
@@ -289,6 +321,8 @@ export const cancelOrderService = async (userId, orderId) => {
     error.statusCode = 400;
     throw error;
   }
+
+  const previousOrderStatus = order.orderStatus;
   order.orderStatus = "Cancelled";
   const cancellableItemStatus = ["Placed", "Confirmed", "Processing", "Packed"];
   order.products.forEach((item) => {
@@ -297,17 +331,25 @@ export const cancelOrderService = async (userId, orderId) => {
     }
   });
 
+  if (
+    previousOrderStatus !== "Cancelled" &&
+    order.isStockDeducted
+  ) {
+    await restoreProductStock(order.products);
+    order.isStockDeducted = false;
+  }
+
   await order.save();
   if (order.paymentMethod === "RAZORPAY" && order.paymentStatus === "Paid") {
     try {
-    await refundPaymentService(order);
-  } catch (refundError) {
-    console.error(
-      "Refund failed after order cancellation:",
-      refundError.message
-    );
+      await refundPaymentService(order);
+    } catch (refundError) {
+      console.error(
+        "Refund failed after order cancellation:",
+        refundError.message
+      );
+    }
   }
-}
   return order;
 };
 
