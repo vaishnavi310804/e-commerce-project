@@ -22,33 +22,33 @@ const ProductTable = ({ products, loading, onEdit, onToggleStatus }) => {
     <>
       <div className="hidden overflow-hidden rounded-xl bg-white shadow md:block">
         <div className="overflow-x-auto">
-          <table className="min-w-[1300px] w-full">
+          <table className="min-w-[1300px] w-full border-collapse">
             <thead className="bg-gray-100">
               <tr>
-                <th className="px-6 py-4 text-left whitespace-nowrap">Image</th>
-                <th className="px-6 py-4 text-left whitespace-nowrap">Name</th>
-                <th className="px-6 py-4 text-left whitespace-nowrap">
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Image</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Name</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                   Category
                 </th>
-                <th className="px-6 py-4 text-left whitespace-nowrap">Brand</th>
-                <th className="px-6 py-4 text-left whitespace-nowrap">Price</th>
-                <th className="px-6 py-4 text-left whitespace-nowrap">
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Brand</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Price</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                   Discount Price
                 </th>
-                <th className="px-6 py-4 text-left whitespace-nowrap">
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                   Final Price
                 </th>
 
-                <th className="px-6 py-4 text-left whitespace-nowrap">Stock</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Stock</th>
 
-                <th className="px-6 py-4 text-left whitespace-nowrap">
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                   Status
                 </th>
 
-                <th className="px-6 py-4 text-left whitespace-nowrap">
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                   Created
                 </th>
-                <th className="px-6 py-4 text-center whitespace-nowrap">
+                <th className="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider text-gray-600">
                   Actions
                 </th>
               </tr>
@@ -68,7 +68,7 @@ const ProductTable = ({ products, loading, onEdit, onToggleStatus }) => {
                 return (
                   <tr
                     key={product._id}
-                    className="border-t transition hover:bg-gray-50"
+                    className="border-b border-gray-300 transition hover:bg-gray-50"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <ProductImage product={product} />

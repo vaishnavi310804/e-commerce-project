@@ -58,12 +58,12 @@ const CategoryTable = ({
           <table className="w-full min-w-[700px]">
             <thead className="bg-gray-100">
               <tr>
-                <th className="px-6 py-4 text-left">Icon</th>
-                <th className="px-6 py-4 text-left">Name</th>
-                <th className="px-6 py-4 text-left">Description</th>
-                <th className="px-6 py-4 text-left">Status</th>
-                <th className="px-6 py-4 text-left">Created</th>
-                <th className="px-6 py-4 text-center">Actions</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Icon</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Name</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Description</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Status</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Created</th>
+                <th className="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider text-gray-600">Actions</th>
               </tr>
             </thead>
 
@@ -71,7 +71,7 @@ const CategoryTable = ({
               {categories.map((category) => (
                 <tr
                   key={category._id}
-                  className="border-t transition hover:bg-gray-50"
+                  className="border-b border-gray-300 transition hover:bg-gray-50"
                 >
                   <td className="px-6 py-4">
                     <CategoryIcon icon={category.icon} />
