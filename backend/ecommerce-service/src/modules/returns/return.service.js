@@ -197,6 +197,7 @@ export const createReturnService = async (userId, payload) => {
 
   return await Return.findById(returnRequest._id)
     .populate("user", "fullName email phoneNumber")
+    .populate("replacementOrder", "orderNumber orderStatus totalAmount products")
     .populate(
       "order",
       "orderNumber orderStatus totalAmount paymentMethod paymentStatus products",
@@ -206,6 +207,7 @@ export const createReturnService = async (userId, payload) => {
 
 export const getMyReturnsService = async (userId) => {
   return await Return.find({ user: userId })
+    .populate("replacementOrder", "orderNumber orderStatus totalAmount products")
     .populate(
       "order",
       "orderNumber orderStatus totalAmount paymentMethod paymentStatus products",
@@ -226,6 +228,7 @@ export const getReturnDetailsService = async (userId, returnId) => {
 
   const returnRequest = await Return.findOne(filter)
     .populate("user", "fullName email phoneNumber")
+    .populate("replacementOrder", "orderNumber orderStatus totalAmount products")
     .populate(
       "order",
       "orderNumber orderStatus totalAmount paymentMethod paymentStatus shippingAddress products",
@@ -250,6 +253,7 @@ export const getAllReturnsService = async (query = {}) => {
 
   return await Return.find(filter)
     .populate("user", "fullName email phoneNumber")
+    .populate("replacementOrder", "orderNumber orderStatus totalAmount products")
     .populate(
       "order",
       "orderNumber orderStatus totalAmount paymentMethod paymentStatus products",
@@ -373,6 +377,7 @@ export const updateReturnStatusService = async (returnId, status) => {
 
   return await Return.findById(returnRequest._id)
     .populate("user", "fullName email phoneNumber")
+    .populate("replacementOrder", "orderNumber orderStatus totalAmount products")
     .populate(
       "order",
       "orderNumber orderStatus totalAmount paymentMethod paymentStatus products",

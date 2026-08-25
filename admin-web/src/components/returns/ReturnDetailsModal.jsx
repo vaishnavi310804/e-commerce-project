@@ -186,7 +186,7 @@ const ReturnDetailsModal = ({ open, returnItem, onClose, onCheckRefundStatus }) 
                     <p className="text-xs text-gray-400">Replacement Order</p>
 
                     <p className="mt-1 text-sm font-bold text-purple-700">
-                      Order #{returnItem.replacementOrder.orderNumber || returnItem.replacementOrder}
+                      Order #{typeof returnItem.replacementOrder === "object" ? (returnItem.replacementOrder.orderNumber || returnItem.replacementOrder._id) : returnItem.replacementOrder}
                     </p>
                   </div>
                 )}
