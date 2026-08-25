@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -16,6 +17,7 @@ import OrderStatus from "@/src/components/order/OrderStatus";
 import Colors from "@/src/constants/colors";
 import Fonts from "@/src/constants/fonts";
 import { getMyOrderDetails, OrderData, cancelOrder } from "@/src/api/order.api";
+import { getMyReturns, ReturnData } from "@/src/api/return.api";
 import ShippingDetailsCard from "@/src/components/order/ShippingDetailsCard";
 import PaymentDetailsCard from "@/src/components/payment/PaymentDetailsCard";
 import PriceSummaryCard from "@/src/components/payment/PriceSummaryCard";
@@ -26,6 +28,8 @@ const OrderDetailsScreen = () => {
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState<OrderData | null>(null);
   const [cancelLoading, setCancelLoading] = useState(false);
+  const [showReturnModal, setShowReturnModal] = useState(false);
+  const [returnInfo, setReturnInfo] = useState<ReturnData | null>(null);
 
   const fetchOrder = async () => {
     try {
@@ -43,6 +47,29 @@ const OrderDetailsScreen = () => {
 
   useEffect(() => {
     fetchOrder();
+  }, [orderId]);
+
+  useEffect(() => {
+    const fetchReturnInfo = async () => {
+      try {
+        if (!orderId) return;
+        const response = await getMyReturns();
+        if (response.success && response.data) {
+          const match = response.data.find(
+            (r) =>
+              (typeof r.order === "string" ? r.order : r.order?._id) ===
+              orderId,
+          );
+          if (match) {
+            setReturnInfo(match);
+          }
+        }
+      } catch (error) {
+        console.log("Fetch Return Info Error:", error);
+      }
+    };
+
+    fetchReturnInfo();
   }, [orderId]);
 
   const handleCancel = () => {
@@ -108,9 +135,9 @@ const OrderDetailsScreen = () => {
 
       case "Delivered":
         return {
-          title: "Return Order",
+          title: "Return / Exchange Order",
           onPress: () => {
-            router.push(`/return/${order._id}`);
+            setShowReturnModal(true);
           },
         };
 
@@ -161,6 +188,17 @@ const OrderDetailsScreen = () => {
   const productsList = order.products || [];
 
   const getReturnStatusText = () => {
+    if (returnInfo?.returnType === "REPLACEMENT") {
+      if (returnInfo.replacementOrder) {
+        return "Replacement Order Created";
+      }
+      if (returnInfo.status === "Approved") return "Exchange Approved";
+      if (returnInfo.status === "Picked Up") return "Exchange Picked Up";
+      if (returnInfo.status === "Completed") return "Exchange Completed";
+      if (returnInfo.status === "Rejected") return "Exchange Rejected";
+      return "Exchange Initiated";
+    }
+
     const returnStatuses = productsList
       .map((item) => item.returnStatus)
       .filter((status) => status && status !== "Not Requested");
@@ -193,6 +231,11 @@ const OrderDetailsScreen = () => {
   };
 
   const returnStatusText = getReturnStatusText();
+
+  const replacementOrderObj =
+    returnInfo && typeof returnInfo.replacementOrder === "object"
+      ? returnInfo.replacementOrder
+      : null;
 
   return (
     <ScreenWrapper>
@@ -230,6 +273,31 @@ const OrderDetailsScreen = () => {
           </Text>
         </View>
 
+        {replacementOrderObj && (
+          <View style={styles.replacementCard}>
+            <Ionicons name="swap-horizontal" size={24} color={Colors.primary} />
+            <View style={{ flex: 1, marginLeft: 12 }}>
+              <Text style={styles.replacementTitle}>
+                Replacement Order Created
+              </Text>
+              <Text style={styles.replacementSub}>
+                Order #{replacementOrderObj.orderNumber}
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.viewReplacementBtn}
+              onPress={() =>
+                router.push({
+                  pathname: "/order-details",
+                  params: { orderId: replacementOrderObj._id },
+                })
+              }
+            >
+              <Text style={styles.viewReplacementText}>View</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>
             Products ({productsList.length})
@@ -250,8 +318,6 @@ const OrderDetailsScreen = () => {
         />
 
         {order.paymentMethod === "RAZORPAY" &&
-          order.paymentStatus !== "Pending" &&
-          order.orderStatus === "Cancelled" &&
           order.refundStatus !== "Not Applicable" && (
             <RefundDetailsCard
               refundStatus={order.refundStatus}
@@ -295,6 +361,82 @@ const OrderDetailsScreen = () => {
           </TouchableOpacity>
         )}
       </ScrollView>
+
+      <Modal
+        visible={showReturnModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowReturnModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>What would you like to do?</Text>
+
+              <TouchableOpacity
+                onPress={() => setShowReturnModal(false)}
+                style={styles.modalCloseBtn}
+              >
+                <Ionicons name="close" size={22} color={Colors.text} />
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              style={styles.optionCard}
+              activeOpacity={0.8}
+              onPress={() => {
+                setShowReturnModal(false);
+                router.push(`/return/${order._id}`);
+              }}
+            >
+              <View style={styles.optionIconContainer}>
+                <Ionicons
+                  name="wallet-outline"
+                  size={24}
+                  color={Colors.primary}
+                />
+              </View>
+
+              <View style={styles.optionTextContainer}>
+                <Text style={styles.optionTitle}>Return & Refund</Text>
+
+                <Text style={styles.optionDescription}>
+                  Get your money back after returning the item.
+                </Text>
+              </View>
+
+              <Ionicons name="chevron-forward" size={20} color={Colors.gray} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.optionCard}
+              activeOpacity={0.8}
+              onPress={() => {
+                setShowReturnModal(false);
+                router.push(`/exchange/${order._id}` as any);
+              }}
+            >
+              <View style={styles.optionIconContainer}>
+                <Ionicons
+                  name="repeat-outline"
+                  size={24}
+                  color={Colors.primary}
+                />
+              </View>
+
+              <View style={styles.optionTextContainer}>
+                <Text style={styles.optionTitle}>Exchange</Text>
+
+                <Text style={styles.optionDescription}>
+                  Return the item and receive a replacement.
+                </Text>
+              </View>
+
+              <Ionicons name="chevron-forward" size={20} color={Colors.gray} />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScreenWrapper>
   );
 };
@@ -324,10 +466,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#E0E0E0",
-    padding:4,
+    padding: 4,
     borderRadius: 40,
-    borderWidth:1,
-    borderColor:Colors.primary,
+    borderWidth: 1,
+    borderColor: Colors.primary,
     paddingHorizontal: 14,
     paddingVertical: 8,
     marginTop: 10,
@@ -338,6 +480,43 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: Fonts.semibold,
     color: Colors.primary,
+  },
+
+  replacementCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F7F5FF",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+  },
+
+  replacementTitle: {
+    fontSize: 15,
+    fontFamily: Fonts.bold,
+    color: Colors.text,
+  },
+
+  replacementSub: {
+    fontSize: 13,
+    fontFamily: Fonts.medium,
+    color: Colors.gray,
+    marginTop: 2,
+  },
+
+  viewReplacementBtn: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+
+  viewReplacementText: {
+    color: Colors.white,
+    fontFamily: Fonts.bold,
+    fontSize: 13,
   },
 
   statusContainer: {
@@ -415,5 +594,74 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: Colors.primary,
     fontFamily: Fonts.semibold,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
+  },
+
+  modalContent: {
+    backgroundColor: Colors.white,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    paddingBottom: 36,
+  },
+
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: Fonts.bold,
+    color: Colors.text,
+  },
+
+  modalCloseBtn: {
+    padding: 4,
+  },
+
+  optionCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F9F9F9",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#EFEFEF",
+  },
+
+  optionIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: "#F0EBFF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
+  },
+
+  optionTextContainer: {
+    flex: 1,
+  },
+
+  optionTitle: {
+    fontSize: 16,
+    fontFamily: Fonts.bold,
+    color: Colors.text,
+    marginBottom: 3,
+  },
+
+  optionDescription: {
+    fontSize: 13,
+    fontFamily: Fonts.medium,
+    color: Colors.gray,
   },
 });

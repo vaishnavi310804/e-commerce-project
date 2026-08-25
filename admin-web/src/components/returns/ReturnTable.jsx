@@ -9,6 +9,7 @@ const ReturnTable = ({
   onUpdateStatus,
   onProcessRefund,
   onCheckRefundStatus,
+  onProcessReplacement,
 }) => {
   if (loading) {
     return (
@@ -286,6 +287,7 @@ const ReturnActions = ({
   onUpdateStatus,
   onProcessRefund,
   onCheckRefundStatus,
+  onProcessReplacement,
 }) => {
   const canUpdateStatus = ["Pending", "Approved", "Picked Up"].includes(
     returnItem.status,
@@ -298,8 +300,19 @@ const ReturnActions = ({
     returnItem.refundStatus === "Not Processed" ||
     returnItem.refundStatus === "Failed";
 
-  const canProcessRefund = isPickedUp && isRefundNotProcessedOrFailed;
-  const canCheckRefundStatus = isPickedUp && isRefundPending;
+  const canProcessRefund =
+    (returnItem.returnType !== "REPLACEMENT") &&
+    isPickedUp &&
+    isRefundNotProcessedOrFailed;
+  const canCheckRefundStatus =
+    (returnItem.returnType !== "REPLACEMENT") &&
+    isPickedUp &&
+    isRefundPending;
+
+  const canProcessReplacement =
+    returnItem.returnType === "REPLACEMENT" &&
+    !returnItem.replacementOrder &&
+    ["Approved", "Picked Up"].includes(returnItem.status);
 
   return (
     <div className="flex shrink-0 items-center gap-1">
@@ -320,6 +333,17 @@ const ReturnActions = ({
           onClick={() => onUpdateStatus(returnItem)}
           className="rounded-lg p-2 text-purple-600 transition hover:bg-purple-50 hover:text-purple-700"
           title="Update Return Status"
+        >
+          <FaExchangeAlt size={16} />
+        </button>
+      )}
+
+      {canProcessReplacement && onProcessReplacement && (
+        <button
+          type="button"
+          onClick={() => onProcessReplacement(returnItem)}
+          className="rounded-lg p-2 text-emerald-600 transition hover:bg-emerald-50 hover:text-emerald-700"
+          title="Create Replacement Order"
         >
           <FaExchangeAlt size={16} />
         </button>

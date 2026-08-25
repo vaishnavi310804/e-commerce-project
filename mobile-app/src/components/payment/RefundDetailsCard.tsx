@@ -23,7 +23,7 @@ const RefundDetailsCard = ({
       case "Processed":
         return {
           title: "Refund Processed",
-          message: "Your refund has been successfully processed.",
+          message: "Your refund has been processed successfully.",
         };
 
       case "Pending":
@@ -115,7 +115,6 @@ const styles = StyleSheet.create({
 
   statusContent: {
     flex: 1,
-    marginLeft: 10,
   },
 
   statusTitle: {

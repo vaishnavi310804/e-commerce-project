@@ -10,6 +10,7 @@ import {
   updateReturnStatus,
   processReturnRefund,
   checkReturnRefundStatus,
+  processReturnReplacement,
 } from "./return.controller.js";
 import {
   createReturnValidation,
@@ -73,6 +74,15 @@ router.patch(
   returnIdValidation,
   validate,
   checkReturnRefundStatus,
+);
+
+router.post(
+  "/:id/replacement",
+  protect,
+  authorize("ADMIN"),
+  returnIdValidation,
+  validate,
+  processReturnReplacement,
 );
 
 export default router;

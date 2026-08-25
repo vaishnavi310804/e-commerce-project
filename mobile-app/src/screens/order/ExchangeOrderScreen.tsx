@@ -17,14 +17,13 @@ import Fonts from "@/src/constants/fonts";
 import { getMyOrderDetails, OrderData } from "@/src/api/order.api";
 import { CreateReturnPayload, createReturn } from "@/src/api/return.api";
 
-const RETURN_REASONS = [
+const EXCHANGE_REASONS = [
   "Product is damaged",
   "Product is defective",
   "Wrong product received",
   "Product does not match description",
-  "Product is not as expected",
   "Size or fit issue",
-  "Changed my mind",
+  "Color preference change",
   "Other",
 ];
 
@@ -33,7 +32,7 @@ interface SelectedItem {
   quantity: number;
 }
 
-const ReturnOrderScreen = () => {
+const ExchangeOrderScreen = () => {
   const { orderId } = useLocalSearchParams();
 
   const [loading, setLoading] = useState(true);
@@ -47,13 +46,6 @@ const ReturnOrderScreen = () => {
   const [reason, setReason] = useState("");
   const [description, setDescription] = useState("");
   const [showReasons, setShowReasons] = useState(false);
-
-  const [refundMode, setRefundMode] = useState<"UPI" | "BANK">("UPI");
-  const [upiId, setUpiId] = useState("");
-  const [accountHolderName, setAccountHolderName] = useState("");
-  const [accountNumber, setAccountNumber] = useState("");
-  const [ifscCode, setIfscCode] = useState("");
-  const [bankName, setBankName] = useState("");
 
   const fetchOrder = async () => {
     try {
@@ -139,41 +131,17 @@ const ReturnOrderScreen = () => {
     if (items.length === 0) {
       Alert.alert(
         "Select Product",
-        "Please select at least one product to return.",
+        "Please select at least one product to exchange.",
       );
       return;
     }
 
     if (!reason) {
-      Alert.alert("Return Reason", "Please select a reason for the return.");
+      Alert.alert(
+        "Exchange Reason",
+        "Please select a reason for the exchange.",
+      );
       return;
-    }
-
-    const isCodOrder = order?.paymentMethod === "COD";
-
-    if (isCodOrder) {
-      if (refundMode === "UPI") {
-        if (!upiId.trim()) {
-          Alert.alert(
-            "Refund Details Required",
-            "Please enter a valid UPI ID for your refund.",
-          );
-          return;
-        }
-      } else {
-        if (
-          !accountHolderName.trim() ||
-          !accountNumber.trim() ||
-          !ifscCode.trim() ||
-          !bankName.trim()
-        ) {
-          Alert.alert(
-            "Refund Details Required",
-            "Please provide complete bank account details (Account Holder Name, Account Number, IFSC Code, and Bank Name) for your refund.",
-          );
-          return;
-        }
-      }
     }
 
     setSubmitting(true);
@@ -188,30 +156,15 @@ const ReturnOrderScreen = () => {
         })),
         reason,
         description: description.trim(),
-        returnType: "REFUND",
+        returnType: "REPLACEMENT",
       };
-
-      if (isCodOrder) {
-        if (refundMode === "UPI") {
-          payload.bankDetails = {
-            upiId: upiId.trim(),
-          };
-        } else {
-          payload.bankDetails = {
-            accountHolderName: accountHolderName.trim(),
-            accountNumber: accountNumber.trim(),
-            ifscCode: ifscCode.trim(),
-            bankName: bankName.trim(),
-          };
-        }
-      }
 
       const response = await createReturn(payload);
 
       if (response.success) {
         Alert.alert(
-          "Return Requested",
-          "Your return request has been submitted successfully.",
+          "Exchange Requested",
+          "Your exchange request has been submitted successfully.",
           [
             {
               text: "OK",
@@ -222,7 +175,7 @@ const ReturnOrderScreen = () => {
       }
     } catch (error: any) {
       console.log(
-        "Return Request Error:",
+        "Exchange Request Error:",
         error?.response?.data || error?.message,
       );
 
@@ -230,7 +183,7 @@ const ReturnOrderScreen = () => {
         "Error",
         error?.response?.data?.message ||
           error?.message ||
-          "Failed to submit return request.",
+          "Failed to submit exchange request.",
       );
     } finally {
       setSubmitting(false);
@@ -257,7 +210,7 @@ const ReturnOrderScreen = () => {
             <Ionicons name="chevron-back" size={24} color={Colors.text} />
           </TouchableOpacity>
 
-          <Text style={styles.title}>Return Order</Text>
+          <Text style={styles.title}>Exchange Item</Text>
 
           <View style={{ width: 24 }} />
         </View>
@@ -282,15 +235,15 @@ const ReturnOrderScreen = () => {
             <Ionicons name="chevron-back" size={24} color={Colors.text} />
           </TouchableOpacity>
 
-          <Text style={styles.title}>Return Order</Text>
+          <Text style={styles.title}>Exchange Item</Text>
 
           <View style={{ width: 24 }} />
         </View>
 
-        <Text style={styles.heading}>Select items to return</Text>
+        <Text style={styles.heading}>Select items to exchange</Text>
 
         <Text style={styles.subHeading}>
-          Select the products you want to return with a valid reason.
+          Select the item you want to exchange and tell us why.
         </Text>
 
         <View style={styles.productsContainer}>
@@ -349,13 +302,13 @@ const ReturnOrderScreen = () => {
                 {alreadyRequested ? (
                   <View style={styles.alreadyReturned}>
                     <Text style={styles.alreadyReturnedText}>
-                      Return already requested
+                      Return or exchange already requested
                     </Text>
                   </View>
                 ) : (
                   selected && (
                     <View style={styles.quantityRow}>
-                      <Text style={styles.quantityLabel}>Return quantity</Text>
+                      <Text style={styles.quantityLabel}>Exchange quantity</Text>
 
                       <View style={styles.quantityControls}>
                         <TouchableOpacity
@@ -391,7 +344,7 @@ const ReturnOrderScreen = () => {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.label}>Return reason</Text>
+          <Text style={styles.label}>Why do you want to exchange this item?</Text>
 
           <TouchableOpacity
             style={styles.dropdown}
@@ -399,7 +352,7 @@ const ReturnOrderScreen = () => {
             onPress={() => setShowReasons((previous) => !previous)}
           >
             <Text style={[styles.dropdownText, !reason && styles.placeholder]}>
-              {reason || "Select a reason"}
+              {reason || "Select a reason for exchange"}
             </Text>
 
             <Ionicons
@@ -411,7 +364,7 @@ const ReturnOrderScreen = () => {
 
           {showReasons && (
             <View style={styles.reasonList}>
-              {RETURN_REASONS.map((item) => (
+              {EXCHANGE_REASONS.map((item) => (
                 <TouchableOpacity
                   key={item}
                   style={styles.reasonOption}
@@ -433,145 +386,13 @@ const ReturnOrderScreen = () => {
           <TextInput
             value={description}
             onChangeText={setDescription}
-            placeholder="Tell us more about the reason for your return..."
+            placeholder="Tell us more about the issue..."
             placeholderTextColor={Colors.gray}
             multiline
             textAlignVertical="top"
             style={styles.descriptionInput}
           />
         </View>
-
-        {order?.paymentMethod === "COD" && (
-          <View style={styles.section}>
-            <Text style={styles.label}>Refund Details</Text>
-
-            <Text style={styles.infoText}>
-              For COD orders, your refund will be transferred to the account/UPI
-              details provided below.
-            </Text>
-
-            <View style={styles.tabContainer}>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                style={[
-                  styles.tabButton,
-                  refundMode === "UPI" && styles.tabButtonActive,
-                ]}
-                onPress={() => setRefundMode("UPI")}
-              >
-                <Ionicons
-                  name="qr-code-outline"
-                  size={16}
-                  color={refundMode === "UPI" ? Colors.white : Colors.text}
-                  style={{ marginRight: 6 }}
-                />
-
-                <Text
-                  style={[
-                    styles.tabText,
-                    refundMode === "UPI" && styles.tabTextActive,
-                  ]}
-                >
-                  UPI ID
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                activeOpacity={0.8}
-                style={[
-                  styles.tabButton,
-                  refundMode === "BANK" && styles.tabButtonActive,
-                ]}
-                onPress={() => setRefundMode("BANK")}
-              >
-                <Ionicons
-                  name="card-outline"
-                  size={16}
-                  color={refundMode === "BANK" ? Colors.white : Colors.text}
-                  style={{ marginRight: 6 }}
-                />
-
-                <Text
-                  style={[
-                    styles.tabText,
-                    refundMode === "BANK" && styles.tabTextActive,
-                  ]}
-                >
-                  Bank Account
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            {refundMode === "UPI" ? (
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>UPI ID *</Text>
-
-                <TextInput
-                  value={upiId}
-                  onChangeText={setUpiId}
-                  placeholder="Enter your UPI ID (e.g. mobile@upi)"
-                  placeholderTextColor={Colors.gray}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  style={styles.textInput}
-                />
-              </View>
-            ) : (
-              <View style={styles.bankFormGroup}>
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Account Holder Name *</Text>
-
-                  <TextInput
-                    value={accountHolderName}
-                    onChangeText={setAccountHolderName}
-                    placeholder="Enter full name as per bank"
-                    placeholderTextColor={Colors.gray}
-                    style={styles.textInput}
-                  />
-                </View>
-
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Account Number *</Text>
-
-                  <TextInput
-                    value={accountNumber}
-                    onChangeText={setAccountNumber}
-                    placeholder="Enter bank account number"
-                    placeholderTextColor={Colors.gray}
-                    keyboardType="number-pad"
-                    style={styles.textInput}
-                  />
-                </View>
-
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>IFSC Code *</Text>
-
-                  <TextInput
-                    value={ifscCode}
-                    onChangeText={setIfscCode}
-                    placeholder="e.g. SBIN0001234"
-                    placeholderTextColor={Colors.gray}
-                    autoCapitalize="characters"
-                    autoCorrect={false}
-                    style={styles.textInput}
-                  />
-                </View>
-
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Bank Name *</Text>
-
-                  <TextInput
-                    value={bankName}
-                    onChangeText={setBankName}
-                    placeholder="Enter bank name"
-                    placeholderTextColor={Colors.gray}
-                    style={styles.textInput}
-                  />
-                </View>
-              </View>
-            )}
-          </View>
-        )}
 
         <TouchableOpacity
           disabled={submitting}
@@ -582,7 +403,7 @@ const ReturnOrderScreen = () => {
           {submitting ? (
             <ActivityIndicator color={Colors.white} />
           ) : (
-            <Text style={styles.submitText}>Request Return</Text>
+            <Text style={styles.submitText}>Request Exchange</Text>
           )}
         </TouchableOpacity>
       </ScrollView>
@@ -590,7 +411,7 @@ const ReturnOrderScreen = () => {
   );
 };
 
-export default ReturnOrderScreen;
+export default ExchangeOrderScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -806,72 +627,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E5E5E5",
     padding: 15,
-    fontSize: 14,
-    fontFamily: Fonts.medium,
-    color: Colors.text,
-  },
-
-  infoText: {
-    fontSize: 13,
-    fontFamily: Fonts.medium,
-    color: Colors.gray,
-    lineHeight: 18,
-    marginBottom: 14,
-  },
-
-  tabContainer: {
-    flexDirection: "row",
-    backgroundColor: "#F3F3F3",
-    borderRadius: 12,
-    padding: 4,
-    marginBottom: 16,
-  },
-
-  tabButton: {
-    flex: 1,
-    flexDirection: "row",
-    height: 40,
-    borderRadius: 9,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  tabButtonActive: {
-    backgroundColor: Colors.primary,
-  },
-
-  tabText: {
-    fontSize: 14,
-    fontFamily: Fonts.semibold,
-    color: Colors.text,
-  },
-
-  tabTextActive: {
-    color: Colors.white,
-  },
-
-  inputGroup: {
-    marginBottom: 14,
-  },
-
-  inputLabel: {
-    fontSize: 13,
-    fontFamily: Fonts.medium,
-    color: Colors.text,
-    marginBottom: 6,
-  },
-
-  bankFormGroup: {
-    marginTop: 2,
-  },
-
-  textInput: {
-    height: 48,
-    backgroundColor: "#FFF",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#E5E5E5",
-    paddingHorizontal: 14,
     fontSize: 14,
     fontFamily: Fonts.medium,
     color: Colors.text,

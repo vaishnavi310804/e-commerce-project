@@ -58,6 +58,18 @@ const returnSchema = new mongoose.Schema(
       maxlength: 1000,
     },
 
+    returnType: {
+      type: String,
+      enum: ["REFUND", "REPLACEMENT"],
+      default: "REFUND",
+    },
+
+    replacementOrder: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Order",
+      default: null,
+    },
+
     status: {
       type: String,
       enum: [
@@ -74,6 +86,40 @@ const returnSchema = new mongoose.Schema(
       type: String,
       enum: ["Not Processed", "Pending", "Processed", "Failed"],
       default: "Not Processed",
+    },
+
+    refundMethod: {
+      type: String,
+      enum: ["RAZORPAY", "BANK_TRANSFER", "UPI"],
+      default: "RAZORPAY",
+    },
+
+    bankDetails: {
+      accountHolderName: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+      accountNumber: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+      ifscCode: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+      bankName: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+      upiId: {
+        type: String,
+        trim: true,
+        default: "",
+      },
     },
 
     refundAmount: {

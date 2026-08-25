@@ -24,7 +24,6 @@ export const createOrderService = async (userId, payload) => {
     throw error;
   }
 
-  // Stock validation before processing
   for (const item of cart.items) {
     const product = item.product;
     if (!product || !product.isActive) {

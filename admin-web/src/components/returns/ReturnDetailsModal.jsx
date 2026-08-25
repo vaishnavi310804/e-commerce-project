@@ -174,6 +174,24 @@ const ReturnDetailsModal = ({ open, returnItem, onClose, onCheckRefundStatus }) 
                 </div>
 
                 <div>
+                  <p className="text-xs text-gray-400">Return Type</p>
+
+                  <p className="mt-1 text-sm font-semibold text-indigo-600">
+                    {returnItem.returnType || "REFUND"}
+                  </p>
+                </div>
+
+                {returnItem.replacementOrder && (
+                  <div>
+                    <p className="text-xs text-gray-400">Replacement Order</p>
+
+                    <p className="mt-1 text-sm font-bold text-purple-700">
+                      Order #{returnItem.replacementOrder.orderNumber || returnItem.replacementOrder}
+                    </p>
+                  </div>
+                )}
+
+                <div>
                   <p className="text-xs text-gray-400">Return Status</p>
 
                   <div className="mt-1">
@@ -194,6 +212,44 @@ const ReturnDetailsModal = ({ open, returnItem, onClose, onCheckRefundStatus }) 
                     ₹{Number(returnItem.refundAmount || 0).toFixed(2)}
                   </p>
                 </div>
+
+                {returnItem.refundMethod && (
+                  <div>
+                    <p className="text-xs text-gray-400">Refund Method</p>
+
+                    <p className="mt-1 text-sm font-semibold text-gray-800">
+                      {returnItem.refundMethod === "BANK_TRANSFER"
+                        ? "Bank Transfer"
+                        : returnItem.refundMethod}
+                    </p>
+                  </div>
+                )}
+
+                {returnItem.bankDetails?.upiId && (
+                  <div>
+                    <p className="text-xs text-gray-400">Customer UPI ID</p>
+
+                    <p className="mt-1 text-sm font-bold text-gray-800 select-all">
+                      {returnItem.bankDetails.upiId}
+                    </p>
+                  </div>
+                )}
+
+                {returnItem.bankDetails?.accountNumber && (
+                  <div>
+                    <p className="text-xs text-gray-400">Customer Bank Account</p>
+
+                    <p className="mt-1 text-sm font-medium text-gray-800">
+                      {returnItem.bankDetails.accountHolderName
+                        ? `${returnItem.bankDetails.accountHolderName} • `
+                        : ""}
+                      {String(returnItem.bankDetails.accountNumber).slice(-4).padStart(String(returnItem.bankDetails.accountNumber).length, '*')}
+                      {returnItem.bankDetails.ifscCode
+                        ? ` (${returnItem.bankDetails.ifscCode.toUpperCase()})`
+                        : ""}
+                    </p>
+                  </div>
+                )}
               </div>
             </section>
 

@@ -6,6 +6,7 @@ import {
   updateReturnStatusService,
   processReturnRefundService,
   checkReturnRefundStatusService,
+  processReturnReplacementService,
 } from "./return.service.js";
 
 export const createReturn = async (req, res, next) => {
@@ -111,6 +112,20 @@ export const checkReturnRefundStatus = async (req, res, next) => {
     const result = await checkReturnRefundStatusService(
       req.params.id,
     );
+
+    return res.status(200).json({
+      success: true,
+      message: result.message,
+      data: result.data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const processReturnReplacement = async (req, res, next) => {
+  try {
+    const result = await processReturnReplacementService(req.params.id);
 
     return res.status(200).json({
       success: true,

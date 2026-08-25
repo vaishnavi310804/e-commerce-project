@@ -23,6 +23,7 @@ import {
   updateReturnStatus,
   processReturnRefund,
   checkReturnRefundStatus,
+  processReturnReplacement,
 } from "../../services/returnApi";
 
 const ITEMS_PER_PAGE = 10;
@@ -185,6 +186,35 @@ const Returns = () => {
     }
   };
 
+  const handleProcessReplacement = async (returnItem) => {
+    if (
+      !window.confirm(
+        `Are you sure you want to create a Replacement Order for Order #${returnItem.order?.orderNumber || ""}?`,
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const response = await processReturnReplacement(returnItem._id);
+
+      alert(response?.message || "Replacement order created successfully.");
+
+      await fetchReturns();
+    } catch (error) {
+      console.error("Failed to process replacement:", error);
+
+      alert(
+        error.response?.data?.message ||
+          "Failed to create replacement order.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-4">
@@ -319,6 +349,7 @@ const Returns = () => {
           onUpdateStatus={handleUpdateStatus}
           onProcessRefund={handleProcessRefund}
           onCheckRefundStatus={handleCheckRefundStatus}
+          onProcessReplacement={handleProcessReplacement}
         />
 
         {!loading && filteredReturns.length > 0 && (

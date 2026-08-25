@@ -34,3 +34,8 @@ export const checkReturnRefundStatus = async (returnId) => {
 
   return data;
 };
+
+export const processReturnReplacement = async (returnId) => {
+  const { data } = await ecommerceApi.post(`/return/${returnId}/replacement`);
+  return data;
+};

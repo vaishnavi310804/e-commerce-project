@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   FaTimes,
   FaRupeeSign,
@@ -6,6 +6,8 @@ import {
   FaBox,
   FaCreditCard,
   FaExclamationTriangle,
+  FaUniversity,
+  FaQrcode,
 } from "react-icons/fa";
 
 const RefundProcessingModal = ({
@@ -16,6 +18,12 @@ const RefundProcessingModal = ({
   processing = false,
 }) => {
   const [confirmed, setConfirmed] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setConfirmed(false);
+    }
+  }, [open, returnItem]);
 
   const getProductId = (product) => {
     if (!product) return null;
@@ -73,6 +81,22 @@ const RefundProcessingModal = ({
 
   const paymentStatus = returnItem.order?.paymentStatus || "—";
 
+  const isCod = paymentMethod === "COD";
+
+  const bankDetails = returnItem.bankDetails || {};
+  const upiId = bankDetails.upiId;
+  const accountHolderName = bankDetails.accountHolderName;
+  const accountNumber = bankDetails.accountNumber;
+  const ifscCode = bankDetails.ifscCode;
+  const bankName = bankDetails.bankName;
+
+  const maskAccountNumber = (acc) => {
+    if (!acc) return "—";
+    const str = String(acc).trim();
+    if (str.length <= 4) return str;
+    return "*".repeat(str.length - 4) + str.slice(-4);
+  };
+
   const handleClose = () => {
     if (processing) return;
 
@@ -89,7 +113,7 @@ const RefundProcessingModal = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl">
-        <div className="flex shrink-0 items-center justify-between px-6 py-4">
+        <div className="flex shrink-0 items-center justify-between px-6 py-4 border-b border-gray-100">
           <div>
             <h2 className="text-xl font-semibold text-gray-800">
               Process Refund
@@ -150,6 +174,68 @@ const RefundProcessingModal = ({
               </div>
             </div>
 
+            {isCod && (
+              <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 p-4">
+                <div className="mb-3 flex items-center gap-2 text-indigo-900">
+                  {upiId ? <FaQrcode size={16} /> : <FaUniversity size={16} />}
+                  <span className="text-xs font-bold uppercase tracking-wider">
+                    Customer Refund Destination ({upiId ? "UPI" : "Bank Transfer"})
+                  </span>
+                </div>
+
+                {upiId ? (
+                  <div className="rounded-lg bg-white p-3 border border-indigo-100">
+                    <p className="text-xs text-gray-500 font-medium">UPI ID</p>
+                    <p className="text-sm font-bold text-gray-900 mt-0.5 select-all">
+                      {upiId}
+                    </p>
+                  </div>
+                ) : accountNumber ? (
+                  <div className="grid grid-cols-2 gap-3 rounded-lg bg-white p-3 border border-indigo-100">
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">
+                        Account Holder
+                      </p>
+                      <p className="text-sm font-semibold text-gray-800 mt-0.5">
+                        {accountHolderName || "—"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">
+                        Account Number
+                      </p>
+                      <p className="text-sm font-semibold text-gray-800 mt-0.5">
+                        {maskAccountNumber(accountNumber)}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">
+                        IFSC Code
+                      </p>
+                      <p className="text-sm font-semibold text-gray-800 mt-0.5 uppercase">
+                        {ifscCode || "—"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium">
+                        Bank Name
+                      </p>
+                      <p className="text-sm font-semibold text-gray-800 mt-0.5">
+                        {bankName || "—"}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-lg bg-white p-3 border border-amber-200 text-amber-700 text-xs font-medium">
+                    No customer bank/UPI destination details found for this COD return.
+                  </div>
+                )}
+              </div>
+            )}
+
             <div>
               <h3 className="mb-2 text-sm font-semibold text-gray-700">
                 Returned Products
@@ -166,7 +252,7 @@ const RefundProcessingModal = ({
                   return (
                     <div
                       key={`${product?._id || index}-${index}`}
-                      className="flex items-center justify-between gap-4 border-gray-100 p-4 last:border-b-0"
+                      className="flex items-center justify-between gap-4 border-b border-gray-100 p-4 last:border-b-0"
                     >
                       <div className="min-w-0">
                         <p className="truncate font-medium text-gray-800">
@@ -198,18 +284,17 @@ const RefundProcessingModal = ({
               </div>
             </div>
 
-            <div className="rounded-xl border border-red-200 bg-amber-50 p-4">
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
               <div className="flex gap-3">
-                <FaExclamationTriangle className="mt-0.5 shrink-0 text-red-600" />
+                <FaExclamationTriangle className="mt-0.5 shrink-0 text-amber-600" />
 
                 <div>
-                  <p className="text-sm font-semibold text-red-800">
+                  <p className="text-sm font-semibold text-amber-800">
                     Refund Confirmation
                   </p>
 
-                  <p className="mt-1 text-xs leading-5 text-red-700">
-                    Verify the details before proceeding as the action cannot be
-                    reversed.
+                  <p className="mt-1 text-xs leading-5 text-amber-700">
+                    Verify the customer's refund details before processing.
                   </p>
                 </div>
               </div>
@@ -232,7 +317,7 @@ const RefundProcessingModal = ({
           </div>
         </div>
 
-        <div className="flex shrink-0 justify-end gap-3 bg-white px-6 py-4">
+        <div className="flex shrink-0 justify-end gap-3 bg-white px-6 py-4 border-t border-gray-100">
           <button
             type="button"
             onClick={handleClose}

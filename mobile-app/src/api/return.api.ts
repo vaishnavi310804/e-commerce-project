@@ -37,6 +37,18 @@ export interface ReturnData {
   reason: string;
   description?: string;
 
+  returnType?: "REFUND" | "REPLACEMENT";
+
+  replacementOrder?: string | {
+    _id: string;
+    orderNumber: string;
+    orderStatus: string;
+    totalAmount: number;
+  };
+
+  refundStatus?: "Not Processed" | "Pending" | "Processed" | "Failed";
+  refundAmount?: number;
+
   status:
     | "Pending"
     | "Approved"
@@ -64,6 +76,14 @@ export interface CreateReturnPayload {
   items: CreateReturnItem[];
   reason: string;
   description?: string;
+  returnType?: "REFUND" | "REPLACEMENT";
+  bankDetails?: {
+    accountHolderName?: string;
+    accountNumber?: string;
+    ifscCode?: string;
+    bankName?: string;
+    upiId?: string;
+  };
 }
 
 export interface ReturnResponse {
