@@ -169,6 +169,7 @@ const ReturnTable = ({
                         onUpdateStatus={onUpdateStatus}
                         onProcessRefund={onProcessRefund}
                         onCheckRefundStatus={onCheckRefundStatus}
+                        onProcessReplacement={onProcessReplacement}
                       />
                     </td>
                   </tr>
@@ -271,6 +272,7 @@ const ReturnTable = ({
                   onUpdateStatus={onUpdateStatus}
                   onProcessRefund={onProcessRefund}
                   onCheckRefundStatus={onCheckRefundStatus}
+                  onProcessReplacement={onProcessReplacement}
                 />
               </div>
             </div>

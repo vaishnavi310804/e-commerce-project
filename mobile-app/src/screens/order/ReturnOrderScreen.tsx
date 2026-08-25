@@ -509,7 +509,7 @@ const ReturnOrderScreen = () => {
                 <TextInput
                   value={upiId}
                   onChangeText={setUpiId}
-                  placeholder="Enter your UPI ID (e.g. mobile@upi)"
+                  placeholder="Enter your UPI ID (customer@upi)"
                   placeholderTextColor={Colors.gray}
                   autoCapitalize="none"
                   autoCorrect={false}
@@ -531,12 +531,12 @@ const ReturnOrderScreen = () => {
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Account Number *</Text>
+                  <Text style={styles.inputLabel}>Account Number</Text>
 
                   <TextInput
                     value={accountNumber}
                     onChangeText={setAccountNumber}
-                    placeholder="Enter bank account number"
+                    placeholder="Enter your bank account number"
                     placeholderTextColor={Colors.gray}
                     keyboardType="number-pad"
                     style={styles.textInput}
@@ -544,12 +544,12 @@ const ReturnOrderScreen = () => {
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>IFSC Code *</Text>
+                  <Text style={styles.inputLabel}>IFSC Code</Text>
 
                   <TextInput
                     value={ifscCode}
                     onChangeText={setIfscCode}
-                    placeholder="e.g. SBIN0001234"
+                    placeholder="SBIN0001234"
                     placeholderTextColor={Colors.gray}
                     autoCapitalize="characters"
                     autoCorrect={false}
@@ -558,7 +558,7 @@ const ReturnOrderScreen = () => {
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Bank Name *</Text>
+                  <Text style={styles.inputLabel}>Bank Name</Text>
 
                   <TextInput
                     value={bankName}

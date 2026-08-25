@@ -1,9 +1,10 @@
+import mongoose from "mongoose";
 import Return from "./return.model.js";
 import Order from "../orders/order.model.js";
 import { refundPartialPaymentService } from "../payment/payment.service.js";
 import razorpay from "../../config/razorpay.js";
 import { sendNotification } from "../../services/notification.service.js";
-import { deductProductStock } from "../products/product.service.js";
+import { deductProductStock, restoreProductStock } from "../products/product.service.js";
 
 export const createReturnService = async (userId, payload) => {
   const { orderId, items, reason, description, returnType, bankDetails } = payload;
@@ -288,6 +289,30 @@ export const updateReturnStatusService = async (returnId, status) => {
     throw error;
   }
 
+  if (status === "Completed") {
+    if (
+      returnRequest.returnType === "REFUND" &&
+      returnRequest.refundStatus !== "Processed"
+    ) {
+      const error = new Error(
+        "Return status cannot be updated to Completed until the refund has been processed.",
+      );
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (
+      returnRequest.returnType === "REPLACEMENT" &&
+      !returnRequest.replacementOrder
+    ) {
+      const error = new Error(
+        "Return status cannot be updated to Completed until the replacement order has been created.",
+      );
+      error.statusCode = 400;
+      throw error;
+    }
+  }
+
   const order = await Order.findById(returnRequest.order);
 
   if (!order) {
@@ -364,15 +389,6 @@ export const processReturnRefundService = async (returnId) => {
     throw error;
   }
 
-  const validStatuses = ["Approved", "Picked Up"];
-  if (!validStatuses.includes(returnRequest.status)) {
-    const error = new Error(
-      "Refund can only be processed for return requests that are Approved or Picked Up.",
-    );
-    error.statusCode = 400;
-    throw error;
-  }
-
   if (returnRequest.returnType !== "REFUND") {
     const error = new Error(
       "Refund cannot be processed for a replacement return.",
@@ -381,24 +397,10 @@ export const processReturnRefundService = async (returnId) => {
     throw error;
   }
 
-  if (returnRequest.refundStatus === "Processed") {
-    const populatedExisting = await Return.findById(returnRequest._id)
-      .populate("user", "fullName email phoneNumber")
-      .populate(
-        "order",
-        "orderNumber orderStatus totalAmount paymentMethod paymentStatus refundStatus refundAmount razorpayRefundId refundDate products",
-      )
-      .populate("items.product", "name price productImage image brand");
-
-    return {
-      message: "Refund has already been processed.",
-      data: populatedExisting,
-    };
-  }
-
-  if (returnRequest.refundStatus === "Pending") {
+  const validStatuses = ["Approved", "Picked Up"];
+  if (!validStatuses.includes(returnRequest.status)) {
     const error = new Error(
-      "Refund request is already pending. Please check the refund status instead.",
+      "Refund can only be processed for return requests that are Approved or Picked Up.",
     );
     error.statusCode = 400;
     throw error;
@@ -409,16 +411,6 @@ export const processReturnRefundService = async (returnId) => {
   if (!order) {
     const error = new Error("Associated order not found.");
     error.statusCode = 404;
-    throw error;
-  }
-
-  if (order.paymentStatus !== "Paid" && order.paymentStatus !== "Refunded") {
-    const error = new Error(
-      order.paymentMethod === "COD"
-        ? "COD order payment must be marked as Paid before refund."
-        : "This order payment is not eligible for refund.",
-    );
-    error.statusCode = 400;
     throw error;
   }
 
@@ -473,24 +465,38 @@ export const processReturnRefundService = async (returnId) => {
     0,
   );
 
-  const remainingRefundableBalance = Math.max(
-    0,
-    (Number(order.totalAmount) || 0) - alreadyRefunded,
+  const lockedReturn = await Return.findOneAndUpdate(
+    {
+      _id: returnId,
+      returnType: "REFUND",
+      refundStatus: { $in: ["Not Processed", "Failed"] },
+      status: { $in: ["Approved", "Picked Up"] },
+    },
+    {
+      $set: { refundStatus: "Pending", refundAmount: requestedRefundAmount },
+    },
+    { new: true },
   );
 
-  if (remainingRefundableBalance <= 0) {
-    const error = new Error("This order has no remaining refundable balance.");
-    error.statusCode = 400;
-    throw error;
-  }
+  if (!lockedReturn) {
+    const reFetched = await Return.findById(returnId);
+    if (reFetched && reFetched.refundStatus === "Processed") {
+      const populatedExisting = await Return.findById(returnId)
+        .populate("user", "fullName email phoneNumber")
+        .populate(
+          "order",
+          "orderNumber orderStatus totalAmount paymentMethod paymentStatus refundStatus refundAmount razorpayRefundId refundDate products",
+        )
+        .populate("items.product", "name price productImage image brand");
 
-  if (requestedRefundAmount > remainingRefundableBalance) {
+      return {
+        message: "Refund has already been processed.",
+        data: populatedExisting,
+      };
+    }
+
     const error = new Error(
-      `Requested refund of ₹${requestedRefundAmount.toFixed(
-        2,
-      )} exceeds the remaining refundable balance of ₹${remainingRefundableBalance.toFixed(
-        2,
-      )} for this order.`,
+      "Refund request is already in progress or cannot be processed.",
     );
     error.statusCode = 400;
     throw error;
@@ -498,21 +504,23 @@ export const processReturnRefundService = async (returnId) => {
 
   if (order.paymentMethod === "RAZORPAY") {
     if (!order.razorpayPaymentId) {
+      await Return.updateOne(
+        { _id: returnId },
+        { $set: { refundStatus: "Failed" } },
+      );
       const error = new Error("Razorpay payment ID not found.");
       error.statusCode = 400;
       throw error;
     }
 
-    returnRequest.refundStatus = "Pending";
-    returnRequest.refundAmount = requestedRefundAmount;
-    await returnRequest.save();
-
     let refund;
     try {
       refund = await refundPartialPaymentService(order, requestedRefundAmount);
     } catch (refundError) {
-      returnRequest.refundStatus = "Failed";
-      await returnRequest.save();
+      await Return.updateOne(
+        { _id: returnId },
+        { $set: { refundStatus: "Failed" } },
+      );
 
       const message =
         refundError.error?.description ||
@@ -525,26 +533,26 @@ export const processReturnRefundService = async (returnId) => {
     }
 
     if (!refund) {
-      returnRequest.refundStatus = "Failed";
-      await returnRequest.save();
+      await Return.updateOne(
+        { _id: returnId },
+        { $set: { refundStatus: "Failed" } },
+      );
       const error = new Error("Refund could not be processed.");
       error.statusCode = 500;
       throw error;
     }
 
-    returnRequest.razorpayRefundId = refund.id;
-
-    const previousRefundStatus = returnRequest.refundStatus;
+    lockedReturn.razorpayRefundId = refund.id;
 
     let message =
       "Refund request initiated successfully. The refund is still being processed.";
 
     if (refund.status === "processed") {
-      returnRequest.refundStatus = "Processed";
-      returnRequest.refundAmount = requestedRefundAmount;
-      returnRequest.refundedAt = new Date();
-      returnRequest.status = "Completed";
-      returnRequest.completedAt = new Date();
+      lockedReturn.refundStatus = "Processed";
+      lockedReturn.refundAmount = requestedRefundAmount;
+      lockedReturn.refundedAt = new Date();
+      lockedReturn.status = "Completed";
+      lockedReturn.completedAt = new Date();
 
       const newCumulativeRefund = alreadyRefunded + requestedRefundAmount;
       order.refundAmount = newCumulativeRefund;
@@ -556,7 +564,7 @@ export const processReturnRefundService = async (returnId) => {
         order.paymentStatus = "Refunded";
       }
 
-      returnRequest.items.forEach((returnItem) => {
+      lockedReturn.items.forEach((returnItem) => {
         const orderItem = order.products.find(
           (item) =>
             item.product &&
@@ -569,119 +577,13 @@ export const processReturnRefundService = async (returnId) => {
       });
 
       await order.save();
-      await returnRequest.save();
+      await lockedReturn.save();
 
       message = "Refund processed successfully.";
 
-      if (
-        previousRefundStatus !== "Processed" &&
-        returnRequest.refundStatus === "Processed"
-      ) {
-        try {
-          await sendNotification({
-            userId: returnRequest.user,
-            title: "Refund Processed",
-            body: `Your refund for order ${order.orderNumber} has been processed successfully.`,
-            type: "REFUND_PROCESSED",
-            data: {
-              orderId: order._id,
-            },
-          });
-        } catch (notificationError) {
-          console.error(
-            "Failed to send refund notification:",
-            notificationError.message,
-          );
-        }
-      }
-    } else if (refund.status === "failed") {
-      returnRequest.refundStatus = "Failed";
-      await returnRequest.save();
-      const error = new Error("Razorpay refund failed.");
-      error.statusCode = 400;
-      throw error;
-    } else {
-      returnRequest.refundStatus = "Pending";
-      returnRequest.refundAmount = requestedRefundAmount;
-      order.refundStatus = "Pending";
-      order.refundAmount = alreadyRefunded + requestedRefundAmount;
-      order.razorpayRefundId = refund.id;
-
-      await order.save();
-      await returnRequest.save();
-
-      message =
-        "Refund request initiated successfully. The refund is still being processed.";
-    }
-
-    const populated = await Return.findById(returnRequest._id)
-      .populate("user", "fullName email phoneNumber")
-      .populate(
-        "order",
-        "orderNumber orderStatus totalAmount paymentMethod paymentStatus refundStatus refundAmount razorpayRefundId refundDate products",
-      )
-      .populate("items.product", "name price productImage image brand");
-
-    return {
-      message,
-      data: populated,
-    };
-  } else if (order.paymentMethod === "COD") {
-    let derivedRefundMethod = "";
-    if (returnRequest.bankDetails?.upiId) {
-      derivedRefundMethod = "UPI";
-    } else if (
-      returnRequest.bankDetails?.accountHolderName &&
-      returnRequest.bankDetails?.accountNumber &&
-      returnRequest.bankDetails?.ifscCode &&
-      returnRequest.bankDetails?.bankName
-    ) {
-      derivedRefundMethod = "BANK_TRANSFER";
-    } else {
-      const error = new Error(
-        "Refund destination details are required for COD refunds.",
-      );
-      error.statusCode = 400;
-      throw error;
-    }
-
-    const previousRefundStatus = returnRequest.refundStatus;
-
-    returnRequest.refundStatus = "Processed";
-    returnRequest.refundMethod = derivedRefundMethod;
-    returnRequest.refundAmount = requestedRefundAmount;
-    returnRequest.refundedAt = new Date();
-    returnRequest.status = "Completed";
-    returnRequest.completedAt = new Date();
-
-    const newCumulativeRefund = alreadyRefunded + requestedRefundAmount;
-    order.refundAmount = newCumulativeRefund;
-    order.refundStatus = "Processed";
-    order.refundDate = new Date();
-
-    if (newCumulativeRefund >= order.totalAmount) {
-      order.paymentStatus = "Refunded";
-    }
-
-    returnRequest.items.forEach((returnItem) => {
-      const orderItem = order.products.find(
-        (item) =>
-          item.product &&
-          item.product.toString() === returnItem.product.toString(),
-      );
-
-      if (orderItem) {
-        orderItem.returnStatus = "Refunded";
-      }
-    });
-
-    await order.save();
-    await returnRequest.save();
-
-    if (previousRefundStatus !== "Processed") {
       try {
         await sendNotification({
-          userId: returnRequest.user,
+          userId: lockedReturn.user,
           title: "Refund Processed",
           body: `Your refund for order ${order.orderNumber} has been processed successfully.`,
           type: "REFUND_PROCESSED",
@@ -695,9 +597,110 @@ export const processReturnRefundService = async (returnId) => {
           notificationError.message,
         );
       }
+    } else if (refund.status === "failed") {
+      lockedReturn.refundStatus = "Failed";
+      await lockedReturn.save();
+      const error = new Error("Razorpay refund failed.");
+      error.statusCode = 400;
+      throw error;
+    } else {
+      lockedReturn.refundStatus = "Pending";
+      lockedReturn.refundAmount = requestedRefundAmount;
+      order.refundStatus = "Pending";
+      order.refundAmount = alreadyRefunded + requestedRefundAmount;
+      order.razorpayRefundId = refund.id;
+
+      await order.save();
+      await lockedReturn.save();
+
+      message =
+        "Refund request initiated successfully. The refund is still being processed.";
     }
 
-    const populated = await Return.findById(returnRequest._id)
+    const populated = await Return.findById(lockedReturn._id)
+      .populate("user", "fullName email phoneNumber")
+      .populate(
+        "order",
+        "orderNumber orderStatus totalAmount paymentMethod paymentStatus refundStatus refundAmount razorpayRefundId refundDate products",
+      )
+      .populate("items.product", "name price productImage image brand");
+
+    return {
+      message,
+      data: populated,
+    };
+  } else if (order.paymentMethod === "COD") {
+    let derivedRefundMethod = "";
+    if (lockedReturn.bankDetails?.upiId) {
+      derivedRefundMethod = "UPI";
+    } else if (
+      lockedReturn.bankDetails?.accountHolderName &&
+      lockedReturn.bankDetails?.accountNumber &&
+      lockedReturn.bankDetails?.ifscCode &&
+      lockedReturn.bankDetails?.bankName
+    ) {
+      derivedRefundMethod = "BANK_TRANSFER";
+    } else {
+      await Return.updateOne(
+        { _id: returnId },
+        { $set: { refundStatus: "Not Processed" } },
+      );
+      const error = new Error(
+        "Refund destination details are required for COD refunds.",
+      );
+      error.statusCode = 400;
+      throw error;
+    }
+
+    lockedReturn.refundStatus = "Processed";
+    lockedReturn.refundMethod = derivedRefundMethod;
+    lockedReturn.refundAmount = requestedRefundAmount;
+    lockedReturn.refundedAt = new Date();
+    lockedReturn.status = "Completed";
+    lockedReturn.completedAt = new Date();
+
+    const newCumulativeRefund = alreadyRefunded + requestedRefundAmount;
+    order.refundAmount = newCumulativeRefund;
+    order.refundStatus = "Processed";
+    order.refundDate = new Date();
+
+    if (newCumulativeRefund >= order.totalAmount) {
+      order.paymentStatus = "Refunded";
+    }
+
+    lockedReturn.items.forEach((returnItem) => {
+      const orderItem = order.products.find(
+        (item) =>
+          item.product &&
+          item.product.toString() === returnItem.product.toString(),
+      );
+
+      if (orderItem) {
+        orderItem.returnStatus = "Refunded";
+      }
+    });
+
+    await order.save();
+    await lockedReturn.save();
+
+    try {
+      await sendNotification({
+        userId: lockedReturn.user,
+        title: "Refund Processed",
+        body: `Your refund for order ${order.orderNumber} has been processed successfully.`,
+        type: "REFUND_PROCESSED",
+        data: {
+          orderId: order._id,
+        },
+      });
+    } catch (notificationError) {
+      console.error(
+        "Failed to send refund notification:",
+        notificationError.message,
+      );
+    }
+
+    const populated = await Return.findById(lockedReturn._id)
       .populate("user", "fullName email phoneNumber")
       .populate(
         "order",
@@ -710,6 +713,10 @@ export const processReturnRefundService = async (returnId) => {
       data: populated,
     };
   } else {
+    await Return.updateOne(
+      { _id: returnId },
+      { $set: { refundStatus: "Not Processed" } },
+    );
     const error = new Error("Unsupported payment method for refund.");
     error.statusCode = 400;
     throw error;
@@ -722,6 +729,14 @@ export const checkReturnRefundStatusService = async (returnId) => {
   if (!returnRequest) {
     const error = new Error("Return request not found.");
     error.statusCode = 404;
+    throw error;
+  }
+
+  if (returnRequest.returnType !== "REFUND") {
+    const error = new Error(
+      "Refund status check is not applicable for replacement returns.",
+    );
+    error.statusCode = 400;
     throw error;
   }
 
@@ -743,42 +758,57 @@ export const checkReturnRefundStatusService = async (returnId) => {
       .populate("items.product", "name price productImage image brand");
 
     return {
-      message: "Refund processed successfully.",
+      message: "Refund has already been processed.",
       data: populated,
     };
   }
 
-  const refundId = returnRequest.razorpayRefundId || order.razorpayRefundId;
+  if (
+    returnRequest.refundStatus !== "Pending" ||
+    order.paymentMethod !== "RAZORPAY"
+  ) {
+    const populated = await Return.findById(returnRequest._id)
+      .populate("user", "fullName email phoneNumber")
+      .populate(
+        "order",
+        "orderNumber orderStatus totalAmount paymentMethod paymentStatus refundStatus refundAmount razorpayRefundId refundDate products",
+      )
+      .populate("items.product", "name price productImage image brand");
 
-  if (!refundId) {
-    const error = new Error("Razorpay refund ID not found for this return.");
+    return {
+      message: "Refund status check not applicable.",
+      data: populated,
+    };
+  }
+
+  if (!returnRequest.razorpayRefundId) {
+    const error = new Error("Razorpay refund ID not found on return request.");
     error.statusCode = 400;
     throw error;
   }
 
-  let refund;
+  let razorpayRefund;
   try {
-    refund = await razorpay.refunds.fetch(refundId);
-  } catch (fetchError) {
-    const msg =
-      fetchError.error?.description ||
-      fetchError.description ||
-      fetchError.message ||
-      "Failed to fetch refund status from Razorpay.";
-    const customError = new Error(msg);
-    customError.statusCode = fetchError.statusCode || 400;
-    throw customError;
+    razorpayRefund = await razorpay.refunds.fetch(returnRequest.razorpayRefundId);
+  } catch (apiError) {
+    console.error("Razorpay fetch refund error:", apiError);
+    const error = new Error(
+      apiError.error?.description || "Failed to fetch refund status from Razorpay.",
+    );
+    error.statusCode = 400;
+    throw error;
   }
 
-  const previousRefundStatus = returnRequest.refundStatus;
+  let message = "";
 
-  let message = "Refund is still being processed.";
-
-  if (refund.status === "processed") {
+  if (razorpayRefund.status === "processed") {
     returnRequest.refundStatus = "Processed";
-    returnRequest.refundedAt = returnRequest.refundedAt || new Date();
+    returnRequest.refundedAt = new Date();
     returnRequest.status = "Completed";
-    returnRequest.completedAt = returnRequest.completedAt || new Date();
+    returnRequest.completedAt = new Date();
+
+    order.refundStatus = "Processed";
+    order.refundDate = new Date();
 
     const processedReturns = await Return.find({
       order: returnRequest.order,
@@ -791,13 +821,8 @@ export const checkReturnRefundStatusService = async (returnId) => {
       0,
     );
 
-    const newCumulativeRefund =
-      alreadyRefunded + (returnRequest.refundAmount || 0);
-
+    const newCumulativeRefund = alreadyRefunded + returnRequest.refundAmount;
     order.refundAmount = newCumulativeRefund;
-    order.razorpayRefundId = refund.id;
-    order.refundStatus = "Processed";
-    order.refundDate = new Date();
 
     if (newCumulativeRefund >= order.totalAmount) {
       order.paymentStatus = "Refunded";
@@ -818,47 +843,30 @@ export const checkReturnRefundStatusService = async (returnId) => {
     await order.save();
     await returnRequest.save();
 
-    message = "Refund processed successfully.";
-
-    if (
-      previousRefundStatus !== "Processed" &&
-      returnRequest.refundStatus === "Processed"
-    ) {
-      console.log("========== REFUND NOTIFICATION ==========");
-      console.log("REFUND PROCESSED");
-      console.log(`User ID: ${returnRequest.user}`);
-      console.log(`Order ID: ${order._id}`);
-      console.log(`Order Number: ${order.orderNumber}`);
-      console.log("Notification Type: REFUND_PROCESSED");
-
-      try {
-        await sendNotification({
-          userId: returnRequest.user,
-          title: "Refund Processed",
-          body: `Your refund for order ${order.orderNumber} has been processed successfully.`,
-          type: "REFUND_PROCESSED",
-          data: {
-            orderId: order._id,
-          },
-        });
-      } catch (notificationError) {
-        console.error(
-          "Failed to send refund notification:",
-          notificationError.message,
-        );
-      }
-
-      console.log("REFUND NOTIFICATION REQUEST COMPLETED");
+    try {
+      await sendNotification({
+        userId: returnRequest.user,
+        title: "Refund Processed",
+        body: `Your refund for order ${order.orderNumber} has been processed successfully.`,
+        type: "REFUND_PROCESSED",
+        data: {
+          orderId: order._id,
+        },
+      });
+    } catch (notificationError) {
+      console.error(
+        "Failed to send refund notification:",
+        notificationError.message,
+      );
     }
-  } else if (refund.status === "failed") {
+
+    message = "Refund status verified and marked as Processed.";
+  } else if (razorpayRefund.status === "failed") {
     returnRequest.refundStatus = "Failed";
     await returnRequest.save();
 
     message = "Refund failed. The refund can be retried.";
   } else {
-    returnRequest.refundStatus = "Pending";
-    await returnRequest.save();
-
     message = "Refund is still being processed.";
   }
 
@@ -893,31 +901,6 @@ export const processReturnReplacementService = async (returnId) => {
     throw error;
   }
 
-  if (returnRequest.replacementOrder) {
-    const populatedExisting = await Return.findById(returnRequest._id)
-      .populate("user", "fullName email phoneNumber")
-      .populate("replacementOrder", "orderNumber orderStatus totalAmount products")
-      .populate(
-        "order",
-        "orderNumber orderStatus totalAmount paymentMethod paymentStatus products",
-      )
-      .populate("items.product", "name price productImage image brand");
-
-    return {
-      message: "Replacement order already exists.",
-      data: populatedExisting,
-    };
-  }
-
-  const validStatuses = ["Approved", "Picked Up"];
-  if (!validStatuses.includes(returnRequest.status)) {
-    const error = new Error(
-      "Replacement order can only be created for return requests that are Approved or Picked Up.",
-    );
-    error.statusCode = 400;
-    throw error;
-  }
-
   const order = await Order.findById(returnRequest.order);
 
   if (!order) {
@@ -926,57 +909,120 @@ export const processReturnReplacementService = async (returnId) => {
     throw error;
   }
 
-  const replacementItems = returnRequest.items.map((item) => ({
+  const tempLockId = new mongoose.Types.ObjectId();
+
+  const lockedReturn = await Return.findOneAndUpdate(
+    {
+      _id: returnId,
+      returnType: "REPLACEMENT",
+      replacementOrder: null,
+      status: { $in: ["Approved", "Picked Up"] },
+    },
+    {
+      $set: { replacementOrder: tempLockId },
+    },
+    { returnDocument: "after" },
+  );
+
+  if (!lockedReturn) {
+    const reFetched = await Return.findById(returnId);
+    if (reFetched && reFetched.replacementOrder) {
+      const populatedExisting = await Return.findById(returnId)
+        .populate("user", "fullName email phoneNumber")
+        .populate("replacementOrder", "orderNumber orderStatus totalAmount products")
+        .populate(
+          "order",
+          "orderNumber orderStatus totalAmount paymentMethod paymentStatus products",
+        )
+        .populate("items.product", "name price productImage image brand");
+
+      return {
+        message: "Replacement order already exists.",
+        data: populatedExisting,
+      };
+    }
+
+    const error = new Error(
+      "Replacement order creation is already in progress or cannot be processed.",
+    );
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const replacementItems = lockedReturn.items.map((item) => ({
     product: item.product,
     quantity: item.quantity,
   }));
 
-  await deductProductStock(replacementItems);
+  let stockDeductionSuccess = false;
 
-  const replacementOrderProducts = returnRequest.items.map((item) => ({
-    product: item.product,
-    quantity: item.quantity,
-    price: 0,
-    itemStatus: "Placed",
-    returnStatus: "Not Requested",
-  }));
+  try {
+    await deductProductStock(replacementItems);
+    stockDeductionSuccess = true;
 
-  const replacementOrder = await Order.create({
-    user: returnRequest.user,
-    products: replacementOrderProducts,
-    subtotal: 0,
-    shippingCharge: 0,
-    tax: 0,
-    discount: 0,
-    totalAmount: 0,
-    paymentMethod: "COD",
-    paymentStatus: "Paid",
-    orderStatus: "Placed",
-    isStockDeducted: true,
-    shippingAddress: order.shippingAddress,
-    address: order.address,
-  });
+    const replacementOrderProducts = lockedReturn.items.map((item) => ({
+      product: item.product,
+      quantity: item.quantity,
+      price: 0,
+      itemStatus: "Placed",
+      returnStatus: "Not Requested",
+    }));
 
-  returnRequest.replacementOrder = replacementOrder._id;
-  returnRequest.status = "Completed";
-  returnRequest.completedAt = new Date();
+    const replacementOrder = await Order.create({
+      user: lockedReturn.user,
+      products: replacementOrderProducts,
+      subtotal: 0,
+      shippingCharge: 0,
+      tax: 0,
+      discount: 0,
+      totalAmount: 0,
+      paymentMethod: "COD",
+      paymentStatus: "Paid",
+      orderStatus: "Placed",
+      isStockDeducted: true,
+      shippingAddress: order.shippingAddress,
+      address: order.address,
+    });
 
-  returnRequest.items.forEach((returnItem) => {
-    const orderItem = order.products.find(
-      (item) =>
-        item.product &&
-        item.product.toString() === returnItem.product.toString(),
+    lockedReturn.replacementOrder = replacementOrder._id;
+    lockedReturn.status = "Completed";
+    lockedReturn.completedAt = new Date();
+
+    lockedReturn.items.forEach((returnItem) => {
+      const orderItem = order.products.find(
+        (item) =>
+          item.product &&
+          item.product.toString() === returnItem.product.toString(),
+      );
+
+      if (orderItem) {
+        orderItem.returnStatus = "Replaced";
+      }
+    });
+
+    await order.save();
+    await lockedReturn.save();
+  } catch (error) {
+    if (stockDeductionSuccess) {
+      try {
+        await restoreProductStock(replacementItems);
+      } catch (rollbackError) {
+        console.error(
+          "Failed to restore product stock after replacement creation failure:",
+          rollbackError.message,
+        );
+      }
+    }
+
+    await Return.updateOne(
+      { _id: returnId, replacementOrder: tempLockId },
+      { $set: { replacementOrder: null } },
     );
 
-    if (orderItem) {
-      orderItem.returnStatus = "Refunded";
-    }
-  });
+    throw error;
+  }
 
-  await order.save();
-  await returnRequest.save();
-
-  const populated = await Return.findById(returnRequest._id)
+  const populated = await Return.findById(lockedReturn._id)
     .populate("user", "fullName email phoneNumber")
     .populate("replacementOrder", "orderNumber orderStatus totalAmount products")
     .populate(

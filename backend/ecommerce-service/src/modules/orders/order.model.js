@@ -47,6 +47,7 @@ const orderItemSchema = new mongoose.Schema({
       "Rejected",
       "Picked Up",
       "Refunded",
+      "Replaced",
     ],
     default: "Not Requested",
   },

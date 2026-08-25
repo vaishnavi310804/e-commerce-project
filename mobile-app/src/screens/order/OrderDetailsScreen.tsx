@@ -317,8 +317,7 @@ const OrderDetailsScreen = () => {
           paymentStatus={order.paymentStatus}
         />
 
-        {order.paymentMethod === "RAZORPAY" &&
-          order.refundStatus !== "Not Applicable" && (
+        {order.refundStatus !== "Not Applicable" && (
             <RefundDetailsCard
               refundStatus={order.refundStatus}
               refundAmount={order.refundAmount}
