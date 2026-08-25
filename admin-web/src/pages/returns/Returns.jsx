@@ -221,11 +221,11 @@ const Returns = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">
-              Return Dashboard
+              Return/Exchange Dashboard
             </h1>
 
             <p className="mt-1 text-gray-500">
-              Manage all customer return requests.
+              Manage all customer return and return requests.
             </p>
           </div>
         </div>

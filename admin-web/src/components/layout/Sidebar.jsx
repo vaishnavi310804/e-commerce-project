@@ -112,7 +112,7 @@ const Sidebar = () => {
 
             <SidebarItem icon={FaTruck} title="Shipment" path="/shipment" />
 
-            <SidebarItem icon={FaBan} title="Return" path="/return" />
+            <SidebarItem icon={FaBan} title="Return/Exchange" path="/return" />
 
             <SidebarItem icon={FaUsers} title="Customers" path="/customers" />
 

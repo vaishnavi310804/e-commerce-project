@@ -55,7 +55,7 @@ const navigationItems = [
   },
   {
     icon: FaBan,
-    title: "Return",
+    title: "Return/Exchange",
     path: "/return",
   },
   {
