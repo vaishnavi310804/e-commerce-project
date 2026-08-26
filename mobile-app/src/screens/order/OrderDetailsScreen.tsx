@@ -546,11 +546,11 @@ const OrderDetailsScreen = () => {
 
             {refundMode === "UPI" ? (
               <View style={{ marginBottom: 16 }}>
-                <Text style={{ fontSize: 12, color: Colors.text, marginBottom: 6, fontFamily: Fonts.semibold }}>UPI ID *</Text>
+                <Text style={{ fontSize: 12, color: Colors.text, marginBottom: 6, fontFamily: Fonts.semibold }}>UPI ID</Text>
                 <TextInput
                   value={upiId}
                   onChangeText={setUpiId}
-                  placeholder="e.g. name@upi"
+                  placeholder="Customer@upi"
                   style={{ borderWidth: 1, borderColor: "#E5E7EB", borderRadius: 8, padding: 12, fontSize: 14 }}
                 />
               </View>

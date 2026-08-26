@@ -38,7 +38,6 @@ const RefundDetailsModal = ({ open, refund, onClose }) => {
             <div className="rounded-xl bg-indigo-50 p-3 text-indigo-600">
               <FaUndoAlt size={18} />
             </div>
-
             <div>
               <h2 className="text-lg font-bold text-gray-800 sm:text-xl">
                 Refund Details
