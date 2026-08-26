@@ -1,7 +1,8 @@
 import Order from "./order.model.js";
 import Cart from "../cart/cart.model.js";
 import Address from "../address/address.model.js";
-import { refundPaymentService, checkRefundStatusService } from "../../modules/payment/payment.service.js";
+import Return from "../returns/return.model.js";
+import { refundPaymentService, refundPartialPaymentService, checkRefundStatusService } from "../../modules/payment/payment.service.js";
 import { sendNotification } from "../../services/notification.service.js";
 import { deductProductStock, restoreProductStock } from "../products/product.service.js";
 
@@ -133,6 +134,7 @@ export const getMyOrderDetailsService = async (userId, orderId) => {
   const order = await Order.findOne({ _id: orderId, user: userId })
     .populate("user", "fullName email phoneNumber")
     .populate("address")
+    .populate("originalOrder", "orderNumber totalAmount paymentMethod paymentStatus razorpayPaymentId")
     .populate("products.product", "name price productImage image brand");
 
   if (!order) {
@@ -157,6 +159,7 @@ export const getAllOrdersService = async (query = {}) => {
   return await Order.find(filter)
     .populate("user", "fullName email name")
     .populate("address")
+    .populate("originalOrder", "orderNumber totalAmount paymentMethod paymentStatus razorpayPaymentId")
     .populate("products.product", "name price productImage image brand")
     .sort({ createdAt: -1 });
 };
@@ -165,6 +168,7 @@ export const getOrderDetailsService = async (orderId) => {
   const order = await Order.findById(orderId)
     .populate("user", "fullName email name phoneNumber")
     .populate("address")
+    .populate("originalOrder", "orderNumber totalAmount paymentMethod paymentStatus razorpayPaymentId")
     .populate("products.product", "name price productImage image brand");
 
   if (!order) {
@@ -298,7 +302,7 @@ export const getOrderStatsService = async () => {
   };
 };
 
-export const cancelOrderService = async (userId, orderId) => {
+export const cancelOrderService = async (userId, orderId, options = {}) => {
   const filter = userId ? { _id: orderId, user: userId } : { _id: orderId };
   const order = await Order.findOne(filter);
 
@@ -307,6 +311,7 @@ export const cancelOrderService = async (userId, orderId) => {
     error.statusCode = 404;
     throw error;
   }
+
   const cancellableStatus = [
     "Pending",
     "Placed",
@@ -330,25 +335,153 @@ export const cancelOrderService = async (userId, orderId) => {
     }
   });
 
-  if (
-    previousOrderStatus !== "Cancelled" &&
-    order.isStockDeducted
-  ) {
+  if (previousOrderStatus !== "Cancelled" && order.isStockDeducted) {
     await restoreProductStock(order.products);
     order.isStockDeducted = false;
   }
 
-  await order.save();
-  if (order.paymentMethod === "RAZORPAY" && order.paymentStatus === "Paid") {
-    try {
-      await refundPaymentService(order);
-    } catch (refundError) {
-      console.error(
-        "Refund failed after order cancellation:",
-        refundError.message
+  // Detect whether this order is a replacement order by resolving root original paid order
+  let rootOriginalOrder = order;
+  while (rootOriginalOrder.originalOrder) {
+    const parent = await Order.findById(rootOriginalOrder.originalOrder);
+    if (!parent) break;
+    rootOriginalOrder = parent;
+  }
+
+  const isReplacementOrder = String(order._id) !== String(rootOriginalOrder._id);
+
+  if (isReplacementOrder) {
+    // 1. Calculate actual refund amount from effective unit prices
+    let requestedRefundAmount = 0;
+    for (const item of order.products) {
+      let effectivePrice = Number(item.originalPrice || 0);
+      if (effectivePrice <= 0) {
+        const rootItem = rootOriginalOrder.products?.find(
+          (p) => p.product && String(p.product) === String(item.product)
+        );
+        effectivePrice = Number(rootItem?.originalPrice || rootItem?.price || 0);
+      }
+      requestedRefundAmount += effectivePrice * Number(item.quantity || 1);
+    }
+
+    if (requestedRefundAmount > 0) {
+      // 2. Refund Cap / Cumulative refund protection
+      const linkedReplacementOrders = await Order.find({ originalOrder: rootOriginalOrder._id }).select("_id");
+      const linkedOrderIds = [rootOriginalOrder._id, ...linkedReplacementOrders.map((o) => o._id)];
+
+      const processedReturns = await Return.find({
+        order: { $in: linkedOrderIds },
+        refundStatus: "Processed",
+      });
+
+      const processedRefundOrders = await Order.find({
+        _id: { $in: linkedOrderIds },
+        refundStatus: "Processed",
+        _id: { $ne: order._id },
+      });
+
+      const alreadyRefunded =
+        processedReturns.reduce((sum, ret) => sum + (Number(ret.refundAmount) || 0), 0) +
+        processedRefundOrders.reduce((sum, ord) => sum + (Number(ord.refundAmount) || 0), 0);
+
+      const remainingRefundableBalance = Math.max(
+        0,
+        Number(rootOriginalOrder.totalAmount || 0) - alreadyRefunded
       );
+
+      if (remainingRefundableBalance <= 0) {
+        await order.save();
+        const error = new Error("This original order has no remaining refundable balance.");
+        error.statusCode = 400;
+        throw error;
+      }
+
+      if (requestedRefundAmount > remainingRefundableBalance) {
+        await order.save();
+        const error = new Error(
+          `Requested refund of ₹${requestedRefundAmount.toFixed(
+            2
+          )} exceeds the remaining refundable balance of ₹${remainingRefundableBalance.toFixed(
+            2
+          )} for the original order.`
+        );
+        error.statusCode = 400;
+        throw error;
+      }
+
+      // 3. Process Refund based on rootOriginalOrder payment method
+      if (
+        rootOriginalOrder.paymentMethod === "RAZORPAY" &&
+        (rootOriginalOrder.paymentStatus === "Paid" || rootOriginalOrder.paymentStatus === "Refunded")
+      ) {
+        try {
+          const refund = await refundPartialPaymentService(rootOriginalOrder, requestedRefundAmount);
+          order.refundStatus = refund?.status === "processed" ? "Processed" : "Pending";
+          order.refundAmount = requestedRefundAmount;
+          order.razorpayRefundId = refund?.id;
+          order.refundDate = new Date();
+
+          const newCumulative = alreadyRefunded + requestedRefundAmount;
+          rootOriginalOrder.refundAmount = newCumulative;
+          if (newCumulative >= rootOriginalOrder.totalAmount) {
+            rootOriginalOrder.paymentStatus = "Refunded";
+          }
+          await rootOriginalOrder.save();
+        } catch (refundError) {
+          console.error("Razorpay replacement cancellation refund failed:", refundError.message);
+          order.refundStatus = "Failed";
+          order.refundAmount = requestedRefundAmount;
+        }
+      } else if (rootOriginalOrder.paymentMethod === "COD") {
+        let bankDetails = options?.bankDetails || order.bankDetails;
+
+        if (!bankDetails?.upiId && !bankDetails?.accountNumber) {
+          const legacyReturn = await Return.findOne({ replacementOrder: order._id });
+          if (legacyReturn?.bankDetails) {
+            bankDetails = legacyReturn.bankDetails;
+          }
+        }
+
+        let derivedRefundMethod = "";
+        if (bankDetails?.upiId && String(bankDetails.upiId).trim().length > 0) {
+          derivedRefundMethod = "UPI";
+        } else if (
+          bankDetails?.accountHolderName &&
+          bankDetails?.accountNumber &&
+          bankDetails?.ifscCode &&
+          bankDetails?.bankName
+        ) {
+          derivedRefundMethod = "BANK_TRANSFER";
+        } else {
+          await order.save();
+          const error = new Error(
+            "Refund destination details (UPI ID or complete bank details) are required for COD replacement order cancellation."
+          );
+          error.statusCode = 400;
+          throw error;
+        }
+
+        order.bankDetails = bankDetails;
+        order.refundMethod = derivedRefundMethod;
+        order.refundStatus = "Pending";
+        order.refundAmount = requestedRefundAmount;
+      }
+    }
+  } else {
+    // Normal order cancellation flow (preserved)
+    if (order.paymentMethod === "RAZORPAY" && order.paymentStatus === "Paid") {
+      try {
+        await refundPaymentService(order);
+      } catch (refundError) {
+        console.error(
+          "Refund failed after order cancellation:",
+          refundError.message
+        );
+      }
     }
   }
+
+  await order.save();
   return order;
 };
 
@@ -365,10 +498,10 @@ export const getRefundOrdersService = async (query = {}) => {
 
   return await Order.find(filter)
     .populate("user", "fullName email phoneNumber")
+    .populate("originalOrder", "orderNumber totalAmount paymentMethod paymentStatus razorpayPaymentId")
     .populate("products.product", "name price productImage brand")
     .sort({ updatedAt: -1 });
 };
-
 
 export const processRefundService = async (orderId) => {
   const order = await Order.findById(orderId);
@@ -379,49 +512,81 @@ export const processRefundService = async (orderId) => {
     throw error;
   }
 
-  if (order.paymentMethod !== "RAZORPAY") {
-    const error = new Error(
-      "Refund is only available for Razorpay payments.",
-    );
-    error.statusCode = 400;
-    throw error;
+  let rootOriginalOrder = order;
+  while (rootOriginalOrder.originalOrder) {
+    const parent = await Order.findById(rootOriginalOrder.originalOrder);
+    if (!parent) break;
+    rootOriginalOrder = parent;
   }
 
-  if (order.razorpayRefundId) {
-    const refund = await checkRefundStatusService(order);
+  if (rootOriginalOrder.paymentMethod === "RAZORPAY") {
+    if (order.razorpayRefundId) {
+      const refund = await checkRefundStatusService(order);
+
+      const updatedOrder = await Order.findById(order._id)
+        .populate("user", "fullName email phoneNumber")
+        .populate("originalOrder", "orderNumber totalAmount paymentMethod")
+        .populate("products.product", "name price productImage brand");
+
+      return {
+        order: updatedOrder,
+        refund,
+      };
+    }
+
+    if (rootOriginalOrder.paymentStatus !== "Paid" && rootOriginalOrder.paymentStatus !== "Refunded") {
+      const error = new Error("This payment is not eligible for a refund.");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const amountToRefund = Number(order.refundAmount) > 0 ? Number(order.refundAmount) : Number(order.totalAmount);
+    let refund;
+
+    if (String(order._id) !== String(rootOriginalOrder._id)) {
+      refund = await refundPartialPaymentService(rootOriginalOrder, amountToRefund);
+      order.razorpayRefundId = refund.id;
+      order.refundStatus = refund.status === "processed" ? "Processed" : "Pending";
+      if (refund.status === "processed") {
+        order.refundDate = new Date();
+      }
+      await order.save();
+    } else {
+      refund = await refundPaymentService(order);
+    }
 
     const updatedOrder = await Order.findById(order._id)
       .populate("user", "fullName email phoneNumber")
-      .populate(
-        "products.product",
-        "name price productImage brand",
-      );
+      .populate("originalOrder", "orderNumber totalAmount paymentMethod")
+      .populate("products.product", "name price productImage brand");
 
     return {
       order: updatedOrder,
       refund,
     };
-  }
+  } else if (rootOriginalOrder.paymentMethod === "COD") {
+    if (!order.bankDetails?.upiId && !order.bankDetails?.accountNumber) {
+      const error = new Error("Refund destination details are required for COD refund processing.");
+      error.statusCode = 400;
+      throw error;
+    }
 
-  if (order.paymentStatus !== "Paid") {
-    const error = new Error(
-      "This payment is not eligible for a refund.",
-    );
+    order.refundStatus = "Processed";
+    order.refundDate = new Date();
+    await order.save();
+
+    const updatedOrder = await Order.findById(order._id)
+      .populate("user", "fullName email phoneNumber")
+      .populate("originalOrder", "orderNumber totalAmount paymentMethod")
+      .populate("products.product", "name price productImage brand");
+
+    return {
+      order: updatedOrder,
+      refund: { status: "processed" },
+    };
+  } else {
+    const error = new Error("Unsupported payment method for refund processing.");
     error.statusCode = 400;
     throw error;
   }
-
-  const refund = await refundPaymentService(order);
-
-  const updatedOrder = await Order.findById(order._id)
-    .populate("user", "fullName email phoneNumber")
-    .populate(
-      "products.product",
-      "name price productImage brand",
-    );
-
-  return {
-    order: updatedOrder,
-    refund,
-  };
 };

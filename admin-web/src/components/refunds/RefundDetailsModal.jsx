@@ -183,6 +183,27 @@ const RefundDetailsModal = ({ open, refund, onClose }) => {
                   {formatAmount(refund.refundAmount)}
                 </p>
               </div>
+
+              {refund.bankDetails?.upiId && (
+                <div className="sm:col-span-2">
+                  <p className="text-xs text-gray-400">Customer UPI ID</p>
+                  <p className="mt-1 text-sm font-bold text-gray-900 select-all">
+                    {refund.bankDetails.upiId}
+                  </p>
+                </div>
+              )}
+
+              {refund.bankDetails?.accountNumber && (
+                <div className="sm:col-span-2">
+                  <p className="text-xs text-gray-400">Customer Bank Account</p>
+                  <p className="mt-1 text-sm font-medium text-gray-800">
+                    {refund.bankDetails.accountHolderName ? `${refund.bankDetails.accountHolderName} • ` : ""}
+                    {refund.bankDetails.accountNumber}
+                    {refund.bankDetails.ifscCode ? ` (${refund.bankDetails.ifscCode.toUpperCase()})` : ""}
+                    {refund.bankDetails.bankName ? ` - ${refund.bankDetails.bankName}` : ""}
+                  </p>
+                </div>
+              )}
             </div>
           </section>
 

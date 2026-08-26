@@ -83,11 +83,32 @@ const ProcessRefundModal = ({
                 {refundAmount.toFixed(2)}
               </span>
             </div>
+
+            {refund.bankDetails?.upiId && (
+              <div className="mt-3 border-t border-purple-200 pt-2">
+                <p className="text-xs text-gray-500 font-medium">Customer UPI ID</p>
+                <p className="text-sm font-bold text-gray-900 mt-0.5 select-all">
+                  {refund.bankDetails.upiId}
+                </p>
+              </div>
+            )}
+
+            {refund.bankDetails?.accountNumber && (
+              <div className="mt-3 border-t border-purple-200 pt-2">
+                <p className="text-xs text-gray-500 font-medium">Customer Bank Account</p>
+                <p className="text-sm font-medium text-gray-800 mt-0.5">
+                  {refund.bankDetails.accountHolderName ? `${refund.bankDetails.accountHolderName} • ` : ""}
+                  {refund.bankDetails.accountNumber}
+                  {refund.bankDetails.ifscCode ? ` (${refund.bankDetails.ifscCode.toUpperCase()})` : ""}
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="rounded-lg bg-amber-50 p-3 text-sm text-amber-700">
-            The refund will be processed through Razorpay. This action
-            cannot be manually reversed after the refund has been initiated.
+            {refund.bankDetails?.upiId || refund.bankDetails?.accountNumber || refund.originalOrder?.paymentMethod === "COD" || refund.paymentMethod === "COD"
+              ? "Please transfer the refund amount to the customer's UPI/Bank destination above, then click Process Refund to mark as completed."
+              : "The refund will be processed through Razorpay. This action cannot be manually reversed after the refund has been initiated."}
           </div>
         </div>
 

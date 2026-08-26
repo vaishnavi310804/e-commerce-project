@@ -71,6 +71,9 @@ export interface OrderData {
   refundDate?: string;
   orderStatus: OrderStatus;
   shippingAddress: ShippingAddress;
+  originalOrder?: any;
+  bankDetails?: any;
+  refundMethod?: string;
   createdAt: string;
 }
 
@@ -108,9 +111,10 @@ export const getOrderById = async (orderId: string) => {
   return response.data;
 };
 
-export const cancelOrder = async (orderId: string) => {
+export const cancelOrder = async (orderId: string, payload?: { bankDetails?: any }) => {
   const { data } = await ecommerceClient.patch(
-    `/order/${orderId}/cancel`
+    `/order/${orderId}/cancel`,
+    payload
   );
   return data;
 };

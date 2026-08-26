@@ -131,6 +131,17 @@ const orderSchema = new mongoose.Schema(
     refundDate: {
       type: Date,
     },
+    refundMethod: {
+      type: String,
+      default: "",
+    },
+    bankDetails: {
+      accountHolderName: String,
+      accountNumber: String,
+      ifscCode: String,
+      bankName: String,
+      upiId: String,
+    },
     orderStatus: {
       type: String,
       enum: [

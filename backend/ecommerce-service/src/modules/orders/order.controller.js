@@ -144,7 +144,9 @@ export const cancelOrder = async (req, res, next) => {
   try {
     const userId = req.user._id || req.user.id;
     const orderId = req.params.id;
-    const canceledOrder = await cancelOrderService(userId, orderId);
+    const canceledOrder = await cancelOrderService(userId, orderId, {
+      bankDetails: req.body?.bankDetails,
+    });
     return res.status(200).json({
       success: true,
       message: "Order cancelled successfully.",

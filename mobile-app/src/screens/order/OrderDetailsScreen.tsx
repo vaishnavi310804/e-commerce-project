@@ -6,6 +6,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -30,6 +31,15 @@ const OrderDetailsScreen = () => {
   const [cancelLoading, setCancelLoading] = useState(false);
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [returnInfo, setReturnInfo] = useState<ReturnData | null>(null);
+
+  // COD Replacement Cancellation Modal State
+  const [showCodCancelModal, setShowCodCancelModal] = useState(false);
+  const [refundMode, setRefundMode] = useState<"UPI" | "BANK">("UPI");
+  const [upiId, setUpiId] = useState("");
+  const [accountHolderName, setAccountHolderName] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
+  const [ifscCode, setIfscCode] = useState("");
+  const [bankName, setBankName] = useState("");
 
   const fetchOrder = async () => {
     try {
@@ -72,43 +82,86 @@ const OrderDetailsScreen = () => {
     fetchReturnInfo();
   }, [orderId]);
 
+  const executeCancellation = async (payload?: { bankDetails?: any }) => {
+    if (!order?._id) return;
+    setCancelLoading(true);
+    try {
+      const response = await cancelOrder(order._id, payload);
+      if (response.success) {
+        setShowCodCancelModal(false);
+        Alert.alert("Success", "Order cancelled successfully.");
+        await fetchOrder();
+      } else {
+        Alert.alert(
+          "Error",
+          response.message || "Failed to cancel order.",
+        );
+      }
+    } catch (error: any) {
+      console.log(
+        "Cancel Order Error:",
+        error?.response?.data || error?.message,
+      );
+      Alert.alert(
+        "Error",
+        error?.response?.data?.message ||
+          error?.message ||
+          "Failed to cancel order.",
+      );
+    } finally {
+      setCancelLoading(false);
+    }
+  };
+
   const handleCancel = () => {
+    const isReplacement = Boolean(order?.originalOrder);
+    const rootPaymentMethod =
+      order?.originalOrder?.paymentMethod ||
+      (order?.paymentMethod === "COD" && isReplacement ? "COD" : order?.paymentMethod || "COD");
+
+    if (isReplacement && rootPaymentMethod === "COD") {
+      // Show COD refund destination form before cancellation
+      setShowCodCancelModal(true);
+      return;
+    }
+
     Alert.alert("Cancel Order", "Are you sure you want to cancel this order?", [
       { text: "No", style: "cancel" },
       {
         text: "Yes",
         style: "destructive",
-        onPress: async () => {
-          if (!order?._id) return;
-          setCancelLoading(true);
-          try {
-            const response = await cancelOrder(order._id);
-            if (response.success) {
-              Alert.alert("Success", "Order cancelled successfully.");
-              await fetchOrder();
-            } else {
-              Alert.alert(
-                "Error",
-                response.message || "Failed to cancel order.",
-              );
-            }
-          } catch (error: any) {
-            console.log(
-              "Cancel Order Error:",
-              error?.response?.data || error?.message,
-            );
-            Alert.alert(
-              "Error",
-              error?.response?.data?.message ||
-                error?.message ||
-                "Failed to cancel order.",
-            );
-          } finally {
-            setCancelLoading(false);
-          }
-        },
+        onPress: () => executeCancellation(),
       },
     ]);
+  };
+
+  const handleCodCancelSubmit = () => {
+    let bankDetails: any = {};
+    if (refundMode === "UPI") {
+      if (!upiId.trim()) {
+        Alert.alert("Error", "Please enter a valid UPI ID.");
+        return;
+      }
+      bankDetails = { upiId: upiId.trim() };
+    } else {
+      if (
+        !accountHolderName.trim() ||
+        !accountNumber.trim() ||
+        !ifscCode.trim() ||
+        !bankName.trim()
+      ) {
+        Alert.alert("Error", "Please fill in all bank details.");
+        return;
+      }
+      bankDetails = {
+        accountHolderName: accountHolderName.trim(),
+        accountNumber: accountNumber.trim(),
+        ifscCode: ifscCode.trim(),
+        bankName: bankName.trim(),
+      };
+    }
+
+    executeCancellation({ bankDetails });
   };
 
   const getActionButton = () => {
@@ -432,6 +485,120 @@ const OrderDetailsScreen = () => {
               </View>
 
               <Ionicons name="chevron-forward" size={20} color={Colors.gray} />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showCodCancelModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowCodCancelModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>COD Refund</Text>
+              <TouchableOpacity
+                onPress={() => setShowCodCancelModal(false)}
+                style={styles.modalCloseBtn}
+              >
+                <Ionicons name="close" size={22} color={Colors.text} />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={{ fontSize: 13, color: Colors.gray, marginBottom: 16, lineHeight: 18 }}>
+              As the original order was paid via COD, please enter your UPI or Bank details where the refund will be processed.
+            </Text>
+
+            <View style={{ flexDirection: "row", marginBottom: 16 }}>
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  paddingVertical: 10,
+                  alignItems: "center",
+                  borderBottomWidth: 2,
+                  borderBottomColor: refundMode === "UPI" ? Colors.primary : "transparent",
+                }}
+                onPress={() => setRefundMode("UPI")}
+              >
+                <Text style={{ fontFamily: Fonts.bold, color: refundMode === "UPI" ? Colors.primary : Colors.gray }}>
+                  UPI
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  paddingVertical: 10,
+                  alignItems: "center",
+                  borderBottomWidth: 2,
+                  borderBottomColor: refundMode === "BANK" ? Colors.primary : "transparent",
+                }}
+                onPress={() => setRefundMode("BANK")}
+              >
+                <Text style={{ fontFamily: Fonts.bold, color: refundMode === "BANK" ? Colors.primary : Colors.gray }}>
+                  Bank Transfer
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {refundMode === "UPI" ? (
+              <View style={{ marginBottom: 16 }}>
+                <Text style={{ fontSize: 12, color: Colors.text, marginBottom: 6, fontFamily: Fonts.semibold }}>UPI ID *</Text>
+                <TextInput
+                  value={upiId}
+                  onChangeText={setUpiId}
+                  placeholder="e.g. name@upi"
+                  style={{ borderWidth: 1, borderColor: "#E5E7EB", borderRadius: 8, padding: 12, fontSize: 14 }}
+                />
+              </View>
+            ) : (
+              <View style={{ marginBottom: 16 }}>
+                <Text style={{ fontSize: 12, color: Colors.text, marginBottom: 4, fontFamily: Fonts.semibold }}>Account Holder Name *</Text>
+                <TextInput
+                  value={accountHolderName}
+                  onChangeText={setAccountHolderName}
+                  placeholder="Name as per bank account"
+                  style={{ borderWidth: 1, borderColor: "#E5E7EB", borderRadius: 8, padding: 10, fontSize: 14, marginBottom: 10 }}
+                />
+                <Text style={{ fontSize: 12, color: Colors.text, marginBottom: 4, fontFamily: Fonts.semibold }}>Account Number *</Text>
+                <TextInput
+                  value={accountNumber}
+                  onChangeText={setAccountNumber}
+                  placeholder="Bank Account Number"
+                  keyboardType="number-pad"
+                  style={{ borderWidth: 1, borderColor: "#E5E7EB", borderRadius: 8, padding: 10, fontSize: 14, marginBottom: 10 }}
+                />
+                <Text style={{ fontSize: 12, color: Colors.text, marginBottom: 4, fontFamily: Fonts.semibold }}>IFSC Code *</Text>
+                <TextInput
+                  value={ifscCode}
+                  onChangeText={setIfscCode}
+                  placeholder="IFSC Code"
+                  autoCapitalize="characters"
+                  style={{ borderWidth: 1, borderColor: "#E5E7EB", borderRadius: 8, padding: 10, fontSize: 14, marginBottom: 10 }}
+                />
+                <Text style={{ fontSize: 12, color: Colors.text, marginBottom: 4, fontFamily: Fonts.semibold }}>Bank Name *</Text>
+                <TextInput
+                  value={bankName}
+                  onChangeText={setBankName}
+                  placeholder="State Bank of India, etc."
+                  style={{ borderWidth: 1, borderColor: "#E5E7EB", borderRadius: 8, padding: 10, fontSize: 14 }}
+                />
+              </View>
+            )}
+
+            <TouchableOpacity
+              style={[styles.actionButton, cancelLoading && styles.disabledButton]}
+              disabled={cancelLoading}
+              onPress={handleCodCancelSubmit}
+            >
+              {cancelLoading ? (
+                <ActivityIndicator size="small" color={Colors.white} />
+              ) : (
+                <Text style={styles.actionText}>Confirm Cancellation</Text>
+              )}
             </TouchableOpacity>
           </View>
         </View>
