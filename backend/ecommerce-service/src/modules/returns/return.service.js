@@ -411,24 +411,54 @@ export const processReturnRefundService = async (returnId) => {
     throw error;
   }
 
-  const order = await Order.findById(returnRequest.order);
+  const targetOrder = await Order.findById(returnRequest.order);
 
-  if (!order) {
+  if (!targetOrder) {
     const error = new Error("Associated order not found.");
     error.statusCode = 404;
     throw error;
   }
 
+  let parentOrder = null;
+  if (targetOrder.originalOrder) {
+    parentOrder = await Order.findById(targetOrder.originalOrder);
+  } else if (
+    targetOrder.totalAmount === 0 ||
+    targetOrder.products.some((p) => p.price === 0 && p.originalPrice > 0)
+  ) {
+    const replacementReturn = await Return.findOne({
+      replacementOrder: targetOrder._id,
+    });
+    if (replacementReturn) {
+      parentOrder = await Order.findById(replacementReturn.order);
+      if (parentOrder && parentOrder.originalOrder) {
+        parentOrder =
+          (await Order.findById(parentOrder.originalOrder)) || parentOrder;
+      }
+    }
+  }
+
+  if (!parentOrder) {
+    if (targetOrder.totalAmount === 0) {
+      const error = new Error(
+        "Unable to resolve original paid order for replacement return.",
+      );
+      error.statusCode = 400;
+      throw error;
+    }
+    parentOrder = targetOrder;
+  }
+
   let requestedRefundAmount = 0;
 
   for (const returnItem of returnRequest.items) {
-    const orderItem = order.products.find(
+    const targetItem = targetOrder.products.find(
       (item) =>
         item.product &&
         item.product.toString() === returnItem.product.toString(),
     );
 
-    if (!orderItem) {
+    if (!targetItem) {
       const error = new Error(
         "One or more returned products were not found in the order.",
       );
@@ -442,7 +472,7 @@ export const processReturnRefundService = async (returnId) => {
       throw error;
     }
 
-    if (returnItem.quantity > orderItem.quantity) {
+    if (returnItem.quantity > targetItem.quantity) {
       const error = new Error(
         "Return quantity cannot exceed the ordered quantity.",
       );
@@ -450,7 +480,36 @@ export const processReturnRefundService = async (returnId) => {
       throw error;
     }
 
-    requestedRefundAmount += orderItem.price * returnItem.quantity;
+    let effectivePrice =
+      Number(targetItem.originalPrice) > 0
+        ? Number(targetItem.originalPrice)
+        : Number(targetItem.price);
+
+    if (
+      effectivePrice === 0 &&
+      targetOrder._id.toString() !== parentOrder._id.toString()
+    ) {
+      const parentItem = parentOrder.products.find(
+        (item) =>
+          item.product &&
+          item.product.toString() === returnItem.product.toString(),
+      );
+      effectivePrice = Number(
+        parentItem?.originalPrice > 0
+          ? parentItem.originalPrice
+          : parentItem?.price || 0,
+      );
+    }
+
+    if (effectivePrice <= 0) {
+      const error = new Error(
+        "Original paid price for returned product cannot be determined.",
+      );
+      error.statusCode = 400;
+      throw error;
+    }
+
+    requestedRefundAmount += effectivePrice * returnItem.quantity;
   }
 
   if (requestedRefundAmount <= 0) {
@@ -459,8 +518,33 @@ export const processReturnRefundService = async (returnId) => {
     throw error;
   }
 
+  const linkedReplacementOrders = await Order.find({
+    originalOrder: parentOrder._id,
+  }).select("_id");
+  const linkedOrderIds = [
+    parentOrder._id,
+    ...linkedReplacementOrders.map((o) => o._id),
+  ];
+
+  const legacyReturns = await Return.find({
+    order: parentOrder._id,
+    returnType: "REPLACEMENT",
+    replacementOrder: { $ne: null },
+  }).select("replacementOrder");
+
+  legacyReturns.forEach((r) => {
+    if (
+      r.replacementOrder &&
+      !linkedOrderIds.some(
+        (id) => id.toString() === r.replacementOrder.toString(),
+      )
+    ) {
+      linkedOrderIds.push(r.replacementOrder);
+    }
+  });
+
   const processedReturns = await Return.find({
-    order: returnRequest.order,
+    order: { $in: linkedOrderIds },
     refundStatus: "Processed",
     _id: { $ne: returnRequest._id },
   });
@@ -469,6 +553,29 @@ export const processReturnRefundService = async (returnId) => {
     (sum, ret) => sum + (Number(ret.refundAmount) || 0),
     0,
   );
+
+  const remainingRefundableBalance = Math.max(
+    0,
+    (Number(parentOrder.totalAmount) || 0) - alreadyRefunded,
+  );
+
+  if (remainingRefundableBalance <= 0) {
+    const error = new Error("This order has no remaining refundable balance.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (requestedRefundAmount > remainingRefundableBalance) {
+    const error = new Error(
+      `Requested refund of ₹${requestedRefundAmount.toFixed(
+        2,
+      )} exceeds the remaining refundable balance of ₹${remainingRefundableBalance.toFixed(
+        2,
+      )} for the original order.`,
+    );
+    error.statusCode = 400;
+    throw error;
+  }
 
   const lockedReturn = await Return.findOneAndUpdate(
     {
@@ -480,7 +587,7 @@ export const processReturnRefundService = async (returnId) => {
     {
       $set: { refundStatus: "Pending", refundAmount: requestedRefundAmount },
     },
-    { new: true },
+    { returnDocument: "after" },
   );
 
   if (!lockedReturn) {
@@ -491,6 +598,10 @@ export const processReturnRefundService = async (returnId) => {
         .populate(
           "order",
           "orderNumber orderStatus totalAmount paymentMethod paymentStatus refundStatus refundAmount razorpayRefundId refundDate products",
+        )
+        .populate(
+          "replacementOrder",
+          "orderNumber orderStatus totalAmount products",
         )
         .populate("items.product", "name price productImage image brand");
 
@@ -507,20 +618,23 @@ export const processReturnRefundService = async (returnId) => {
     throw error;
   }
 
-  if (order.paymentMethod === "RAZORPAY") {
-    if (!order.razorpayPaymentId) {
+  if (parentOrder.paymentMethod === "RAZORPAY") {
+    if (!parentOrder.razorpayPaymentId) {
       await Return.updateOne(
         { _id: returnId },
         { $set: { refundStatus: "Failed" } },
       );
-      const error = new Error("Razorpay payment ID not found.");
+      const error = new Error("Razorpay payment ID not found on original order.");
       error.statusCode = 400;
       throw error;
     }
 
     let refund;
     try {
-      refund = await refundPartialPaymentService(order, requestedRefundAmount);
+      refund = await refundPartialPaymentService(
+        parentOrder,
+        requestedRefundAmount,
+      );
     } catch (refundError) {
       await Return.updateOne(
         { _id: returnId },
@@ -560,17 +674,17 @@ export const processReturnRefundService = async (returnId) => {
       lockedReturn.completedAt = new Date();
 
       const newCumulativeRefund = alreadyRefunded + requestedRefundAmount;
-      order.refundAmount = newCumulativeRefund;
-      order.razorpayRefundId = refund.id;
-      order.refundStatus = "Processed";
-      order.refundDate = new Date();
+      parentOrder.refundAmount = newCumulativeRefund;
+      parentOrder.razorpayRefundId = refund.id;
+      parentOrder.refundStatus = "Processed";
+      parentOrder.refundDate = new Date();
 
-      if (newCumulativeRefund >= order.totalAmount) {
-        order.paymentStatus = "Refunded";
+      if (newCumulativeRefund >= parentOrder.totalAmount) {
+        parentOrder.paymentStatus = "Refunded";
       }
 
       lockedReturn.items.forEach((returnItem) => {
-        const orderItem = order.products.find(
+        const orderItem = targetOrder.products.find(
           (item) =>
             item.product &&
             item.product.toString() === returnItem.product.toString(),
@@ -581,7 +695,8 @@ export const processReturnRefundService = async (returnId) => {
         }
       });
 
-      await order.save();
+      await targetOrder.save();
+      await parentOrder.save();
       await lockedReturn.save();
 
       message = "Refund processed successfully.";
@@ -590,10 +705,10 @@ export const processReturnRefundService = async (returnId) => {
         await sendNotification({
           userId: lockedReturn.user,
           title: "Refund Processed",
-          body: `Your refund for order ${order.orderNumber} has been processed successfully.`,
+          body: `Your refund for order ${parentOrder.orderNumber} has been processed successfully.`,
           type: "REFUND_PROCESSED",
           data: {
-            orderId: order._id,
+            orderId: parentOrder._id,
           },
         });
       } catch (notificationError) {
@@ -611,11 +726,11 @@ export const processReturnRefundService = async (returnId) => {
     } else {
       lockedReturn.refundStatus = "Pending";
       lockedReturn.refundAmount = requestedRefundAmount;
-      order.refundStatus = "Pending";
-      order.refundAmount = alreadyRefunded + requestedRefundAmount;
-      order.razorpayRefundId = refund.id;
+      parentOrder.refundStatus = "Pending";
+      parentOrder.refundAmount = alreadyRefunded + requestedRefundAmount;
+      parentOrder.razorpayRefundId = refund.id;
 
-      await order.save();
+      await parentOrder.save();
       await lockedReturn.save();
 
       message =
@@ -628,13 +743,17 @@ export const processReturnRefundService = async (returnId) => {
         "order",
         "orderNumber orderStatus totalAmount paymentMethod paymentStatus refundStatus refundAmount razorpayRefundId refundDate products",
       )
+      .populate(
+        "replacementOrder",
+        "orderNumber orderStatus totalAmount originalOrder products",
+      )
       .populate("items.product", "name price productImage image brand");
 
     return {
       message,
       data: populated,
     };
-  } else if (order.paymentMethod === "COD") {
+  } else if (parentOrder.paymentMethod === "COD") {
     let derivedRefundMethod = "";
     if (lockedReturn.bankDetails?.upiId) {
       derivedRefundMethod = "UPI";
@@ -665,16 +784,16 @@ export const processReturnRefundService = async (returnId) => {
     lockedReturn.completedAt = new Date();
 
     const newCumulativeRefund = alreadyRefunded + requestedRefundAmount;
-    order.refundAmount = newCumulativeRefund;
-    order.refundStatus = "Processed";
-    order.refundDate = new Date();
+    parentOrder.refundAmount = newCumulativeRefund;
+    parentOrder.refundStatus = "Processed";
+    parentOrder.refundDate = new Date();
 
-    if (newCumulativeRefund >= order.totalAmount) {
-      order.paymentStatus = "Refunded";
+    if (newCumulativeRefund >= parentOrder.totalAmount) {
+      parentOrder.paymentStatus = "Refunded";
     }
 
     lockedReturn.items.forEach((returnItem) => {
-      const orderItem = order.products.find(
+      const orderItem = targetOrder.products.find(
         (item) =>
           item.product &&
           item.product.toString() === returnItem.product.toString(),
@@ -685,17 +804,18 @@ export const processReturnRefundService = async (returnId) => {
       }
     });
 
-    await order.save();
+    await targetOrder.save();
+    await parentOrder.save();
     await lockedReturn.save();
 
     try {
       await sendNotification({
         userId: lockedReturn.user,
         title: "Refund Processed",
-        body: `Your refund for order ${order.orderNumber} has been processed successfully.`,
+        body: `Your refund for order ${parentOrder.orderNumber} has been processed successfully.`,
         type: "REFUND_PROCESSED",
         data: {
-          orderId: order._id,
+          orderId: parentOrder._id,
         },
       });
     } catch (notificationError) {
@@ -710,6 +830,10 @@ export const processReturnRefundService = async (returnId) => {
       .populate(
         "order",
         "orderNumber orderStatus totalAmount paymentMethod paymentStatus refundStatus refundAmount refundDate products",
+      )
+      .populate(
+        "replacementOrder",
+        "orderNumber orderStatus totalAmount originalOrder products",
       )
       .populate("items.product", "name price productImage image brand");
 
@@ -745,12 +869,35 @@ export const checkReturnRefundStatusService = async (returnId) => {
     throw error;
   }
 
-  const order = await Order.findById(returnRequest.order);
+  const targetOrder = await Order.findById(returnRequest.order);
 
-  if (!order) {
+  if (!targetOrder) {
     const error = new Error("Associated order not found.");
     error.statusCode = 404;
     throw error;
+  }
+
+  let parentOrder = null;
+  if (targetOrder.originalOrder) {
+    parentOrder = await Order.findById(targetOrder.originalOrder);
+  } else if (
+    targetOrder.totalAmount === 0 ||
+    targetOrder.products.some((p) => p.price === 0 && p.originalPrice > 0)
+  ) {
+    const replacementReturn = await Return.findOne({
+      replacementOrder: targetOrder._id,
+    });
+    if (replacementReturn) {
+      parentOrder = await Order.findById(replacementReturn.order);
+      if (parentOrder && parentOrder.originalOrder) {
+        parentOrder =
+          (await Order.findById(parentOrder.originalOrder)) || parentOrder;
+      }
+    }
+  }
+
+  if (!parentOrder) {
+    parentOrder = targetOrder;
   }
 
   if (returnRequest.refundStatus === "Processed") {
@@ -770,7 +917,7 @@ export const checkReturnRefundStatusService = async (returnId) => {
 
   if (
     returnRequest.refundStatus !== "Pending" ||
-    order.paymentMethod !== "RAZORPAY"
+    parentOrder.paymentMethod !== "RAZORPAY"
   ) {
     const populated = await Return.findById(returnRequest._id)
       .populate("user", "fullName email phoneNumber")
@@ -794,11 +941,14 @@ export const checkReturnRefundStatusService = async (returnId) => {
 
   let razorpayRefund;
   try {
-    razorpayRefund = await razorpay.refunds.fetch(returnRequest.razorpayRefundId);
+    razorpayRefund = await razorpay.refunds.fetch(
+      returnRequest.razorpayRefundId,
+    );
   } catch (apiError) {
     console.error("Razorpay fetch refund error:", apiError);
     const error = new Error(
-      apiError.error?.description || "Failed to fetch refund status from Razorpay.",
+      apiError.error?.description ||
+        "Failed to fetch refund status from Razorpay.",
     );
     error.statusCode = 400;
     throw error;
@@ -812,11 +962,19 @@ export const checkReturnRefundStatusService = async (returnId) => {
     returnRequest.status = "Completed";
     returnRequest.completedAt = new Date();
 
-    order.refundStatus = "Processed";
-    order.refundDate = new Date();
+    parentOrder.refundStatus = "Processed";
+    parentOrder.refundDate = new Date();
+
+    const linkedReplacementOrders = await Order.find({
+      originalOrder: parentOrder._id,
+    }).select("_id");
+    const linkedOrderIds = [
+      parentOrder._id,
+      ...linkedReplacementOrders.map((o) => o._id),
+    ];
 
     const processedReturns = await Return.find({
-      order: returnRequest.order,
+      order: { $in: linkedOrderIds },
       refundStatus: "Processed",
       _id: { $ne: returnRequest._id },
     });
@@ -827,14 +985,14 @@ export const checkReturnRefundStatusService = async (returnId) => {
     );
 
     const newCumulativeRefund = alreadyRefunded + returnRequest.refundAmount;
-    order.refundAmount = newCumulativeRefund;
+    parentOrder.refundAmount = newCumulativeRefund;
 
-    if (newCumulativeRefund >= order.totalAmount) {
-      order.paymentStatus = "Refunded";
+    if (newCumulativeRefund >= parentOrder.totalAmount) {
+      parentOrder.paymentStatus = "Refunded";
     }
 
     returnRequest.items.forEach((returnItem) => {
-      const orderItem = order.products.find(
+      const orderItem = targetOrder.products.find(
         (item) =>
           item.product &&
           item.product.toString() === returnItem.product.toString(),
@@ -845,17 +1003,18 @@ export const checkReturnRefundStatusService = async (returnId) => {
       }
     });
 
-    await order.save();
+    await targetOrder.save();
+    await parentOrder.save();
     await returnRequest.save();
 
     try {
       await sendNotification({
         userId: returnRequest.user,
         title: "Refund Processed",
-        body: `Your refund for order ${order.orderNumber} has been processed successfully.`,
+        body: `Your refund for order ${parentOrder.orderNumber} has been processed successfully.`,
         type: "REFUND_PROCESSED",
         data: {
-          orderId: order._id,
+          orderId: parentOrder._id,
         },
       });
     } catch (notificationError) {
@@ -909,7 +1068,10 @@ export const processReturnReplacementService = async (returnId) => {
   if (returnRequest.replacementOrder) {
     const populatedExisting = await Return.findById(returnRequest._id)
       .populate("user", "fullName email phoneNumber")
-      .populate("replacementOrder", "orderNumber orderStatus totalAmount products")
+      .populate(
+        "replacementOrder",
+        "orderNumber orderStatus totalAmount originalOrder products",
+      )
       .populate(
         "order",
         "orderNumber orderStatus totalAmount paymentMethod paymentStatus products",
@@ -938,6 +1100,10 @@ export const processReturnReplacementService = async (returnId) => {
     throw error;
   }
 
+  const rootOriginalOrder = order.originalOrder
+    ? (await Order.findById(order.originalOrder)) || order
+    : order;
+
   const tempLockId = new mongoose.Types.ObjectId();
 
   const lockedReturn = await Return.findOneAndUpdate(
@@ -958,7 +1124,10 @@ export const processReturnReplacementService = async (returnId) => {
     if (reFetched && reFetched.replacementOrder) {
       const populatedExisting = await Return.findById(returnId)
         .populate("user", "fullName email phoneNumber")
-        .populate("replacementOrder", "orderNumber orderStatus totalAmount products")
+        .populate(
+          "replacementOrder",
+          "orderNumber orderStatus totalAmount products",
+        )
         .populate(
           "order",
           "orderNumber orderStatus totalAmount paymentMethod paymentStatus products",
@@ -989,16 +1158,38 @@ export const processReturnReplacementService = async (returnId) => {
     await deductProductStock(replacementItems);
     stockDeductionSuccess = true;
 
-    const replacementOrderProducts = lockedReturn.items.map((item) => ({
-      product: item.product,
-      quantity: item.quantity,
-      price: 0,
-      itemStatus: "Placed",
-      returnStatus: "Not Requested",
-    }));
+    const replacementOrderProducts = lockedReturn.items.map((item) => {
+      const originalOrderItem =
+        rootOriginalOrder.products.find(
+          (prod) =>
+            prod.product &&
+            prod.product.toString() === item.product.toString(),
+        ) ||
+        order.products.find(
+          (prod) =>
+            prod.product &&
+            prod.product.toString() === item.product.toString(),
+        );
+
+      const originalPrice = Number(
+        originalOrderItem?.originalPrice > 0
+          ? originalOrderItem.originalPrice
+          : originalOrderItem?.price || 0,
+      );
+
+      return {
+        product: item.product,
+        quantity: item.quantity,
+        price: 0,
+        originalPrice,
+        itemStatus: "Placed",
+        returnStatus: "Not Requested",
+      };
+    });
 
     const replacementOrder = await Order.create({
       user: lockedReturn.user,
+      originalOrder: rootOriginalOrder._id,
       products: replacementOrderProducts,
       subtotal: 0,
       shippingCharge: 0,
@@ -1053,7 +1244,10 @@ export const processReturnReplacementService = async (returnId) => {
 
   const populated = await Return.findById(lockedReturn._id)
     .populate("user", "fullName email phoneNumber")
-    .populate("replacementOrder", "orderNumber orderStatus totalAmount products")
+    .populate(
+      "replacementOrder",
+      "orderNumber orderStatus totalAmount originalOrder products",
+    )
     .populate(
       "order",
       "orderNumber orderStatus totalAmount paymentMethod paymentStatus products",

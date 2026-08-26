@@ -24,6 +24,11 @@ const orderItemSchema = new mongoose.Schema({
     required: true,
   },
 
+  originalPrice: {
+    type: Number,
+    default: 0,
+  },
+
   itemStatus: {
     type: String,
     enum: [
@@ -70,6 +75,11 @@ const orderSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+    },
+    originalOrder: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Order",
+      default: null,
     },
     products: [orderItemSchema],
     subtotal: {
