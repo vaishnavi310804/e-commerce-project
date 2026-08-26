@@ -27,3 +27,11 @@ export const updateProductStatus = async (id) => {
   const response = await ecommerceApi.patch(`/product/status/${id}`);
   return response.data;
 };
+
+export const bulkUpdateProductVisibility = async (productIds, isActive) => {
+  const response = await ecommerceApi.patch("/product/bulk-visibility", {
+    productIds,
+    isActive,
+  });
+  return response.data;
+};

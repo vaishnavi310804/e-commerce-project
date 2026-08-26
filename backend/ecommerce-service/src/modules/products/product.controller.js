@@ -4,6 +4,7 @@ import {
   getAllProductsAdminService,
   getProductByIdService,
   productStatusService,
+  bulkUpdateProductVisibilityService,
   updateProductService,
   getProductsByCategoryService
 } from "./product.service.js";
@@ -99,6 +100,20 @@ export const updateProduct = async (req, res, next) => {
       success: true,
       message: "Product updated successfully.",
       data: product,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const bulkUpdateProductVisibility = async (req, res, next) => {
+  try {
+    const { productIds, isActive } = req.body;
+    const result = await bulkUpdateProductVisibilityService(productIds, isActive);
+    return res.status(200).json({
+      success: true,
+      message: "Bulk product visibility updated successfully.",
+      data: result,
     });
   } catch (error) {
     next(error);

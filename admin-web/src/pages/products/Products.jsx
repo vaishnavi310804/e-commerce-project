@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaEye, FaEyeSlash } from "react-icons/fa";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import SearchBar from "../../components/common/SearchBar";
 import ProductTable from "../../components/products/ProductTable";
@@ -7,6 +7,7 @@ import ProductModel from "../../components/products/ProductModel";
 import {
   getAllProducts,
   updateProductStatus,
+  bulkUpdateProductVisibility,
 } from "../../services/productApi";
 
 const Products = () => {
@@ -16,28 +17,35 @@ const Products = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [statusFilter, setStatusFilter] = useState("active");
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [loadingBulk, setLoadingBulk] = useState(false);
 
   const fetchProducts = async () => {
-  try {
-    setLoading(true);
-    const response = await getAllProducts();
-    console.log("Response:", response);
-    setProducts(response.data);
-  } catch (error) {
-    console.error(error);
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      setLoading(true);
+      const response = await getAllProducts();
+      console.log("Response:", response);
+      setProducts(response.data || []);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchProducts();
   }, []);
 
+  useEffect(() => {
+    setSelectedIds([]);
+  }, [searchTerm, statusFilter]);
+
   const filteredProducts = products.filter((product) => {
     const matchesSearch =
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (product.brand && product.brand.toLowerCase().includes(searchTerm.toLowerCase()));
+      (product.brand &&
+        product.brand.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const matchesStatus =
       statusFilter === "active" ? product.isActive : !product.isActive;
@@ -74,12 +82,56 @@ const Products = () => {
     }
   };
 
+  const handleSelectRow = (productId) => {
+    setSelectedIds((prev) =>
+      prev.includes(productId)
+        ? prev.filter((id) => id !== productId)
+        : [...prev, productId]
+    );
+  };
+
+  const handleSelectAll = (shouldSelect) => {
+    if (shouldSelect) {
+      const displayedIds = filteredProducts.map((p) => p._id);
+      setSelectedIds((prev) => [...new Set([...prev, ...displayedIds])]);
+    } else {
+      const displayedSet = new Set(filteredProducts.map((p) => p._id));
+      setSelectedIds((prev) => prev.filter((id) => !displayedSet.has(id)));
+    }
+  };
+
+  const handleBulkVisibility = async (shouldBeActive) => {
+    if (!selectedIds.length || loadingBulk) return;
+
+    const actionText = shouldBeActive ? "visible" : "hidden";
+    const count = selectedIds.length;
+
+    try {
+      setLoadingBulk(true);
+      await bulkUpdateProductVisibility(selectedIds, shouldBeActive);
+      await fetchProducts();
+      setSelectedIds([]);
+      alert(
+        `${count} product${count > 1 ? "s are" : " is"} now ${actionText}.`
+      );
+    } catch (error) {
+      console.error("Bulk Visibility Error:", error);
+      alert(
+        error.response?.data?.message || "Failed to update product visibility."
+      );
+    } finally {
+      setLoadingBulk(false);
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Products Dashboard</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Products Dashboard
+            </h1>
             <p className="mt-1 text-gray-500">Manage all products.</p>
           </div>
 
@@ -121,11 +173,57 @@ const Products = () => {
           </button>
         </div>
 
+        {selectedIds.length > 0 && (
+          <div className="flex items-center justify-between rounded-xl border border-purple-200 bg-purple-50 p-4 shadow-sm">
+            <div className="flex items-center gap-2">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#6547C9] text-xs font-bold text-white">
+                {selectedIds.length}
+              </span>
+              <span className="text-sm font-semibold text-gray-800">
+                product{selectedIds.length > 1 ? "s" : ""}{" "}
+                selected
+              </span>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                disabled={loadingBulk}
+                onClick={() => handleBulkVisibility(true)}
+                className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
+              >
+                <FaEye /> Show Selected
+              </button>
+
+              <button
+                type="button"
+                disabled={loadingBulk}
+                onClick={() => handleBulkVisibility(false)}
+                className="flex items-center gap-2 rounded-lg bg-yellow-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700 disabled:opacity-50"
+              >
+                <FaEyeSlash /> Hide Selected
+              </button>
+
+              <button
+                type="button"
+                disabled={loadingBulk}
+                onClick={() => setSelectedIds([])}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-purple-100 hover:text-gray-900"
+              >
+                Clear Selection
+              </button>
+            </div>
+          </div>
+        )}
+
         <ProductTable
           products={filteredProducts}
           loading={loading}
           onEdit={handleEditProduct}
           onToggleStatus={handleToggleStatus}
+          selectedIds={selectedIds}
+          onSelectAll={handleSelectAll}
+          onSelectRow={handleSelectRow}
         />
 
         <ProductModel

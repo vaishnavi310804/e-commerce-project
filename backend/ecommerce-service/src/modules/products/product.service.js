@@ -1,6 +1,7 @@
 import Product from "./product.model.js";
 import Category from "../categories/category.model.js";
 import slugify from "../../utils/slug.js";
+import mongoose from "mongoose";
 import {
   uploadToCloudinary,
   deleteFromCloudinary,
@@ -116,6 +117,33 @@ export const productStatusService = async (productId) => {
   product.isActive = !product.isActive;
   await product.save();
   return product;
+};
+
+export const bulkUpdateProductVisibilityService = async (productIds = [], isActive = true) => {
+  if (!Array.isArray(productIds) || productIds.length === 0) {
+    const error = new Error("Product IDs must be a non-empty array.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const validIds = [...new Set(productIds)]
+    .filter((id) => mongoose.Types.ObjectId.isValid(id));
+
+  if (!validIds.length) {
+    const error = new Error("No valid product IDs provided.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const result = await Product.updateMany(
+    { _id: { $in: validIds } },
+    { $set: { isActive: Boolean(isActive) } }
+  );
+
+  return {
+    matchedCount: result.matchedCount,
+    modifiedCount: result.modifiedCount,
+  };
 };
 
 export const updateProductService = async (productId, productData, file) => {

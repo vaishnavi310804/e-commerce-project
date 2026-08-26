@@ -1,7 +1,32 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { FaEdit } from "react-icons/fa";
 
-const ProductTable = ({ products, loading, onEdit, onToggleStatus }) => {
+const ProductTable = ({
+  products = [],
+  loading,
+  onEdit,
+  onToggleStatus,
+  selectedIds = [],
+  onSelectAll,
+  onSelectRow,
+}) => {
+  const headerCheckboxRef = useRef(null);
+
+  const displayedCount = products.length;
+  const selectedDisplayedCount = products.filter((p) =>
+    selectedIds.includes(p._id)
+  ).length;
+  const isAllSelected =
+    displayedCount > 0 && selectedDisplayedCount === displayedCount;
+  const isIndeterminate =
+    selectedDisplayedCount > 0 && selectedDisplayedCount < displayedCount;
+
+  useEffect(() => {
+    if (headerCheckboxRef.current) {
+      headerCheckboxRef.current.indeterminate = isIndeterminate;
+    }
+  }, [isIndeterminate]);
+
   if (loading) {
     return (
       <div className="rounded-xl bg-white p-6 text-center shadow">
@@ -25,13 +50,31 @@ const ProductTable = ({ products, loading, onEdit, onToggleStatus }) => {
           <table className="min-w-[1300px] w-full border-collapse">
             <thead className="bg-[#E0E0E0]">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Image</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Name</th>
+                <th className="px-4 py-4 text-center w-12">
+                  <input
+                    type="checkbox"
+                    ref={headerCheckboxRef}
+                    checked={isAllSelected}
+                    onChange={(e) => onSelectAll && onSelectAll(e.target.checked)}
+                    className="h-4 w-4 cursor-pointer rounded border-gray-300 text-[#6547C9] focus:ring-[#6547C9]"
+                    title="Select All Displayed Products"
+                  />
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
+                  Image
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
+                  Name
+                </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                   Category
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Brand</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Price</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
+                  Brand
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
+                  Price
+                </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                   Discount Price
                 </th>
@@ -39,7 +82,9 @@ const ProductTable = ({ products, loading, onEdit, onToggleStatus }) => {
                   Final Price
                 </th>
 
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Stock</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
+                  Stock
+                </th>
 
                 <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                   Status
@@ -65,11 +110,23 @@ const ProductTable = ({ products, loading, onEdit, onToggleStatus }) => {
                   ? Number(product.discountPrice)
                   : Number(product.price || 0);
 
+                const isSelected = selectedIds.includes(product._id);
+
                 return (
                   <tr
                     key={product._id}
-                    className="border-b border-gray-300 transition hover:bg-gray-50"
+                    className={`border-b border-gray-300 transition hover:bg-gray-50 ${
+                      isSelected ? "bg-purple-50/50" : ""
+                    }`}
                   >
+                    <td className="px-4 py-4 text-center whitespace-nowrap">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => onSelectRow && onSelectRow(product._id)}
+                        className="h-4 w-4 cursor-pointer rounded border-gray-300 text-[#6547C9] focus:ring-[#6547C9]"
+                      />
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <ProductImage product={product} />
                     </td>
@@ -144,9 +201,22 @@ const ProductTable = ({ products, loading, onEdit, onToggleStatus }) => {
             ? Number(product.discountPrice)
             : Number(product.price || 0);
 
+          const isSelected = selectedIds.includes(product._id);
+
           return (
-            <div key={product._id} className="rounded-xl bg-white p-4 shadow">
+            <div
+              key={product._id}
+              className={`rounded-xl bg-white p-4 shadow ${
+                isSelected ? "ring-2 ring-[#6547C9]" : ""
+              }`}
+            >
               <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => onSelectRow && onSelectRow(product._id)}
+                  className="mt-1 h-4 w-4 cursor-pointer rounded border-gray-300 text-[#6547C9] focus:ring-[#6547C9]"
+                />
                 <ProductImage product={product} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-2">
@@ -250,6 +320,7 @@ const ProductImage = ({ product }) => {
     />
   );
 };
+
 const StatusToggle = ({ product, onToggleStatus }) => {
   return (
     <button

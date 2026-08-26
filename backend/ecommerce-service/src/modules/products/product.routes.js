@@ -5,6 +5,7 @@ import {
   getProductById,
   updateProduct,
   productStatus,
+  bulkUpdateProductVisibility,
   getAllProductsAdmin,
   getProductsByCategory,
 } from "./product.controller.js";
@@ -34,6 +35,8 @@ router.get("/", getAllProducts);
 router.get("/category/:categoryId", getProductsByCategory);
 
 router.get("/admin/getAll", protect, authorize("ADMIN"), getAllProductsAdmin);
+
+router.patch("/bulk-visibility", protect, authorize("ADMIN"), bulkUpdateProductVisibility);
 
 router.get("/:id", getProductById);
 
