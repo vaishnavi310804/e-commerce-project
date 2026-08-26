@@ -14,6 +14,7 @@ import Refunds from "../pages/refunds/Refunds";
 import Shipment from "../pages/shipments/Shipment";
 import Returns from "../pages/returns/Returns";
 import Tickets from "../pages/tickets/Tickets";
+import Admins from "../pages/admins/Admins";
 
 function AppRoutes() {
   return (
@@ -96,6 +97,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <Tickets />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admins"
+        element={
+          <ProtectedRoute>
+            <Admins />
           </ProtectedRoute>
         }
       />

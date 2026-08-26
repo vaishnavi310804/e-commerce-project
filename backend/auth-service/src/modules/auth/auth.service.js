@@ -314,6 +314,12 @@ export const adminLoginService = async ({ email, password }) => {
     throw new Error("Access denied. Admins only.");
   }
 
+  if (!user.isActive) {
+    const error = new Error("Your account has been deactivated.");
+    error.statusCode = 403;
+    throw error;
+  }
+
   const accessToken = generateAccessToken(user);
 
   const userObject = user.toObject();
@@ -468,6 +474,127 @@ export const updateCurrentLocationService = async (
 export const getAllAdminsService = async () => {
   return await User.find(
     { role: "ADMIN" },
-    "fullName email _id"
-  ).sort({ fullName: 1 });
+    "_id fullName email role isActive createdAt"
+  ).sort({ createdAt: -1 });
+};
+
+export const createAdminService = async ({ fullName, email, password }) => {
+  if (!fullName || !fullName.trim()) {
+    const error = new Error("Full name is required.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (!email || !email.trim()) {
+    const error = new Error("Email is required.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (!password || password.length < 6) {
+    const error = new Error("Password must be at least 6 characters long.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const formattedEmail = String(email).trim().toLowerCase();
+
+  const existingUser = await User.findOne({ email: formattedEmail });
+  if (existingUser) {
+    const error = new Error("User with this email already exists.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const hashedPassword = await hashPassword(password);
+
+  const user = await User.create({
+    fullName: fullName.trim(),
+    email: formattedEmail,
+    password: hashedPassword,
+    role: "ADMIN",
+    isActive: true,
+    isEmailVerified: true,
+  });
+
+  const userObj = user.toObject();
+  delete userObj.password;
+  return userObj;
+};
+
+export const updateAdminService = async (adminId, { fullName, email }) => {
+  const user = await User.findById(adminId);
+  if (!user || user.role !== "ADMIN") {
+    const error = new Error("Admin not found.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (fullName && fullName.trim()) {
+    user.fullName = fullName.trim();
+  }
+
+  if (email && email.trim()) {
+    const formattedEmail = String(email).trim().toLowerCase();
+    if (formattedEmail !== user.email) {
+      const existingUser = await User.findOne({
+        _id: { $ne: adminId },
+        email: formattedEmail,
+      });
+
+      if (existingUser) {
+        const error = new Error("Email is already in use by another user.");
+        error.statusCode = 400;
+        throw error;
+      }
+      user.email = formattedEmail;
+    }
+  }
+
+  await user.save();
+
+  const userObj = user.toObject();
+  delete userObj.password;
+  return userObj;
+};
+
+export const updateAdminStatusService = async (adminId, isActive, currentUserId) => {
+  if (typeof isActive !== "boolean") {
+    const error = new Error("isActive must be a boolean value.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const targetUser = await User.findById(adminId);
+  if (!targetUser || targetUser.role !== "ADMIN") {
+    const error = new Error("Admin user not found.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (currentUserId && currentUserId.toString() === adminId.toString() && isActive === false) {
+    const error = new Error("You cannot deactivate your own account.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (isActive === false) {
+    const activeAdminCount = await User.countDocuments({
+      role: "ADMIN",
+      isActive: true,
+    });
+
+    if (activeAdminCount <= 1) {
+      const error = new Error("Cannot deactivate the last active admin.");
+      error.statusCode = 400;
+      throw error;
+    }
+  }
+
+  targetUser.isActive = isActive;
+  await targetUser.save();
+
+  const userObj = targetUser.toObject();
+  delete userObj.password;
+  return userObj;
 };

@@ -20,6 +20,7 @@ import {
   FaTruck,
   FaBan,
   FaTicketAlt,
+  FaUserShield,
 } from "react-icons/fa";
 
 const navigationItems = [
@@ -72,6 +73,11 @@ const navigationItems = [
     icon: FaTicketAlt,
     title: "Tickets",
     path: "/tickets",
+  },
+  {
+    icon: FaUserShield,
+    title: "Admins",
+    path: "/admins",
   },
 ];
 

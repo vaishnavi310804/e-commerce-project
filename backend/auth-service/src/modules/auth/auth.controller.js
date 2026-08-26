@@ -12,7 +12,10 @@ import {
   verifyRegistrationOTPService,
   updateFcmTokenService,
   updateCurrentLocationService,
-  getAllAdminsService
+  getAllAdminsService,
+  createAdminService,
+  updateAdminService,
+  updateAdminStatusService,
 } from "./auth.service.js";
 
 export const registerUser = async (req, res, next) => {
@@ -280,6 +283,56 @@ export const getAllAdmins = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       data: admins,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createAdmin = async (req, res, next) => {
+  try {
+    const admin = await createAdminService(req.body);
+
+    return res.status(201).json({
+      success: true,
+      message: "Admin created successfully.",
+      data: admin,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateAdmin = async (req, res, next) => {
+  try {
+    const admin = await updateAdminService(req.params.id, req.body);
+
+    return res.status(200).json({
+      success: true,
+      message: "Admin updated successfully.",
+      data: admin,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateAdminStatus = async (req, res, next) => {
+  try {
+    const { isActive } = req.body;
+    const currentUserId = req.user._id || req.user.id;
+    const admin = await updateAdminStatusService(
+      req.params.id,
+      isActive,
+      currentUserId
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: `Admin ${
+        admin.isActive ? "activated" : "deactivated"
+      } successfully.`,
+      data: admin,
     });
   } catch (error) {
     next(error);

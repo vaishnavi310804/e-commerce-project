@@ -30,3 +30,18 @@ export const getAllAdmins = async () => {
 
   return response.data?.data || [];
 };
+
+export const createAdmin = async (data) => {
+  const response = await api.post("/admins", data);
+  return response.data;
+};
+
+export const updateAdmin = async (id, data) => {
+  const response = await api.put(`/admins/${id}`, data);
+  return response.data;
+};
+
+export const updateAdminStatus = async (id, isActive) => {
+  const response = await api.patch(`/admins/${id}/status`, { isActive });
+  return response.data;
+};

@@ -14,7 +14,10 @@ import {
   verifyRegistrationOtp,
   updateFcmToken,
   updateCurrentLocation,
-  getAllAdmins
+  getAllAdmins,
+  createAdmin,
+  updateAdmin,
+  updateAdminStatus,
 } from "./auth.controller.js";
 import {
   registerValidation,
@@ -42,6 +45,24 @@ router.get(
   protect,
   authorize("ADMIN"),
   getAllAdmins,
+);
+router.post(
+  "/admins",
+  protect,
+  authorize("ADMIN"),
+  createAdmin,
+);
+router.put(
+  "/admins/:id",
+  protect,
+  authorize("ADMIN"),
+  updateAdmin,
+);
+router.patch(
+  "/admins/:id/status",
+  protect,
+  authorize("ADMIN"),
+  updateAdminStatus,
 );
 router.post("/login", loginValidation, validate, loginUser);
 router.get("/me", protect, getCurrentUser);
