@@ -196,7 +196,7 @@ const Categories = () => {
                 {selectedIds.length}
               </span>
               <span className="text-sm font-semibold text-gray-800">
-                {selectedIds.length} categor{selectedIds.length > 1 ? "ies" : "y"}{" "}
+                categor{selectedIds.length > 1 ? "ies" : "y"}{" "}
                 selected
               </span>
             </div>
@@ -206,7 +206,7 @@ const Categories = () => {
                 type="button"
                 disabled={loadingBulk}
                 onClick={() => handleBulkVisibility(true)}
-                className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
+                className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-50"
               >
                 <FaEye /> Show Selected
               </button>
@@ -215,7 +215,7 @@ const Categories = () => {
                 type="button"
                 disabled={loadingBulk}
                 onClick={() => handleBulkVisibility(false)}
-                className="flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700 disabled:opacity-50"
+                className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-50"
               >
                 <FaEyeSlash /> Hide Selected
               </button>

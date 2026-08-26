@@ -190,7 +190,7 @@ const Products = () => {
                 type="button"
                 disabled={loadingBulk}
                 onClick={() => handleBulkVisibility(true)}
-                className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
+                className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-50"
               >
                 <FaEye /> Show Selected
               </button>
@@ -199,7 +199,7 @@ const Products = () => {
                 type="button"
                 disabled={loadingBulk}
                 onClick={() => handleBulkVisibility(false)}
-                className="flex items-center gap-2 rounded-lg bg-yellow-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700 disabled:opacity-50"
+                className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-50"
               >
                 <FaEyeSlash /> Hide Selected
               </button>

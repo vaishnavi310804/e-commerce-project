@@ -257,7 +257,7 @@ const StatusToggle = ({ category, onToggleStatus }) => {
       className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition ${
         category.isActive
           ? "bg-green-500"
-          : "bg-red-500"
+          : "bg-red-300"
       }`}
     >
       <span
