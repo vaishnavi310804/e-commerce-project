@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { Navigate } from "react-router-dom";
 import { FaUserPlus } from "react-icons/fa";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import SearchBar from "../../components/common/SearchBar";
@@ -110,16 +111,7 @@ const Admins = () => {
   const isSuperAdmin = authUser?.role === "SUPER_ADMIN";
 
   if (!isSuperAdmin) {
-    return (
-      <DashboardLayout>
-        <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center shadow-sm">
-          <h2 className="text-xl font-bold text-red-700">Access Denied</h2>
-          <p className="mt-2 text-sm text-red-600">
-            Only Super Admin accounts have permission to access Admin User Management.
-          </p>
-        </div>
-      </DashboardLayout>
-    );
+    return <Navigate to="/dashboard" replace />;
   }
 
   return (
