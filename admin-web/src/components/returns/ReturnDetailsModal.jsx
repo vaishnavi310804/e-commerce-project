@@ -89,6 +89,35 @@ const ReturnDetailsModal = ({ open, returnItem, onClose, onCheckRefundStatus }) 
 
   const isPendingRefund = returnItem.refundStatus === "Pending";
 
+  const getEffectivePrice = (orderItem, returnProduct) => {
+    if (orderItem) {
+      const originalPrice = Number(orderItem.originalPrice || 0);
+      if (originalPrice > 0) return originalPrice;
+
+      const price = Number(orderItem.price || 0);
+      if (price > 0) return price;
+    }
+
+    return Number(returnProduct?.product?.price || 0);
+  };
+
+  const calculatedRefundAmount = React.useMemo(() => {
+    if (!returnItem?.items?.length) return 0;
+
+    return returnItem.items.reduce((total, item) => {
+      const returnedProductId = item.product?._id || item.product;
+
+      const orderItem = returnItem.order?.products?.find(
+        (oItem) =>
+          String(oItem.product?._id || oItem.product) ===
+          String(returnedProductId)
+      );
+
+      const price = getEffectivePrice(orderItem, item);
+      return total + price * Number(item.quantity || 0);
+    }, 0);
+  }, [returnItem]);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl">
@@ -209,7 +238,7 @@ const ReturnDetailsModal = ({ open, returnItem, onClose, onCheckRefundStatus }) 
                   <p className="text-xs text-gray-400">Refund Amount</p>
 
                   <p className="mt-1 text-sm font-bold text-gray-900">
-                    ₹{Number(returnItem.refundAmount || 0).toFixed(2)}
+                    ₹{Number(returnItem.refundAmount > 0 ? returnItem.refundAmount : calculatedRefundAmount).toFixed(2)}
                   </p>
                 </div>
 
@@ -331,7 +360,7 @@ const ReturnDetailsModal = ({ open, returnItem, onClose, onCheckRefundStatus }) 
                           },
                         );
 
-                        const price = Number(orderItem?.price || 0);
+                        const price = getEffectivePrice(orderItem, item);
 
                         const amount = price * Number(item.quantity || 0);
 

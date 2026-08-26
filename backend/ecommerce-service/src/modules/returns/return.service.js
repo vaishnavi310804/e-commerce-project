@@ -200,7 +200,7 @@ export const createReturnService = async (userId, payload) => {
     .populate("replacementOrder", "orderNumber orderStatus totalAmount products")
     .populate(
       "order",
-      "orderNumber orderStatus totalAmount paymentMethod paymentStatus products",
+      "orderNumber orderStatus totalAmount paymentMethod paymentStatus originalOrder products",
     )
     .populate("items.product", "name price productImage image brand");
 };
@@ -210,7 +210,7 @@ export const getMyReturnsService = async (userId) => {
     .populate("replacementOrder", "orderNumber orderStatus totalAmount products")
     .populate(
       "order",
-      "orderNumber orderStatus totalAmount paymentMethod paymentStatus products",
+      "orderNumber orderStatus totalAmount paymentMethod paymentStatus originalOrder products",
     )
     .populate("items.product", "name price productImage image brand")
     .sort({ createdAt: -1 });
@@ -231,7 +231,7 @@ export const getReturnDetailsService = async (userId, returnId) => {
     .populate("replacementOrder", "orderNumber orderStatus totalAmount products")
     .populate(
       "order",
-      "orderNumber orderStatus totalAmount paymentMethod paymentStatus shippingAddress products",
+      "orderNumber orderStatus totalAmount paymentMethod paymentStatus originalOrder shippingAddress products",
     )
     .populate("items.product", "name price productImage image brand");
 
@@ -256,7 +256,7 @@ export const getAllReturnsService = async (query = {}) => {
     .populate("replacementOrder", "orderNumber orderStatus totalAmount products")
     .populate(
       "order",
-      "orderNumber orderStatus totalAmount paymentMethod paymentStatus products",
+      "orderNumber orderStatus totalAmount paymentMethod paymentStatus originalOrder products",
     )
     .populate("items.product", "name price productImage image brand")
     .sort({ createdAt: -1 });

@@ -133,8 +133,13 @@ const Returns = () => {
     await fetchReturns();
   };
 
-  const handleProcessRefund = (returnItem) => {
-    setRefundReturn(returnItem);
+  const handleProcessRefund = async (returnItem) => {
+    try {
+      const response = await getReturnDetails(returnItem._id);
+      setRefundReturn(response.data || returnItem);
+    } catch (error) {
+      setRefundReturn(returnItem);
+    }
     setShowRefundProcessing(true);
   };
 

@@ -49,19 +49,26 @@ const RefundProcessingModal = ({
     });
   };
 
+  const getEffectivePrice = (orderItem, returnProduct) => {
+    if (orderItem) {
+      const originalPrice = Number(orderItem.originalPrice || 0);
+      if (originalPrice > 0) return originalPrice;
+
+      const price = Number(orderItem.price || 0);
+      if (price > 0) return price;
+    }
+
+    return Number(returnProduct?.product?.price || 0);
+  };
+
   const refundAmount = useMemo(() => {
-    if (!returnItem?.items?.length || !returnItem?.order?.products?.length) {
+    if (!returnItem?.items?.length) {
       return 0;
     }
 
     return returnItem.items.reduce((total, returnProduct) => {
       const orderItem = getOrderItem(returnProduct);
-
-      if (!orderItem) {
-        return total;
-      }
-
-      const price = Number(orderItem.price || 0);
+      const price = getEffectivePrice(orderItem, returnProduct);
       const quantity = Number(returnProduct.quantity || 0);
 
       return total + price * quantity;
@@ -246,7 +253,7 @@ const RefundProcessingModal = ({
                   const product = item.product;
                   const orderItem = getOrderItem(item);
 
-                  const itemPrice = Number(orderItem?.price || 0);
+                  const itemPrice = getEffectivePrice(orderItem, item);
                   const itemAmount = itemPrice * Number(item.quantity || 0);
 
                   return (
