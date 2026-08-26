@@ -1,4 +1,11 @@
-import {createCategoryService, getAllCategoriesService, getCategoryByIdService, updateCategoryService, categoryStatusService} from "./category.service.js";
+import {
+  createCategoryService,
+  getAllCategoriesService,
+  getCategoryByIdService,
+  updateCategoryService,
+  categoryStatusService,
+  bulkUpdateCategoryVisibilityService,
+} from "./category.service.js";
 
 export const createCategory = async (req, res, next) => {
   try {
@@ -65,6 +72,21 @@ export const categoryStatus = async (req, res, next) => {
         category.isActive ? "activated" : "deactivated"
       } successfully.`,
       data: category,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const bulkUpdateCategoryVisibility = async (req, res, next) => {
+  try {
+    const { categoryIds, isActive } = req.body;
+    const result = await bulkUpdateCategoryVisibilityService(categoryIds, isActive);
+
+    return res.status(200).json({
+      success: true,
+      message: "Bulk category visibility updated successfully.",
+      data: result,
     });
   } catch (error) {
     next(error);

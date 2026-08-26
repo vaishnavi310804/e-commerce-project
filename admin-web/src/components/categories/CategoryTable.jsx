@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   FaEdit,
   FaTshirt,
@@ -30,11 +30,31 @@ const categoryIcons = {
 };
 
 const CategoryTable = ({
-  categories,
+  categories = [],
   loading,
   onEdit,
   onToggleStatus,
+  selectedIds = [],
+  onSelectAll,
+  onSelectRow,
 }) => {
+  const headerCheckboxRef = useRef(null);
+
+  const displayedCount = categories.length;
+  const selectedDisplayedCount = categories.filter((c) =>
+    selectedIds.includes(c._id)
+  ).length;
+  const isAllSelected =
+    displayedCount > 0 && selectedDisplayedCount === displayedCount;
+  const isIndeterminate =
+    selectedDisplayedCount > 0 && selectedDisplayedCount < displayedCount;
+
+  useEffect(() => {
+    if (headerCheckboxRef.current) {
+      headerCheckboxRef.current.indeterminate = isIndeterminate;
+    }
+  }, [isIndeterminate]);
+
   if (loading) {
     return (
       <div className="rounded-xl bg-white p-6 text-center shadow">
@@ -58,6 +78,16 @@ const CategoryTable = ({
           <table className="w-full min-w-[700px]">
             <thead className="bg-[#E0E0E0]">
               <tr>
+                <th className="px-4 py-4 text-center w-12">
+                  <input
+                    type="checkbox"
+                    ref={headerCheckboxRef}
+                    checked={isAllSelected}
+                    onChange={(e) => onSelectAll && onSelectAll(e.target.checked)}
+                    className="h-4 w-4 cursor-pointer rounded border-gray-300 text-[#6547C9] focus:ring-[#6547C9]"
+                    title="Select All Displayed Categories"
+                  />
+                </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Icon</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Name</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Description</th>
@@ -68,102 +98,129 @@ const CategoryTable = ({
             </thead>
 
             <tbody>
-              {categories.map((category) => (
-                <tr
-                  key={category._id}
-                  className="border-b border-gray-300 transition hover:bg-gray-50"
-                >
-                  <td className="px-6 py-4">
-                    <CategoryIcon icon={category.icon} />
-                  </td>
+              {categories.map((category) => {
+                const isSelected = selectedIds.includes(category._id);
 
-                  <td className="px-6 py-4 font-medium">
-                    {category.name}
-                  </td>
-
-                  <td className="max-w-xs px-6 py-4">
-                    <p className="truncate">
-                      {category.description || "—"}
-                    </p>
-                  </td>
-
-                  <td className="px-6 py-4">
-                    <StatusToggle
-                      category={category}
-                      onToggleStatus={onToggleStatus}
-                    />
-                  </td>
-
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {new Date(category.createdAt).toLocaleDateString()}
-                  </td>
-
-                  <td className="px-6 py-4">
-                    <div className="flex justify-center">
-                      <EditButton
-                        category={category}
-                        onEdit={onEdit}
+                return (
+                  <tr
+                    key={category._id}
+                    className={`border-b border-gray-300 transition hover:bg-gray-50 ${
+                      isSelected ? "bg-purple-50/50" : ""
+                    }`}
+                  >
+                    <td className="px-4 py-4 text-center whitespace-nowrap">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => onSelectRow && onSelectRow(category._id)}
+                        className="h-4 w-4 cursor-pointer rounded border-gray-300 text-[#6547C9] focus:ring-[#6547C9]"
                       />
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+
+                    <td className="px-6 py-4">
+                      <CategoryIcon icon={category.icon} />
+                    </td>
+
+                    <td className="px-6 py-4 font-medium">
+                      {category.name}
+                    </td>
+
+                    <td className="max-w-xs px-6 py-4">
+                      <p className="truncate">
+                        {category.description || "—"}
+                      </p>
+                    </td>
+
+                    <td className="px-6 py-4">
+                      <StatusToggle
+                        category={category}
+                        onToggleStatus={onToggleStatus}
+                      />
+                    </td>
+
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {new Date(category.createdAt).toLocaleDateString()}
+                    </td>
+
+                    <td className="px-6 py-4">
+                      <div className="flex justify-center">
+                        <EditButton
+                          category={category}
+                          onEdit={onEdit}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       </div>
 
       <div className="space-y-3 md:hidden">
-        {categories.map((category) => (
-          <div
-            key={category._id}
-            className="rounded-xl bg-white p-4 shadow"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex min-w-0 flex-1 items-start gap-3">
-                <CategoryIcon icon={category.icon} />
+        {categories.map((category) => {
+          const isSelected = selectedIds.includes(category._id);
 
-                <div className="min-w-0">
-                  <h3 className="truncate text-base font-semibold text-gray-900">
-                    {category.name}
-                  </h3>
+          return (
+            <div
+              key={category._id}
+              className={`rounded-xl bg-white p-4 shadow ${
+                isSelected ? "ring-2 ring-[#6547C9]" : ""
+              }`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex min-w-0 flex-1 items-start gap-3">
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => onSelectRow && onSelectRow(category._id)}
+                    className="mt-1 h-4 w-4 cursor-pointer rounded border-gray-300 text-[#6547C9] focus:ring-[#6547C9]"
+                  />
+                  <CategoryIcon icon={category.icon} />
 
-                  <p className="mt-1 text-sm text-gray-500">
-                    {category.description || "No description"}
-                  </p>
+                  <div className="min-w-0">
+                    <h3 className="truncate text-base font-semibold text-gray-900">
+                      {category.name}
+                    </h3>
+
+                    <p className="mt-1 text-sm text-gray-500">
+                      {category.description || "No description"}
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              <EditButton
-                category={category}
-                onEdit={onEdit}
-              />
-            </div>
-
-            <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
-              <div>
-                <p className="text-xs text-gray-400">
-                  Created
-                </p>
-
-                <p className="mt-1 text-sm font-medium text-gray-700">
-                  {new Date(category.createdAt).toLocaleDateString()}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-gray-500">
-                  {category.isActive ? "Active" : "Inactive"}
-                </span>
-
-                <StatusToggle
+                <EditButton
                   category={category}
-                  onToggleStatus={onToggleStatus}
+                  onEdit={onEdit}
                 />
               </div>
+
+              <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
+                <div>
+                  <p className="text-xs text-gray-400">
+                    Created
+                  </p>
+
+                  <p className="mt-1 text-sm font-medium text-gray-700">
+                    {new Date(category.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-gray-500">
+                    {category.isActive ? "Active" : "Inactive"}
+                  </span>
+
+                  <StatusToggle
+                    category={category}
+                    onToggleStatus={onToggleStatus}
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </>
   );

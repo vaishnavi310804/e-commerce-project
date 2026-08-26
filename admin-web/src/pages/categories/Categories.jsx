@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaEye, FaEyeSlash } from "react-icons/fa";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import SearchBar from "../../components/common/SearchBar";
 import CategoryTable from "../../components/categories/CategoryTable";
@@ -8,6 +8,7 @@ import CategoryModel from "../../components/categories/CategoryModel";
 import {
   getAllCategories,
   updateCategoryStatus,
+  bulkUpdateCategoryVisibility,
 } from "../../services/categoryApi";
 
 const Categories = () => {
@@ -19,6 +20,8 @@ const Categories = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
 
   const [statusFilter, setStatusFilter] = useState("active");
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [loadingBulk, setLoadingBulk] = useState(false);
 
   const fetchCategories = async () => {
     try {
@@ -26,7 +29,7 @@ const Categories = () => {
 
       const response = await getAllCategories();
 
-      setCategories(response.data);
+      setCategories(response.data || []);
     } catch (error) {
       console.error("Failed to fetch categories:", error);
     } finally {
@@ -37,6 +40,10 @@ const Categories = () => {
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  useEffect(() => {
+    setSelectedIds([]);
+  }, [searchTerm, statusFilter]);
 
   const filteredCategories = categories.filter((category) => {
     const matchesSearch = category.name
@@ -50,16 +57,18 @@ const Categories = () => {
   });
 
   const activeCount = categories.filter(
-  (category) => category.isActive
-).length;
+    (category) => category.isActive
+  ).length;
 
-const inactiveCount = categories.filter(
-  (category) => !category.isActive
-).length;
+  const inactiveCount = categories.filter(
+    (category) => !category.isActive
+  ).length;
+
   const handleAddCategory = () => {
     setSelectedCategory(null);
     setIsOpen(true);
   };
+
   const handleEditCategory = (category) => {
     setSelectedCategory(category);
     setIsOpen(true);
@@ -77,14 +86,56 @@ const inactiveCount = categories.filter(
       await fetchCategories();
 
       alert(
-        `Category ${category.isActive ? "disabled" : "enabled"} successfully.`,
+        `Category ${category.isActive ? "disabled" : "enabled"} successfully.`
       );
     } catch (error) {
       console.error(error);
 
       alert(
-        error.response?.data?.message || "Failed to update category status.",
+        error.response?.data?.message || "Failed to update category status."
       );
+    }
+  };
+
+  const handleSelectRow = (categoryId) => {
+    setSelectedIds((prev) =>
+      prev.includes(categoryId)
+        ? prev.filter((id) => id !== categoryId)
+        : [...prev, categoryId]
+    );
+  };
+
+  const handleSelectAll = (shouldSelect) => {
+    if (shouldSelect) {
+      const displayedIds = filteredCategories.map((c) => c._id);
+      setSelectedIds((prev) => [...new Set([...prev, ...displayedIds])]);
+    } else {
+      const displayedSet = new Set(filteredCategories.map((c) => c._id));
+      setSelectedIds((prev) => prev.filter((id) => !displayedSet.has(id)));
+    }
+  };
+
+  const handleBulkVisibility = async (shouldBeActive) => {
+    if (!selectedIds.length || loadingBulk) return;
+
+    const actionText = shouldBeActive ? "visible" : "hidden";
+    const count = selectedIds.length;
+
+    try {
+      setLoadingBulk(true);
+      await bulkUpdateCategoryVisibility(selectedIds, shouldBeActive);
+      await fetchCategories();
+      setSelectedIds([]);
+      alert(
+        `${count} categor${count > 1 ? "ies are" : "y is"} now ${actionText}.`
+      );
+    } catch (error) {
+      console.error("Bulk Category Visibility Error:", error);
+      alert(
+        error.response?.data?.message || "Failed to update category visibility."
+      );
+    } finally {
+      setLoadingBulk(false);
     }
   };
 
@@ -93,7 +144,9 @@ const inactiveCount = categories.filter(
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Category Dashboard</h1>
+            <h1 className="text-2xl font-bold text-gray-800">
+              Category Dashboard
+            </h1>
             <p className="mt-1 text-gray-500">Manage all product categories</p>
           </div>
 
@@ -136,11 +189,57 @@ const inactiveCount = categories.filter(
           </button>
         </div>
 
+        {selectedIds.length > 0 && (
+          <div className="flex items-center justify-between rounded-xl border border-purple-200 bg-purple-50 p-4 shadow-sm">
+            <div className="flex items-center gap-2">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#6547C9] text-xs font-bold text-white">
+                {selectedIds.length}
+              </span>
+              <span className="text-sm font-semibold text-gray-800">
+                {selectedIds.length} categor{selectedIds.length > 1 ? "ies" : "y"}{" "}
+                selected
+              </span>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                disabled={loadingBulk}
+                onClick={() => handleBulkVisibility(true)}
+                className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
+              >
+                <FaEye /> Show Selected
+              </button>
+
+              <button
+                type="button"
+                disabled={loadingBulk}
+                onClick={() => handleBulkVisibility(false)}
+                className="flex items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700 disabled:opacity-50"
+              >
+                <FaEyeSlash /> Hide Selected
+              </button>
+
+              <button
+                type="button"
+                disabled={loadingBulk}
+                onClick={() => setSelectedIds([])}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-purple-100 hover:text-gray-900"
+              >
+                Clear Selection
+              </button>
+            </div>
+          </div>
+        )}
+
         <CategoryTable
           categories={filteredCategories}
           loading={loading}
           onEdit={handleEditCategory}
           onToggleStatus={handleToggleStatus}
+          selectedIds={selectedIds}
+          onSelectAll={handleSelectAll}
+          onSelectRow={handleSelectRow}
         />
 
         <CategoryModel

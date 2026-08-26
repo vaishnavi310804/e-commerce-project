@@ -19,3 +19,11 @@ export const updateCategoryStatus = async (id) => {
   const response = await ecommerceApi.patch(`/category/status/${id}`);
   return response.data;
 };
+
+export const bulkUpdateCategoryVisibility = async (categoryIds, isActive) => {
+  const response = await ecommerceApi.patch("/category/bulk-visibility", {
+    categoryIds,
+    isActive,
+  });
+  return response.data;
+};

@@ -1,6 +1,6 @@
 import Category from "./category.model.js";
 import slugify from "../../utils/slug.js";
-
+import mongoose from "mongoose";
 
 export const createCategoryService = async (categoryData) => {
   const {
@@ -92,4 +92,31 @@ export const categoryStatusService = async (categoryId) => {
   await category.save();
 
   return category;
+};
+
+export const bulkUpdateCategoryVisibilityService = async (categoryIds = [], isActive = true) => {
+  if (!Array.isArray(categoryIds) || categoryIds.length === 0) {
+    const error = new Error("Category IDs must be a non-empty array.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const validIds = [...new Set(categoryIds)]
+    .filter((id) => mongoose.Types.ObjectId.isValid(id));
+
+  if (!validIds.length) {
+    const error = new Error("No valid category IDs provided.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const result = await Category.updateMany(
+    { _id: { $in: validIds } },
+    { $set: { isActive: Boolean(isActive) } }
+  );
+
+  return {
+    matchedCount: result.matchedCount,
+    modifiedCount: result.modifiedCount,
+  };
 };
