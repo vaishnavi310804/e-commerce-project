@@ -310,7 +310,7 @@ export const adminLoginService = async ({ email, password }) => {
     throw new Error("Invalid email or password");
   }
 
-  if (user.role !== "ADMIN") {
+  if (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN") {
     throw new Error("Access denied. Admins only.");
   }
 
@@ -318,6 +318,12 @@ export const adminLoginService = async ({ email, password }) => {
     const error = new Error("Your account has been deactivated.");
     error.statusCode = 403;
     throw error;
+  }
+
+  const superAdminCount = await User.countDocuments({ role: "SUPER_ADMIN" });
+  if (superAdminCount === 0 && user.role === "ADMIN" && user.isActive) {
+    user.role = "SUPER_ADMIN";
+    await user.save();
   }
 
   const accessToken = generateAccessToken(user);
@@ -473,7 +479,7 @@ export const updateCurrentLocationService = async (
 
 export const getAllAdminsService = async () => {
   return await User.find(
-    { role: "ADMIN" },
+    { role: { $in: ["ADMIN", "SUPER_ADMIN"] } },
     "_id fullName email role isActive createdAt"
   ).sort({ createdAt: -1 });
 };
@@ -524,7 +530,7 @@ export const createAdminService = async ({ fullName, email, password }) => {
 
 export const updateAdminService = async (adminId, { fullName, email }) => {
   const user = await User.findById(adminId);
-  if (!user || user.role !== "ADMIN") {
+  if (!user || (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN")) {
     const error = new Error("Admin not found.");
     error.statusCode = 404;
     throw error;

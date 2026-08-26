@@ -83,7 +83,7 @@ const navigationItems = [
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [openLogout, setOpenLogout] = useState(false);
@@ -99,6 +99,10 @@ const Navbar = () => {
     setMenuOpen(false);
     navigate("/");
   };
+
+  const filteredNavigationItems = navigationItems.filter(
+    (item) => item.path !== "/admins" || user?.role === "SUPER_ADMIN"
+  );
 
   return (
     <>
@@ -125,7 +129,7 @@ const Navbar = () => {
 
           <div className="fixed right-0 top-16 z-50 w-72 max-w-[60vw] rounded-bl-2xl border-b border-l border-slate-200 bg-white/100 p-4 shadow-xl lg:hidden">
             <nav className="space-y-1">
-              {navigationItems.map(({ icon: Icon, title, path }) => (
+              {filteredNavigationItems.map(({ icon: Icon, title, path }) => (
                 <button
                   key={path}
                   type="button"

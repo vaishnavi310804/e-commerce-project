@@ -121,7 +121,9 @@ const Sidebar = () => {
 
             <SidebarItem icon={FaTicketAlt} title="Tickets" path="/tickets" />
 
-            <SidebarItem icon={FaUserShield} title="Admins" path="/admins" />
+            {user?.role === "SUPER_ADMIN" && (
+              <SidebarItem icon={FaUserShield} title="Admin Users" path="/admins" />
+            )}
           </nav>
         </div>
 

@@ -6,12 +6,20 @@ export const authorize = (...roles) => {
         message: "Authentication Required",
       });
     }
-    if (!roles.includes(req.user.role)) {
-        return res.status(403).json({       
-        success: false,
-        message:"Access Denied.",
-    });
+
+    const userRole = req.user.role;
+
+    if (roles.includes(userRole)) {
+      return next();
     }
-    return next();
+
+    if (userRole === "SUPER_ADMIN" && roles.includes("ADMIN")) {
+      return next();
+    }
+
+    return res.status(403).json({
+      success: false,
+      message: "Access Denied.",
+    });
   };
 };

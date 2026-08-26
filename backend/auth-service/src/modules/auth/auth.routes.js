@@ -43,25 +43,25 @@ router.post("/admin/login", adminLoginValidation, validate, adminLogin);
 router.get(
   "/admins",
   protect,
-  authorize("ADMIN"),
+  authorize("SUPER_ADMIN"),
   getAllAdmins,
 );
 router.post(
   "/admins",
   protect,
-  authorize("ADMIN"),
+  authorize("SUPER_ADMIN"),
   createAdmin,
 );
 router.put(
   "/admins/:id",
   protect,
-  authorize("ADMIN"),
+  authorize("SUPER_ADMIN"),
   updateAdmin,
 );
 router.patch(
   "/admins/:id/status",
   protect,
-  authorize("ADMIN"),
+  authorize("SUPER_ADMIN"),
   updateAdminStatus,
 );
 router.post("/login", loginValidation, validate, loginUser);
