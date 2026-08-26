@@ -131,7 +131,7 @@ const AdminModel = ({ open, onClose, admin, onSuccess, onCreate, onUpdate }) => 
               name="fullName"
               value={formData.fullName}
               onChange={handleChange}
-              placeholder="e.g. John Doe"
+              placeholder="Name"
               className="mt-1 w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-[#6547C9] focus:outline-none focus:ring-1 focus:ring-[#6547C9]"
             />
             {errors.fullName && (
@@ -166,7 +166,7 @@ const AdminModel = ({ open, onClose, admin, onSuccess, onCreate, onUpdate }) => 
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="At least 6 characters"
+                placeholder="At least 8 characters"
                 className="mt-1 w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-[#6547C9] focus:outline-none focus:ring-1 focus:ring-[#6547C9]"
               />
               {errors.password && (

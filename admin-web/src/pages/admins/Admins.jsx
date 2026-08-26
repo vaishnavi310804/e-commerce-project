@@ -117,7 +117,7 @@ const Admins = () => {
               Admin Users Dashboard
             </h1>
             <p className="mt-1 text-gray-500">
-              Manage system administrator accounts and access status.
+              Manage admin accounts and activity status.
             </p>
           </div>
 
