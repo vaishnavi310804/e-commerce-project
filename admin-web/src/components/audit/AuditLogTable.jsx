@@ -43,7 +43,7 @@ const AuditLogTable = ({ logs = [], loading, onViewDetails }) => {
                   Date / Time
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
-                  Actor (Performed By)
+                  Performed By
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                   Action

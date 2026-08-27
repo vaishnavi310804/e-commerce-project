@@ -47,7 +47,7 @@ const AuditLogDetailsModal = ({ open, onClose, log }) => {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 space-y-2">
               <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
-                <FaUser className="text-indigo-500" /> Performed By (Actor)
+                <FaUser className="text-indigo-500" /> Performed By
               </h3>
               <p className="font-semibold text-gray-900">{actorName}</p>
               <p className="text-xs text-gray-600">{actorEmail}</p>
@@ -60,7 +60,7 @@ const AuditLogDetailsModal = ({ open, onClose, log }) => {
 
             <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 space-y-2">
               <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
-                <FaTag className="text-indigo-500" /> Target Resource
+                <FaTag className="text-indigo-500" /> Target
               </h3>
               <p className="font-semibold text-gray-900">{targetName}</p>
               <p className="text-xs text-gray-600">{targetEmail}</p>
@@ -68,20 +68,15 @@ const AuditLogDetailsModal = ({ open, onClose, log }) => {
             </div>
           </div>
 
-          <div className="space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 pb-3">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center justify-between border-b border-gray-100 pb-3">
               <div>
                 <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider block">Action</span>
                 <div className="mt-1">{renderBadge(log.action)}</div>
               </div>
 
               <div>
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider block">Module</span>
-                <span className="text-sm font-medium text-gray-800">{log.module || "ADMIN_USER"}</span>
-              </div>
-
-              <div>
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider block flex items-center gap-1">
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider block flex items-center">
                   <FaClock className="text-gray-400" /> Timestamp
                 </span>
                 <span className="text-sm text-gray-700">
@@ -97,55 +92,9 @@ const AuditLogDetailsModal = ({ open, onClose, log }) => {
               </p>
             </div>
           </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 text-xs">
-            <div className="flex items-center gap-2 text-gray-600 rounded-lg bg-gray-50 p-3 border border-gray-100">
-              <FaGlobe className="text-gray-400 text-base shrink-0" />
-              <div>
-                <span className="font-semibold block text-gray-700">IP Address</span>
-                <span className="font-mono">{log.ipAddress || "Not Recorded"}</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 text-gray-600 rounded-lg bg-gray-50 p-3 border border-gray-100">
-              <FaDesktop className="text-gray-400 text-base shrink-0" />
-              <div className="truncate">
-                <span className="font-semibold block text-gray-700">User Agent</span>
-                <span className="font-mono truncate block" title={log.userAgent}>{log.userAgent || "Not Recorded"}</span>
-              </div>
-            </div>
-          </div>
-
-          {log.changes && (log.changes.before || log.changes.after) && (
-            <div className="space-y-2 border-t border-gray-100 pt-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-gray-700">
-                Data Changes Breakdown
-              </h3>
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <span className="text-xs font-semibold text-red-600 block mb-1">Before State</span>
-                  <pre className="overflow-x-auto rounded-lg bg-red-50/60 p-3 text-xs font-mono text-red-900 border border-red-100 max-h-40">
-                    {log.changes.before
-                      ? JSON.stringify(log.changes.before, null, 2)
-                      : "null (Created)"}
-                  </pre>
-                </div>
-
-                <div>
-                  <span className="text-xs font-semibold text-emerald-600 block mb-1">After State</span>
-                  <pre className="overflow-x-auto rounded-lg bg-emerald-50/60 p-3 text-xs font-mono text-emerald-900 border border-emerald-100 max-h-40">
-                    {log.changes.after
-                      ? JSON.stringify(log.changes.after, null, 2)
-                      : "null"}
-                  </pre>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
-        <div className="flex items-center justify-end border-t border-gray-100 px-6 py-3 bg-gray-50">
+        <div className="flex items-center justify-end border-t border-gray-100 px-6 py-3">
           <button
             type="button"
             onClick={onClose}
