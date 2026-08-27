@@ -536,6 +536,11 @@ export const updateAdminService = async (adminId, { fullName, email }) => {
     throw error;
   }
 
+  const beforeState = {
+    fullName: user.fullName,
+    email: user.email,
+  };
+
   if (fullName && fullName.trim()) {
     user.fullName = fullName.trim();
   }
@@ -561,7 +566,7 @@ export const updateAdminService = async (adminId, { fullName, email }) => {
 
   const userObj = user.toObject();
   delete userObj.password;
-  return userObj;
+  return { user: userObj, beforeState };
 };
 
 export const updateAdminStatusService = async (adminId, isActive, currentUserId) => {
@@ -572,11 +577,13 @@ export const updateAdminStatusService = async (adminId, isActive, currentUserId)
   }
 
   const targetUser = await User.findById(adminId);
-  if (!targetUser || targetUser.role !== "ADMIN") {
+  if (!targetUser || (targetUser.role !== "ADMIN" && targetUser.role !== "SUPER_ADMIN")) {
     const error = new Error("Admin user not found.");
     error.statusCode = 404;
     throw error;
   }
+
+  const previousIsActive = targetUser.isActive;
 
   if (currentUserId && currentUserId.toString() === adminId.toString() && isActive === false) {
     const error = new Error("You cannot deactivate your own account.");
@@ -586,7 +593,7 @@ export const updateAdminStatusService = async (adminId, isActive, currentUserId)
 
   if (isActive === false) {
     const activeAdminCount = await User.countDocuments({
-      role: "ADMIN",
+      role: { $in: ["ADMIN", "SUPER_ADMIN"] },
       isActive: true,
     });
 
@@ -602,5 +609,5 @@ export const updateAdminStatusService = async (adminId, isActive, currentUserId)
 
   const userObj = targetUser.toObject();
   delete userObj.password;
-  return userObj;
+  return { user: userObj, previousIsActive };
 };

@@ -19,6 +19,7 @@ import {
   FaBan,
   FaTicketAlt,
   FaUserShield,
+  FaClipboardList,
 } from "react-icons/fa";
 
 const Sidebar = () => {
@@ -122,7 +123,10 @@ const Sidebar = () => {
             <SidebarItem icon={FaTicketAlt} title="Tickets" path="/tickets" />
 
             {user?.role === "SUPER_ADMIN" && (
-              <SidebarItem icon={FaUserShield} title="Admin Users" path="/admins" />
+              <>
+                <SidebarItem icon={FaUserShield} title="Admin Users" path="/admins" />
+                <SidebarItem icon={FaClipboardList} title="Audit Logs" path="/audit-logs" />
+              </>
             )}
           </nav>
         </div>

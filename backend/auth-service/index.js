@@ -3,6 +3,7 @@ import db from "./src/config/db.js"
 import cors from 'cors'
 import authRoutes from "./src/modules/auth/auth.routes.js"
 import notificationRoutes from "./src/modules/notification/notification.routes.js";
+import auditLogRoutes from "./src/modules/audit/auditLog.routes.js";
 import errorHandler from "./src/middleware/error.middleware.js";
 
 const app=express();
@@ -14,6 +15,7 @@ app.use(express.json());
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/notification", notificationRoutes);
+app.use("/api/v1/audit-logs", auditLogRoutes);
 app.use(errorHandler);
 
 app.get("/",(req,res)=>{

@@ -21,6 +21,7 @@ import {
   FaBan,
   FaTicketAlt,
   FaUserShield,
+  FaClipboardList,
 } from "react-icons/fa";
 
 const navigationItems = [
@@ -79,6 +80,11 @@ const navigationItems = [
     title: "Admins",
     path: "/admins",
   },
+  {
+    icon: FaClipboardList,
+    title: "Audit Logs",
+    path: "/audit-logs",
+  },
 ];
 
 const Navbar = () => {
@@ -100,8 +106,9 @@ const Navbar = () => {
     navigate("/");
   };
 
+  const superAdminPaths = ["/admins", "/audit-logs"];
   const filteredNavigationItems = navigationItems.filter(
-    (item) => item.path !== "/admins" || user?.role === "SUPER_ADMIN"
+    (item) => !superAdminPaths.includes(item.path) || user?.role === "SUPER_ADMIN"
   );
 
   return (

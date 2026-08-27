@@ -17,6 +17,7 @@ import {
   updateAdminService,
   updateAdminStatusService,
 } from "./auth.service.js";
+import { createAuditLog } from "../audit/auditLog.service.js";
 
 export const registerUser = async (req, res, next) => {
   try {
@@ -293,6 +294,30 @@ export const createAdmin = async (req, res, next) => {
   try {
     const admin = await createAdminService(req.body);
 
+    const ipAddress = req.ip || req.headers["x-forwarded-for"] || "";
+    const userAgent = req.headers["user-agent"] || "";
+
+    createAuditLog({
+      actorId: req.user._id,
+      actorRole: req.user.role,
+      module: "ADMIN_USER",
+      action: "ADMIN_CREATED",
+      targetId: admin._id,
+      targetType: "ADMIN",
+      description: `Created new admin user: ${admin.email}`,
+      changes: {
+        before: null,
+        after: {
+          fullName: admin.fullName,
+          email: admin.email,
+          role: admin.role,
+          isActive: admin.isActive,
+        },
+      },
+      ipAddress,
+      userAgent,
+    });
+
     return res.status(201).json({
       success: true,
       message: "Admin created successfully.",
@@ -305,12 +330,37 @@ export const createAdmin = async (req, res, next) => {
 
 export const updateAdmin = async (req, res, next) => {
   try {
-    const admin = await updateAdminService(req.params.id, req.body);
+    const { user: updatedAdmin, beforeState } = await updateAdminService(
+      req.params.id,
+      req.body
+    );
+
+    const ipAddress = req.ip || req.headers["x-forwarded-for"] || "";
+    const userAgent = req.headers["user-agent"] || "";
+
+    createAuditLog({
+      actorId: req.user._id,
+      actorRole: req.user.role,
+      module: "ADMIN_USER",
+      action: "ADMIN_UPDATED",
+      targetId: updatedAdmin._id,
+      targetType: "ADMIN",
+      description: `Updated admin details for ${updatedAdmin.email}`,
+      changes: {
+        before: beforeState,
+        after: {
+          fullName: updatedAdmin.fullName,
+          email: updatedAdmin.email,
+        },
+      },
+      ipAddress,
+      userAgent,
+    });
 
     return res.status(200).json({
       success: true,
       message: "Admin updated successfully.",
-      data: admin,
+      data: updatedAdmin,
     });
   } catch (error) {
     next(error);
@@ -321,11 +371,35 @@ export const updateAdminStatus = async (req, res, next) => {
   try {
     const { isActive } = req.body;
     const currentUserId = req.user._id || req.user.id;
-    const admin = await updateAdminStatusService(
+    const { user: admin, previousIsActive } = await updateAdminStatusService(
       req.params.id,
       isActive,
       currentUserId
     );
+
+    const ipAddress = req.ip || req.headers["x-forwarded-for"] || "";
+    const userAgent = req.headers["user-agent"] || "";
+
+    const action = admin.isActive ? "ADMIN_ACTIVATED" : "ADMIN_DEACTIVATED";
+    const description = `${
+      admin.isActive ? "Activated" : "Deactivated"
+    } admin account for ${admin.email}`;
+
+    createAuditLog({
+      actorId: req.user._id,
+      actorRole: req.user.role,
+      module: "ADMIN_USER",
+      action,
+      targetId: admin._id,
+      targetType: "ADMIN",
+      description,
+      changes: {
+        before: { isActive: previousIsActive },
+        after: { isActive: admin.isActive },
+      },
+      ipAddress,
+      userAgent,
+    });
 
     return res.status(200).json({
       success: true,
