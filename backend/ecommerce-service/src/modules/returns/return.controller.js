@@ -42,7 +42,7 @@ export const getMyReturns = async (req, res, next) => {
 
 export const getReturnDetails = async (req, res, next) => {
   try {
-    const isAdmin = req.user.role === "ADMIN";
+    const isAdmin = ["ADMIN", "SUPER_ADMIN"].includes(req.user.role);
 
     const returnRequest = await getReturnDetailsService(
       isAdmin ? null : req.user._id,
