@@ -75,7 +75,7 @@ const AuditLogs = () => {
               Admin Activity Audit Logs
             </h1>
             <p className="mt-1 text-gray-500">
-              System activity trail for Admin User Management operations.
+              System activity for Admin User Management.
             </p>
           </div>
         </div>
@@ -83,7 +83,7 @@ const AuditLogs = () => {
         <SearchBar
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search logs by actor, target admin, or description..."
+          placeholder="Search logs..."
         />
 
         <div className="flex flex-wrap gap-2">
