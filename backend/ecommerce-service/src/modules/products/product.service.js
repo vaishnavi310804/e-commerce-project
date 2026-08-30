@@ -75,12 +75,27 @@ export const createProductService = async (productData, file) => {
 };
 
 export const getAllProductsService = async () => {
-  return await Product.find({ isActive: true })
+  const activeCategories = await Category.find({ isActive: true }).select("_id");
+  const activeCategoryIds = activeCategories.map((c) => c._id);
+
+  return await Product.find({
+    isActive: true,
+    category: { $in: activeCategoryIds },
+  })
     .populate("category", "name slug")
     .sort({ createdAt: -1 });
 };
 
 export const getProductsByCategoryService = async (categoryId) => {
+  const activeCategory = await Category.findOne({
+    _id: categoryId,
+    isActive: true,
+  });
+
+  if (!activeCategory) {
+    return [];
+  }
+
   return await Product.find({
     category: categoryId,
     isActive: true,
@@ -98,11 +113,18 @@ export const getAllProductsAdminService = async () => {
 export const getProductByIdService = async (productId) => {
   const product = await Product.findById(productId).populate(
     "category",
-    "name slug",
+    "name slug isActive",
   );
 
-  if (!product) {
-    throw new Error("Product not found.");
+  if (
+    !product ||
+    !product.isActive ||
+    !product.category ||
+    product.category.isActive === false
+  ) {
+    const error = new Error("Product not found.");
+    error.statusCode = 404;
+    throw error;
   }
   return product;
 };

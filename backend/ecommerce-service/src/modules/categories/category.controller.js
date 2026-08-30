@@ -1,6 +1,7 @@
 import {
   createCategoryService,
   getAllCategoriesService,
+  getAllCategoriesAdminService,
   getCategoryByIdService,
   updateCategoryService,
   categoryStatusService,
@@ -24,6 +25,19 @@ export const createCategory = async (req, res, next) => {
 export const getAllCategories = async (req, res, next) => {
   try {
     const categories = await getAllCategoriesService();
+
+    return res.status(200).json({
+      success: true,
+      data: categories,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getAllCategoriesAdmin = async (req, res, next) => {
+  try {
+    const categories = await getAllCategoriesAdminService();
 
     return res.status(200).json({
       success: true,

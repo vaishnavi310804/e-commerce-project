@@ -1,7 +1,7 @@
 import ecommerceApi from "./ecommerceApi";
 
 export const getAllCategories = async () => {
-  const response = await ecommerceApi.get("/category");
+  const response = await ecommerceApi.get("/category/admin/getAll");
   return response.data;
 };
 

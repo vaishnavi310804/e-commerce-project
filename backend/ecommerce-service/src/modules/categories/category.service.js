@@ -32,6 +32,10 @@ export const createCategoryService = async (categoryData) => {
 };
 
 export const getAllCategoriesService = async () => {
+  return await Category.find({ isActive: true }).sort({ createdAt: -1 });
+};
+
+export const getAllCategoriesAdminService = async () => {
   return await Category.find().sort({ createdAt: -1 });
 };
 

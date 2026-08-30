@@ -2,6 +2,7 @@ import express from "express";
 import {
   createCategory,
   getAllCategories,
+  getAllCategoriesAdmin,
   getCategoryById,
   updateCategory,
   categoryStatus,
@@ -17,6 +18,8 @@ const router = express.Router();
 router.post("/create", protect, authorize("ADMIN"), createCategoryValidation, validate, createCategory);
 
 router.get("/", getAllCategories);
+
+router.get("/admin/getAll", protect, authorize("ADMIN"), getAllCategoriesAdmin);
 
 router.patch("/bulk-visibility", protect, authorize("ADMIN"), bulkUpdateCategoryVisibility);
 
