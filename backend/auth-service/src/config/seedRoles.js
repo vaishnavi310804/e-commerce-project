@@ -57,7 +57,7 @@ export const seedDefaultRoles = async () => {
       ];
       fullAdminRole = await Role.create({
         name: "FULL_ADMIN",
-        description: "Default full operational admin access to standard business modules",
+        description: "Default full admin access to standard business modules",
         isSystemRole: true,
         permissions: standardModules.map((mod) => ({
           module: mod,

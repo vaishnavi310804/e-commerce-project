@@ -15,7 +15,7 @@ export const createRole = async (req, res, next) => {
       actorId: req.user._id,
       actorRole: req.user.role,
       module: "ROLES",
-      action: "ADMIN_CREATED", // or ROLE_CREATED
+      action: "ADMIN_CREATED", 
       targetId: role._id,
       targetType: "ROLE",
       description: `Created custom role: ${role.name}`,
