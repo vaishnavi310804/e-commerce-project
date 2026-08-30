@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FaTimes } from "react-icons/fa";
+import { getRoles } from "../../services/roleApi";
 
 const AdminModel = ({ open, onClose, admin, onSuccess, onCreate, onUpdate }) => {
   const isEdit = Boolean(admin);
@@ -8,10 +9,27 @@ const AdminModel = ({ open, onClose, admin, onSuccess, onCreate, onUpdate }) => 
     fullName: "",
     email: "",
     password: "",
+    roleId: "",
   });
 
+  const [roles, setRoles] = useState([]);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    const loadRoles = async () => {
+      try {
+        const res = await getRoles();
+        const activeRoles = (res.data || []).filter((r) => r.isActive);
+        setRoles(activeRoles);
+      } catch (err) {
+        console.error("Failed to load roles in AdminModel:", err);
+      }
+    };
+    if (open) {
+      loadRoles();
+    }
+  }, [open]);
 
   useEffect(() => {
     if (admin) {
@@ -19,12 +37,14 @@ const AdminModel = ({ open, onClose, admin, onSuccess, onCreate, onUpdate }) => 
         fullName: admin.fullName || "",
         email: admin.email || "",
         password: "",
+        roleId: admin.roleId?._id || admin.roleId || "",
       });
     } else {
       setFormData({
         fullName: "",
         email: "",
         password: "",
+        roleId: "",
       });
     }
     setErrors({});
@@ -77,12 +97,14 @@ const AdminModel = ({ open, onClose, admin, onSuccess, onCreate, onUpdate }) => 
         await onUpdate(admin._id, {
           fullName: formData.fullName.trim(),
           email: formData.email.trim(),
+          roleId: formData.roleId || null,
         });
       } else {
         await onCreate({
           fullName: formData.fullName.trim(),
           email: formData.email.trim(),
           password: formData.password,
+          roleId: formData.roleId || null,
         });
       }
 
@@ -174,6 +196,25 @@ const AdminModel = ({ open, onClose, admin, onSuccess, onCreate, onUpdate }) => 
               )}
             </div>
           )}
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700">
+              Assigned Custom Role
+            </label>
+            <select
+              name="roleId"
+              value={formData.roleId}
+              onChange={handleChange}
+              className="mt-1 w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-[#6547C9] focus:outline-none focus:ring-1 focus:ring-[#6547C9] bg-white"
+            >
+              <option value="">Full Admin</option>
+              {roles.map((r) => (
+                <option key={r._id} value={r._id}>
+                  {r.name} {r.isSystemRole ? "(System Role)" : ""}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
             <button

@@ -11,22 +11,22 @@ import {
 import { createCategoryValidation, updateCategoryValidation } from "./category.validation.js";
 import { protect } from "../../middleware/auth.middleware.js";
 import validate from "../../middleware/validate.js";
-import { authorize } from "../../middleware/role.middleware.js";
+import { authorizePermission } from "../../middleware/permission.middleware.js";
 
 const router = express.Router();
 
-router.post("/create", protect, authorize("ADMIN"), createCategoryValidation, validate, createCategory);
+router.post("/create", protect, authorizePermission("CATEGORIES", "CREATE"), createCategoryValidation, validate, createCategory);
 
 router.get("/", getAllCategories);
 
-router.get("/admin/getAll", protect, authorize("ADMIN"), getAllCategoriesAdmin);
+router.get("/admin/getAll", protect, authorizePermission("CATEGORIES", "VIEW"), getAllCategoriesAdmin);
 
-router.patch("/bulk-visibility", protect, authorize("ADMIN"), bulkUpdateCategoryVisibility);
+router.patch("/bulk-visibility", protect, authorizePermission("CATEGORIES", "EDIT"), bulkUpdateCategoryVisibility);
 
 router.get("/:id", getCategoryById);
 
-router.put("/update/:id", protect, authorize("ADMIN"), updateCategoryValidation, validate, updateCategory);
+router.put("/update/:id", protect, authorizePermission("CATEGORIES", "EDIT"), updateCategoryValidation, validate, updateCategory);
 
-router.patch("/status/:id", protect, authorize("ADMIN"), categoryStatus);
+router.patch("/status/:id", protect, authorizePermission("CATEGORIES", "EDIT"), categoryStatus);
 
 export default router;

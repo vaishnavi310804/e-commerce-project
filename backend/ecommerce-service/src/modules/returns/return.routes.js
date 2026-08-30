@@ -1,7 +1,7 @@
 import express from "express";
 import { protect } from "../../middleware/auth.middleware.js";
 import validate from "../../middleware/validate.js";
-import { authorize } from "../../middleware/role.middleware.js";
+import { authorizePermission } from "../../middleware/permission.middleware.js";
 import {
   createReturn,
   getAllReturns,
@@ -37,7 +37,7 @@ router.get(
 router.get(
   "/",
   protect,
-  authorize("ADMIN"),
+  authorizePermission("RETURNS", "VIEW"),
   getAllReturns,
 );
 
@@ -52,7 +52,7 @@ router.get(
 router.patch(
   "/:id/status",
   protect,
-  authorize("ADMIN"),
+  authorizePermission("RETURNS", "EDIT"),
   updateReturnStatusValidation,
   validate,
   updateReturnStatus,
@@ -61,7 +61,7 @@ router.patch(
 router.patch(
   "/:id/refund",
   protect,
-  authorize("ADMIN"),
+  authorizePermission("RETURNS", "EDIT"),
   returnIdValidation,
   validate,
   processReturnRefund,
@@ -70,7 +70,7 @@ router.patch(
 router.patch(
   "/:id/refund/status",
   protect,
-  authorize("ADMIN"),
+  authorizePermission("RETURNS", "EDIT"),
   returnIdValidation,
   validate,
   checkReturnRefundStatus,
@@ -79,7 +79,7 @@ router.patch(
 router.post(
   "/:id/replacement",
   protect,
-  authorize("ADMIN"),
+  authorizePermission("RETURNS", "EDIT"),
   returnIdValidation,
   validate,
   processReturnReplacement,

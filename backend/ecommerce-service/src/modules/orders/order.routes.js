@@ -1,6 +1,6 @@
 import express from "express";
 import { protect } from "../../middleware/auth.middleware.js";
-import { authorize } from "../../middleware/role.middleware.js";
+import { authorizePermission } from "../../middleware/permission.middleware.js";
 import validate from "../../middleware/validate.js";
 import {
   createOrderValidation,
@@ -27,12 +27,12 @@ router.post("/", protect, createOrderValidation, validate, createOrder);
 router.get("/my-orders", protect, getMyOrders);
 router.get("/my-orders/:id", protect, getMyOrderDetails);
 router.patch("/:id/cancel", protect, cancelOrder);
-router.get("/stats", protect, authorize("ADMIN"), getOrderStats);
+router.get("/stats", protect, authorizePermission("ORDERS", "VIEW"), getOrderStats);
 
 router.patch(
   "/status/:id",
   protect,
-  authorize("ADMIN"),
+  authorizePermission("ORDERS", "EDIT"),
   updateOrderStatusValidation,
   validate,
   updateOrderStatus,
@@ -41,7 +41,7 @@ router.patch(
 router.patch(
   "/payment-status/:id",
   protect,
-  authorize("ADMIN"),
+  authorizePermission("ORDERS", "EDIT"),
   updatePaymentStatusValidation,
   validate,
   updatePaymentStatus,
@@ -50,16 +50,16 @@ router.patch(
 router.patch(
   "/:id/payment-status",
   protect,
-  authorize("ADMIN"),
+  authorizePermission("ORDERS", "EDIT"),
   updatePaymentStatusValidation,
   validate,
   updatePaymentStatus,
 );
 
-router.get("/", protect, authorize("ADMIN"), getAllOrders);
-router.get("/refunds", protect, authorize("ADMIN"), getRefundOrders);
+router.get("/", protect, authorizePermission("ORDERS", "VIEW"), getAllOrders);
+router.get("/refunds", protect, authorizePermission("REFUNDS", "VIEW"), getRefundOrders);
 
-router.post("/:id/refund", protect, authorize("ADMIN"), processRefund);
-router.get("/:id", protect, authorize("ADMIN"), getOrderDetails);
+router.post("/:id/refund", protect, authorizePermission("REFUNDS", "EDIT"), processRefund);
+router.get("/:id", protect, authorizePermission("ORDERS", "VIEW"), getOrderDetails);
 
 export default router;

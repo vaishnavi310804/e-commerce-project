@@ -4,6 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { getCurrentUser } from "../../services/authApi";
 import ConfirmationModel from "../common/ConfirmationModel";
 import SidebarItem from "./SidebarItem";
+import { usePermission } from "../../hooks/usePermission";
 import logo from "../../assets/logo.png";
 import {
   FaHome,
@@ -63,6 +64,8 @@ const Sidebar = () => {
     .charAt(0)
     .toUpperCase();
 
+  const { hasPermission } = usePermission();
+
   return (
     <>
       <aside className="fixed left-0 top-0 hidden h-screen w-65 flex-col justify-between overflow-y-auto border-r border-slate-200 bg-white p-4 lg:flex">
@@ -98,35 +101,58 @@ const Sidebar = () => {
           </div>
 
           <nav className="space-y-1 ">
-            <SidebarItem icon={FaHome} title="Dashboard" path="/dashboard" />
+            {hasPermission("DASHBOARD", "VIEW") && (
+              <SidebarItem icon={FaHome} title="Dashboard" path="/dashboard" />
+            )}
 
-            <SidebarItem
-              icon={FaLayerGroup}
-              title="Categories"
-              path="/categories"
-            />
+            {hasPermission("CATEGORIES", "VIEW") && (
+              <SidebarItem
+                icon={FaLayerGroup}
+                title="Categories"
+                path="/categories"
+              />
+            )}
 
-            <SidebarItem icon={FaBoxOpen} title="Products" path="/products" />
+            {hasPermission("PRODUCTS", "VIEW") && (
+              <SidebarItem icon={FaBoxOpen} title="Products" path="/products" />
+            )}
 
-            <SidebarItem icon={FaShoppingCart} title="Orders" path="/orders" />
+            {hasPermission("ORDERS", "VIEW") && (
+              <SidebarItem icon={FaShoppingCart} title="Orders" path="/orders" />
+            )}
 
-            <SidebarItem icon={FaUndoAlt} title="Refunds" path="/refund" />
+            {hasPermission("REFUNDS", "VIEW") && (
+              <SidebarItem icon={FaUndoAlt} title="Refunds" path="/refund" />
+            )}
 
-            <SidebarItem icon={FaTruck} title="Shipment" path="/shipment" />
+            {hasPermission("SHIPMENTS", "VIEW") && (
+              <SidebarItem icon={FaTruck} title="Shipment" path="/shipment" />
+            )}
 
-            <SidebarItem icon={FaBan} title="Return/Exchange" path="/return" />
+            {hasPermission("RETURNS", "VIEW") && (
+              <SidebarItem icon={FaBan} title="Return/Exchange" path="/return" />
+            )}
 
-            <SidebarItem icon={FaUsers} title="Customers" path="/customers" />
+            {hasPermission("CUSTOMERS", "VIEW") && (
+              <SidebarItem icon={FaUsers} title="Customers" path="/customers" />
+            )}
 
-            <SidebarItem icon={FaStar} title="Reviews" path="/reviews" />
+            {hasPermission("REVIEWS", "VIEW") && (
+              <SidebarItem icon={FaStar} title="Reviews" path="/reviews" />
+            )}
 
-            <SidebarItem icon={FaTicketAlt} title="Tickets" path="/tickets" />
+            {hasPermission("TICKETS", "VIEW") && (
+              <SidebarItem icon={FaTicketAlt} title="Tickets" path="/tickets" />
+            )}
 
-            <SidebarItem icon={FaClipboardList} title="Customer Logs" path="/customer-audit-logs" />
+            {hasPermission("CUSTOMER_LOGS", "VIEW") && (
+              <SidebarItem icon={FaClipboardList} title="Customer Logs" path="/customer-audit-logs" />
+            )}
 
             {user?.role === "SUPER_ADMIN" && (
               <>
                 <SidebarItem icon={FaUserShield} title="Admin Users" path="/admins" />
+                <SidebarItem icon={FaUserShield} title="Roles & Access" path="/roles" />
                 <SidebarItem icon={FaClipboardList} title="Audit Logs" path="/audit-logs" />
               </>
             )}

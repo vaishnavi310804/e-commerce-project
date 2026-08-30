@@ -9,7 +9,7 @@ import {
   getAllProductsAdmin,
   getProductsByCategory,
 } from "./product.controller.js";
-import { authorize } from "../../middleware/role.middleware.js";
+import { authorizePermission } from "../../middleware/permission.middleware.js";
 import { protect } from "../../middleware/auth.middleware.js";
 import {
   createProductValidation,
@@ -23,7 +23,7 @@ const router = express.Router();
 router.post(
   "/create",
   protect,
-  authorize("ADMIN"),
+  authorizePermission("PRODUCTS", "CREATE"),
   upload.single("productImage"),
   createProductValidation,
   validate,
@@ -34,22 +34,22 @@ router.get("/", getAllProducts);
 
 router.get("/category/:categoryId", getProductsByCategory);
 
-router.get("/admin/getAll", protect, authorize("ADMIN"), getAllProductsAdmin);
+router.get("/admin/getAll", protect, authorizePermission("PRODUCTS", "VIEW"), getAllProductsAdmin);
 
-router.patch("/bulk-visibility", protect, authorize("ADMIN"), bulkUpdateProductVisibility);
+router.patch("/bulk-visibility", protect, authorizePermission("PRODUCTS", "EDIT"), bulkUpdateProductVisibility);
 
 router.get("/:id", getProductById);
 
 router.put(
   "/update/:id",
   protect,
-  authorize("ADMIN"),
+  authorizePermission("PRODUCTS", "EDIT"),
   upload.single("productImage"),
   updateProductValidation,
   validate,
   updateProduct,
 );
 
-router.patch("/status/:id", protect, authorize("ADMIN"), productStatus);
+router.patch("/status/:id", protect, authorizePermission("PRODUCTS", "EDIT"), productStatus);
 
 export default router;

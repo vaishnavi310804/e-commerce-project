@@ -1,6 +1,6 @@
 import express from "express";
 import { protect } from "../../middleware/auth.middleware.js";
-import { authorize } from "../../middleware/role.middleware.js";
+import { authorizePermission } from "../../middleware/permission.middleware.js";
 import {
   getAllReviews,
   getReviewById,
@@ -25,12 +25,12 @@ router.put("/product/:productId", protect, updateReviewValidation, validate ,upd
 router.delete("/product/:productId", protect, deleteMyReview);
 
 
-router.get("/stats", protect, authorize("ADMIN"), getReviewStats);
-router.post("/bulk-hide", protect, authorize("ADMIN"), bulkHideReviews);
-router.post("/bulk-delete", protect, authorize("ADMIN"), bulkDeleteReviews);
-router.get("/", protect, authorize("ADMIN"), getAllReviews);
-router.get("/:id", protect, authorize("ADMIN"), getReviewById);
-router.patch("/hide/:id", protect, authorize("ADMIN"), toggleHideReview);
-router.delete("/:id", protect, authorize("ADMIN"), deleteReview);
+router.get("/stats", protect, authorizePermission("REVIEWS", "VIEW"), getReviewStats);
+router.post("/bulk-hide", protect, authorizePermission("REVIEWS", "EDIT"), bulkHideReviews);
+router.post("/bulk-delete", protect, authorizePermission("REVIEWS", "DELETE"), bulkDeleteReviews);
+router.get("/", protect, authorizePermission("REVIEWS", "VIEW"), getAllReviews);
+router.get("/:id", protect, authorizePermission("REVIEWS", "VIEW"), getReviewById);
+router.patch("/hide/:id", protect, authorizePermission("REVIEWS", "EDIT"), toggleHideReview);
+router.delete("/:id", protect, authorizePermission("REVIEWS", "DELETE"), deleteReview);
 
 export default router;

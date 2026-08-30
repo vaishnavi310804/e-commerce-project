@@ -1,7 +1,7 @@
 import express from "express";
 import { protect } from "../../middleware/auth.middleware.js";
 import validate from "../../middleware/validate.js";
-import { authorize } from "../../middleware/role.middleware.js";
+import { authorizePermission } from "../../middleware/permission.middleware.js";
 import {
   createShipment,
   getAllShipments,
@@ -20,7 +20,7 @@ const router = express.Router();
 router.post(
   "/",
   protect,
-  authorize("ADMIN"),
+  authorizePermission("SHIPMENTS", "CREATE"),
   createShipmentValidation,
   validate,
   createShipment,
@@ -28,7 +28,7 @@ router.post(
 router.get(
   "/",
   protect,
-  authorize("ADMIN"),
+  authorizePermission("SHIPMENTS", "VIEW"),
   getAllShipments
 );
 
@@ -40,7 +40,7 @@ router.get("/order/:orderId",
 router.get(
   "/:id",
   protect,
-  authorize("ADMIN"),
+  authorizePermission("SHIPMENTS", "VIEW"),
   shipmentIdValidation,
   validate,
   getShipmentDetails
@@ -48,7 +48,7 @@ router.get(
 router.patch(
   "/:id/status",
   protect,
-  authorize("ADMIN"),
+  authorizePermission("SHIPMENTS", "EDIT"),
   updateShipmentStatusValidation,
   validate,
   updateShipmentStatus

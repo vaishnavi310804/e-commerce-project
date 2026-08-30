@@ -22,6 +22,7 @@ import {
 import { protect } from "../../middleware/auth.middleware.js";
 import validate from "../../middleware/validate.js";
 import { authorize } from "../../middleware/role.middleware.js";
+import { authorizePermission } from "../../middleware/permission.middleware.js";
 
 const router = express.Router();
 
@@ -52,7 +53,7 @@ router.get(
 router.get(
   "/",
   protect,
-  authorize("ADMIN"),
+  authorizePermission("TICKETS", "VIEW"),
   ticketQueryValidation,
   getAllTickets,
 );
@@ -60,7 +61,7 @@ router.get(
 router.get(
   "/admin/:id",
   protect,
-  authorize("ADMIN"),
+  authorizePermission("TICKETS", "VIEW"),
   ticketIdValidation,
   getTicketDetails,
 );
@@ -68,7 +69,7 @@ router.get(
 router.patch(
   "/admin/:id/assign",
   protect,
-  authorize("ADMIN"),
+  authorizePermission("TICKETS", "EDIT"),
   assignTicketValidation,
   assignTicket,
 );
@@ -76,7 +77,7 @@ router.patch(
 router.patch(
   "/admin/:id/priority",
   protect,
-  authorize("ADMIN"),
+  authorizePermission("TICKETS", "EDIT"),
   updateTicketPriorityValidation,
   updateTicketPriority,
 );
@@ -84,7 +85,7 @@ router.patch(
 router.patch(
   "/admin/:id/escalate",
   protect,
-  authorize("ADMIN"),
+  authorizePermission("TICKETS", "EDIT"),
   escalateTicketValidation,
   escalateTicket,
 );
@@ -92,7 +93,7 @@ router.patch(
 router.patch(
   "/admin/:id/status",
   protect,
-  authorize("ADMIN"),
+  authorizePermission("TICKETS", "EDIT"),
   updateTicketStatusValidation,
   updateTicketStatus,
 );

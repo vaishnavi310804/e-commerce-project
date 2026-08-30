@@ -332,7 +332,8 @@ export const adminLoginService = async ({ email, password }) => {
 
   const accessToken = generateAccessToken(user);
 
-  const userObject = user.toObject();
+  const populatedUser = await User.findById(user._id).select("-password").populate("roleId");
+  const userObject = populatedUser ? populatedUser.toObject() : user.toObject();
   delete userObject.password;
 
   return {
@@ -484,11 +485,13 @@ export const updateCurrentLocationService = async (
 export const getAllAdminsService = async () => {
   return await User.find(
     { role: { $in: ["ADMIN", "SUPER_ADMIN"] } },
-    "_id fullName email role isActive createdAt"
-  ).sort({ createdAt: -1 });
+    "_id fullName email role roleId isActive createdAt"
+  )
+    .populate("roleId", "name description isSystemRole permissions isActive")
+    .sort({ createdAt: -1 });
 };
 
-export const createAdminService = async ({ fullName, email, password }) => {
+export const createAdminService = async ({ fullName, email, password, roleId }) => {
   if (!fullName || !fullName.trim()) {
     const error = new Error("Full name is required.");
     error.statusCode = 400;
@@ -518,21 +521,29 @@ export const createAdminService = async ({ fullName, email, password }) => {
 
   const hashedPassword = await hashPassword(password);
 
+  let targetRoleId = roleId;
+  if (!targetRoleId) {
+    const defaultRole = await Role.findOne({ name: "FULL_ADMIN", isActive: true });
+    if (defaultRole) {
+      targetRoleId = defaultRole._id;
+    }
+  }
+
   const user = await User.create({
     fullName: fullName.trim(),
     email: formattedEmail,
     password: hashedPassword,
     role: "ADMIN",
+    roleId: targetRoleId || null,
     isActive: true,
     isEmailVerified: true,
   });
 
-  const userObj = user.toObject();
-  delete userObj.password;
-  return userObj;
+  const userObj = await User.findById(user._id).select("-password").populate("roleId");
+  return userObj.toObject();
 };
 
-export const updateAdminService = async (adminId, { fullName, email }) => {
+export const updateAdminService = async (adminId, { fullName, email, roleId }) => {
   const user = await User.findById(adminId);
   if (!user || (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN")) {
     const error = new Error("Admin not found.");
@@ -543,6 +554,7 @@ export const updateAdminService = async (adminId, { fullName, email }) => {
   const beforeState = {
     fullName: user.fullName,
     email: user.email,
+    roleId: user.roleId,
   };
 
   if (fullName && fullName.trim()) {
@@ -566,11 +578,14 @@ export const updateAdminService = async (adminId, { fullName, email }) => {
     }
   }
 
+  if (roleId !== undefined) {
+    user.roleId = roleId || null;
+  }
+
   await user.save();
 
-  const userObj = user.toObject();
-  delete userObj.password;
-  return { user: userObj, beforeState };
+  const updatedDoc = await User.findById(user._id).select("-password").populate("roleId");
+  return { user: updatedDoc.toObject(), beforeState };
 };
 
 export const updateAdminStatusService = async (adminId, isActive, currentUserId) => {

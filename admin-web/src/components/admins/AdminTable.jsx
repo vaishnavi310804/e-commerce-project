@@ -86,7 +86,7 @@ const AdminTable = ({
 
                     <td className="whitespace-nowrap px-6 py-4">
                       <span className="inline-flex rounded-md bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 border border-indigo-200">
-                        {admin.role || "ADMIN"}
+                        {admin.roleId?.name || admin.role || "ADMIN"}
                       </span>
                     </td>
 

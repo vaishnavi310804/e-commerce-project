@@ -1,6 +1,6 @@
 import express from "express";
 import { protect } from "../../middleware/auth.middleware.js";
-import { authorize } from "../../middleware/role.middleware.js";
+import { authorizePermission } from "../../middleware/permission.middleware.js";
 import {
   getAllCustomers,
   getCustomerById,
@@ -10,9 +10,9 @@ import {
 
 const router = express.Router();
 
-router.get("/stats", protect, authorize("ADMIN"), getCustomerStats);
-router.get("/", protect, authorize("ADMIN"), getAllCustomers);
-router.get("/:id", protect, authorize("ADMIN"), getCustomerById);
-router.patch("/status/:id", protect, authorize("ADMIN"), toggleCustomerStatus);
+router.get("/stats", protect, authorizePermission("CUSTOMERS", "VIEW"), getCustomerStats);
+router.get("/", protect, authorizePermission("CUSTOMERS", "VIEW"), getAllCustomers);
+router.get("/:id", protect, authorizePermission("CUSTOMERS", "VIEW"), getCustomerById);
+router.patch("/status/:id", protect, authorizePermission("CUSTOMERS", "EDIT"), toggleCustomerStatus);
 
 export default router;
