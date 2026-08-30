@@ -59,36 +59,51 @@ const CategoryModel = ({ open, onClose, category, onSuccess }) => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!formData.name.trim()) {
-      alert("Category name is required.");
-      return;
+  const categoryNameRegex = /^[a-zA-Z0-9\s\-&'.,()/]+$/;
+  const categoryName = formData.name.trim();
+
+  if (!categoryName) {
+    alert("Category name is required.");
+    return;
+  }
+
+  if (categoryName.length < 2 || categoryName.length > 50) {
+    alert("Category name must be between 2 and 50 characters.");
+    return;
+  }
+
+  if (!categoryNameRegex.test(categoryName)) {
+    alert(
+      "Invalid category name."
+    );
+    return;
+  }
+
+  if (!formData.description.trim()) {
+    alert("Description is required.");
+    return;
+  }
+
+  try {
+    setSubmitting(true);
+
+    if (category) {
+      await updateCategory(category._id, formData);
+    } else {
+      await createCategory(formData);
     }
 
-    if (!formData.description.trim()) {
-      alert("Description is required.");
-      return;
-    }
-
-    try {
-      setSubmitting(true);
-
-      if (category) {
-        await updateCategory(category._id, formData);
-      } else {
-        await createCategory(formData);
-      }
-
-      onSuccess();
-      handleClose();
-    } catch (error) {
-      console.error(error);
-      alert(error.response?.data?.message || "Something went wrong.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
+    onSuccess();
+    handleClose();
+  } catch (error) {
+    console.error(error);
+    alert(error.response?.data?.message || "Something went wrong.");
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   if (!open) return null;
 

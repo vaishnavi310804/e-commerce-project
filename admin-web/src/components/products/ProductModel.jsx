@@ -113,10 +113,21 @@ const ProductModel = ({ open, onClose, product, onSuccess }) => {
   };
 
   const validate = () => {
-    if (!formData.name.trim()) {
+    const productNameRegex = /^[a-zA-Z0-9\s\-&'.,()/]+$/;
+    const productName = formData.name.trim();
+
+    if (!productName) {
       alert("Product name is required.");
       return false;
     }
+
+    if (!productNameRegex.test(productName)) {
+      alert(
+        "Invalid product name"
+      );
+      return false;
+    }
+
     if (!formData.price) {
       alert("Price is required.");
       return false;

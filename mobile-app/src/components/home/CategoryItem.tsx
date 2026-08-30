@@ -79,6 +79,7 @@ const styles = StyleSheet.create({
     paddingLeft: 5,
     paddingRight: 15,
     marginRight: 8,
+    maxWidth: "100%",
   },
 
   selectedContainer: {
@@ -109,6 +110,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: Fonts.medium,
     color: Colors.black,
+    flexShrink: 1,
   },
 
   selectedName: {

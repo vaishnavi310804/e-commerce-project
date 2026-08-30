@@ -1,10 +1,17 @@
 import { body } from "express-validator";
 
+const PRODUCT_NAME_REGEX = /^[a-zA-Z0-9\s\-&'.,()/]+$/;
+
 export const createProductValidation = [
   body("name")
     .trim()
     .notEmpty()
-    .withMessage("Product name is required"),
+    .withMessage("Product name is required")
+    .bail()
+    .matches(PRODUCT_NAME_REGEX)
+    .withMessage(
+      "Product name can only contain letters, numbers, spaces, hyphens, ampersands, apostrophes, commas, periods, slashes, and parentheses"
+    ),
 
   body("description")
     .trim()
@@ -39,8 +46,8 @@ export const createProductValidation = [
     .trim(),
 
   body("productImage")
-  .optional()
-  .trim(),
+    .optional()
+    .trim(),
 
   body("isFeatured")
     .optional()
@@ -53,7 +60,12 @@ export const updateProductValidation = [
     .optional()
     .trim()
     .notEmpty()
-    .withMessage("Product name cannot be empty"),
+    .withMessage("Product name cannot be empty")
+    .bail()
+    .matches(PRODUCT_NAME_REGEX)
+    .withMessage(
+      "Invalid product name."
+    ),
 
   body("description")
     .optional()

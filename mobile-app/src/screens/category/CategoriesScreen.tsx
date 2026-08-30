@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  FlatList,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -62,29 +62,30 @@ const CategoriesScreen = () => {
           <View style={{ width: 40 }} />
         </View>
 
-        <FlatList
-          data={categories}
-          keyExtractor={(item) => item._id}
-          numColumns={4}
+        <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.list}
-          columnWrapperStyle={styles.row}
-          renderItem={({ item }) => (
-            <CategoryItem
-              item={item}
-              onPress={() =>
-                router.push({
-                  pathname: "/category/[categoryId]",
-                  params: {
-                    categoryId: item._id,
-                    categoryName: item.name,
-                    slug: item.slug,
-                  },
-                })
-              }
-            />
-          )}
-        />
+          contentContainerStyle={styles.scrollContent}
+        >
+          <View style={styles.chipsWrapper}>
+            {categories.map((item) => (
+              <CategoryItem
+                key={item._id}
+                item={item}
+                selected={false}
+                onPress={() =>
+                  router.push({
+                    pathname: "/category/[categoryId]",
+                    params: {
+                      categoryId: item._id,
+                      categoryName: item.name,
+                      slug: item.slug,
+                    },
+                  })
+                }
+              />
+            ))}
+          </View>
+        </ScrollView>
       </View>
     </ScreenWrapper>
   );
@@ -114,13 +115,15 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
 
-  list: {
+  scrollContent: {
     paddingBottom: 30,
   },
 
-  row: {
-    justifyContent: "space-between",
-    marginBottom: 22,
+  chipsWrapper: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    rowGap: 12,
   },
 
   loader: {
