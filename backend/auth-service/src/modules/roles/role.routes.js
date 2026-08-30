@@ -7,7 +7,7 @@ import {
   deleteRole,
 } from "./role.controller.js";
 import { createRoleValidation, updateRoleValidation } from "./role.validation.js";
-import { validate } from "../../middleware/validate.middleware.js";
+import validate from "../../middleware/validate.js";
 import { protect } from "../../middleware/auth.middleware.js";
 import { authorize } from "../../../../ecommerce-service/src/middleware/role.middleware.js";
 
