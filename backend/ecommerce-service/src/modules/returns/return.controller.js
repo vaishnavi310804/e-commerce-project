@@ -8,6 +8,7 @@ import {
   checkReturnRefundStatusService,
   processReturnReplacementService,
 } from "./return.service.js";
+import { sendCustomerAuditLog } from "../../services/audit.service.js";
 
 export const createReturn = async (req, res, next) => {
   try {
@@ -15,6 +16,21 @@ export const createReturn = async (req, res, next) => {
       req.user._id,
       req.body,
     );
+
+    if (returnRequest?._id) {
+      sendCustomerAuditLog({
+        actorId: req.user._id,
+        actorRole: req.user.role || "CUSTOMER",
+        module: "CUSTOMER_RETURN",
+        action: "RETURN_REQUESTED",
+        targetId: returnRequest._id,
+        targetType: "RETURN",
+        description: `Requested return for order ${returnRequest.order || ""}`,
+        changes: { before: null, after: { reason: returnRequest.reason, status: returnRequest.status } },
+        ipAddress: req.ip || req.headers["x-forwarded-for"] || "",
+        userAgent: req.headers["user-agent"] || "",
+      });
+    }
 
     return res.status(201).json({
       success: true,

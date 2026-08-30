@@ -11,6 +11,7 @@ import {
   createReviewService,
   getProductReviewsService,
 } from "./review.service.js";
+import { sendCustomerAuditLog } from "../../services/audit.service.js";
 
 export const getAllReviews = async (req, res, next) => {
   try {
@@ -120,6 +121,21 @@ export const createReview = async (req, res, next) => {
       productId: req.params.productId,
       ...req.body,
     });
+
+    if (review?._id) {
+      sendCustomerAuditLog({
+        actorId: req.user._id,
+        actorRole: req.user.role || "CUSTOMER",
+        module: "CUSTOMER_REVIEW",
+        action: "REVIEW_CREATED",
+        targetId: review._id,
+        targetType: "REVIEW",
+        description: `Added review for product ${req.params.productId}`,
+        changes: { before: null, after: { rating: review.rating, comment: review.comment } },
+        ipAddress: req.ip || req.headers["x-forwarded-for"] || "",
+        userAgent: req.headers["user-agent"] || "",
+      });
+    }
 
     return res.status(201).json({
       success: true,

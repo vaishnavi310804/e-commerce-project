@@ -76,6 +76,11 @@ const navigationItems = [
     path: "/tickets",
   },
   {
+    icon: FaClipboardList,
+    title: "Customer Logs",
+    path: "/customer-audit-logs",
+  },
+  {
     icon: FaUserShield,
     title: "Admins",
     path: "/admins",

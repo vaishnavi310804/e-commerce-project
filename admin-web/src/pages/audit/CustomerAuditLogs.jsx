@@ -3,11 +3,9 @@ import DashboardLayout from "../../layouts/DashboardLayout";
 import SearchBar from "../../components/common/SearchBar";
 import AuditLogTable from "../../components/audit/AuditLogTable";
 import AuditLogDetailsModal from "../../components/audit/AuditLogDetailsModal";
-import { useAuth } from "../../context/AuthContext";
 import { getAuditLogs } from "../../services/auditApi";
 
-const AuditLogs = () => {
-  const { user: authUser } = useAuth();
+const CustomerAuditLogs = () => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -18,36 +16,34 @@ const AuditLogs = () => {
   const [selectedLog, setSelectedLog] = useState(null);
   const [isOpenModal, setIsOpenModal] = useState(false);
 
-  const fetchAuditLogs = useCallback(async () => {
+  const fetchCustomerAuditLogs = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await getAuditLogs({ page, limit: 20, actorRole: "ADMIN,SUPER_ADMIN" });
+      const res = await getAuditLogs({ page, limit: 20, actorRole: "CUSTOMER" });
       setLogs(res.data || []);
       if (res.pagination) {
         setPagination(res.pagination);
       }
     } catch (error) {
-      console.error("Failed to fetch audit logs:", error);
-      alert("Failed to load audit logs.");
+      console.error("Failed to fetch customer audit logs:", error);
+      alert("Failed to load customer audit logs.");
     } finally {
       setLoading(false);
     }
   }, [page]);
 
   useEffect(() => {
-    fetchAuditLogs();
-  }, [fetchAuditLogs]);
+    fetchCustomerAuditLogs();
+  }, [fetchCustomerAuditLogs]);
 
   const filteredLogs = logs.filter((log) => {
     const actorName = log.actorId?.fullName || "";
     const actorEmail = log.actorId?.email || "";
-    const targetName = log.targetId?.fullName || "";
     const description = log.description || "";
 
     const matchesSearch =
       actorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       actorEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      targetName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       description.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesAction =
@@ -72,10 +68,10 @@ const AuditLogs = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">
-              Admin Activity Audit Logs
+              Customer Activity Audit Logs
             </h1>
             <p className="mt-1 text-gray-500">
-              System activity for Admin User Management.
+              Audit log of key actions performed by customer accounts.
             </p>
           </div>
         </div>
@@ -83,7 +79,7 @@ const AuditLogs = () => {
         <SearchBar
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search logs..."
+          placeholder="Search customer logs..."
         />
 
         <div className="flex flex-wrap gap-2">
@@ -99,47 +95,69 @@ const AuditLogs = () => {
           </button>
 
           <button
-            onClick={() => setActionFilter("ADMIN_CREATED")}
+            onClick={() => setActionFilter("CUSTOMER_REGISTERED")}
             className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition ${
-              actionFilter === "ADMIN_CREATED"
+              actionFilter === "CUSTOMER_REGISTERED"
                 ? "bg-emerald-600 text-white"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
-            Created
+            Registration
           </button>
 
           <button
-            onClick={() => setActionFilter("ADMIN_UPDATED")}
+            onClick={() => setActionFilter("CUSTOMER_LOGIN")}
             className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition ${
-              actionFilter === "ADMIN_UPDATED"
+              actionFilter === "CUSTOMER_LOGIN"
                 ? "bg-blue-600 text-white"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
-            Updated
+            Login
           </button>
 
           <button
-            onClick={() => setActionFilter("ADMIN_ACTIVATED")}
+            onClick={() => setActionFilter("ORDER_CREATED")}
             className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition ${
-              actionFilter === "ADMIN_ACTIVATED"
-                ? "bg-green-600 text-white"
+              actionFilter === "ORDER_CREATED"
+                ? "bg-indigo-600 text-white"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
-            Activated
+            Orders
           </button>
 
           <button
-            onClick={() => setActionFilter("ADMIN_DEACTIVATED")}
+            onClick={() => setActionFilter("ORDER_CANCELLED")}
             className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition ${
-              actionFilter === "ADMIN_DEACTIVATED"
-                ? "bg-red-600 text-white"
+              actionFilter === "ORDER_CANCELLED"
+                ? "bg-amber-600 text-white"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
-            Deactivated
+            Cancellations
+          </button>
+
+          <button
+            onClick={() => setActionFilter("RETURN_REQUESTED")}
+            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition ${
+              actionFilter === "RETURN_REQUESTED"
+                ? "bg-purple-600 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            Returns
+          </button>
+
+          <button
+            onClick={() => setActionFilter("REVIEW_CREATED")}
+            className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition ${
+              actionFilter === "REVIEW_CREATED"
+                ? "bg-pink-600 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            Reviews
           </button>
         </div>
 
@@ -185,4 +203,4 @@ const AuditLogs = () => {
   );
 };
 
-export default AuditLogs;
+export default CustomerAuditLogs;

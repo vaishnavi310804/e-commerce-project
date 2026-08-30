@@ -1,4 +1,4 @@
-import { getAuditLogsService } from "./auditLog.service.js";
+import { createAuditLog, getAuditLogsService } from "./auditLog.service.js";
 
 export const getAuditLogs = async (req, res, next) => {
   try {
@@ -8,6 +8,18 @@ export const getAuditLogs = async (req, res, next) => {
       success: true,
       data: result.logs,
       pagination: result.pagination,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createInternalAuditLog = async (req, res, next) => {
+  try {
+    const auditLog = await createAuditLog(req.body);
+    return res.status(201).json({
+      success: true,
+      data: auditLog,
     });
   } catch (error) {
     next(error);

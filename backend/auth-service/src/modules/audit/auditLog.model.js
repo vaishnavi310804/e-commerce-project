@@ -10,7 +10,7 @@ const auditLogSchema = new mongoose.Schema(
 
     actorRole: {
       type: String,
-      enum: ["ADMIN", "SUPER_ADMIN"],
+      enum: ["ADMIN", "SUPER_ADMIN", "CUSTOMER"],
       required: true,
     },
 
@@ -27,6 +27,15 @@ const auditLogSchema = new mongoose.Schema(
         "ADMIN_UPDATED",
         "ADMIN_ACTIVATED",
         "ADMIN_DEACTIVATED",
+        "CUSTOMER_REGISTERED",
+        "CUSTOMER_LOGIN",
+        "CUSTOMER_PROFILE_UPDATED",
+        "ADDRESS_CREATED",
+        "ADDRESS_DELETED",
+        "ORDER_CREATED",
+        "ORDER_CANCELLED",
+        "RETURN_REQUESTED",
+        "REVIEW_CREATED",
       ],
       required: true,
     },
@@ -34,7 +43,7 @@ const auditLogSchema = new mongoose.Schema(
     targetId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: false,
     },
 
     targetType: {
@@ -73,5 +82,7 @@ const auditLogSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+auditLogSchema.index({ actorRole: 1, createdAt: -1 });
 
 export default mongoose.model("AuditLog", auditLogSchema);

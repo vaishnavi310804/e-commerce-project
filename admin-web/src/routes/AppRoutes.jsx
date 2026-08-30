@@ -16,6 +16,7 @@ import Returns from "../pages/returns/Returns";
 import Tickets from "../pages/tickets/Tickets";
 import Admins from "../pages/admins/Admins";
 import AuditLogs from "../pages/audit/AuditLogs";
+import CustomerAuditLogs from "../pages/audit/CustomerAuditLogs";
 
 function AppRoutes() {
   return (
@@ -114,6 +115,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
             <AuditLogs />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/customer-audit-logs"
+        element={
+          <ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN"]}>
+            <CustomerAuditLogs />
           </ProtectedRoute>
         }
       />

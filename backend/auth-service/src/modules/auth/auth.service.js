@@ -44,11 +44,13 @@ export const registerUserService = async (userData) => {
       return {
         emailSent: true,
         email: existingUser.email,
+        userId: existingUser._id,
       };
     } catch (error) {
       return {
         emailSent: false,
         email: existingUser.email,
+        userId: existingUser._id,
         otp,
         error: error.message,
       };
@@ -73,11 +75,13 @@ export const registerUserService = async (userData) => {
     return {
       emailSent: true,
       email: user.email,
+      userId: user._id,
     };
   } catch (error) {
     return {
       emailSent: false,
       email: user.email,
+      userId: user._id,
       otp,
       error: error.message,
     };

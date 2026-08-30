@@ -23,6 +23,21 @@ export const registerUser = async (req, res, next) => {
   try {
     const result = await registerUserService(req.body);
 
+    if (result?.userId) {
+      createAuditLog({
+        actorId: result.userId,
+        actorRole: "CUSTOMER",
+        module: "CUSTOMER_AUTH",
+        action: "CUSTOMER_REGISTERED",
+        targetId: result.userId,
+        targetType: "CUSTOMER",
+        description: `Registered new customer account: ${result.email}`,
+        changes: { before: null, after: { email: result.email } },
+        ipAddress: req.ip || req.headers["x-forwarded-for"] || "",
+        userAgent: req.headers["user-agent"] || "",
+      });
+    }
+
     return res.status(201).json({
       success: true,
       message: result?.emailSent
@@ -66,6 +81,21 @@ export const verifyRegistrationOtp = async (req, res, next) => {
 export const loginUser = async (req, res, next) => {
   try {
     const { user, accessToken } = await loginUserService(req.body);
+
+    if (user?._id) {
+      createAuditLog({
+        actorId: user._id,
+        actorRole: user.role || "CUSTOMER",
+        module: "CUSTOMER_AUTH",
+        action: "CUSTOMER_LOGIN",
+        targetId: user._id,
+        targetType: "CUSTOMER",
+        description: `Customer logged in: ${user.email}`,
+        changes: null,
+        ipAddress: req.ip || req.headers["x-forwarded-for"] || "",
+        userAgent: req.headers["user-agent"] || "",
+      });
+    }
 
     return res.status(200).json({
       success: true,
@@ -171,6 +201,21 @@ export const resetPassword = async (req, res, next) => {
 export const updateProfile = async (req, res, next) => {
   try {
     const user = await updateProfileService(req.user._id, req.body, req.file);
+
+    if (user?._id) {
+      createAuditLog({
+        actorId: user._id,
+        actorRole: user.role || "CUSTOMER",
+        module: "CUSTOMER_PROFILE",
+        action: "CUSTOMER_PROFILE_UPDATED",
+        targetId: user._id,
+        targetType: "CUSTOMER",
+        description: `Updated profile details for ${user.email}`,
+        changes: { before: null, after: { fullName: user.fullName, email: user.email } },
+        ipAddress: req.ip || req.headers["x-forwarded-for"] || "",
+        userAgent: req.headers["user-agent"] || "",
+      });
+    }
 
     res.status(200).json({
       success: true,

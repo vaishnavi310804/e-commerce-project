@@ -1,4 +1,5 @@
 import { addAddressService, getAllAddressService, getAddressByIdService, updateAddressService, deleteAddressService, getDefaultAddressService } from "./address.service.js";
+import { sendCustomerAuditLog } from "../../services/audit.service.js";
 
 export const addAddress = async (req, res, next) => {
   try {
@@ -6,6 +7,21 @@ export const addAddress = async (req, res, next) => {
       req.user._id,
       req.body
     );
+
+    if (address?._id) {
+      sendCustomerAuditLog({
+        actorId: req.user._id,
+        actorRole: req.user.role || "CUSTOMER",
+        module: "CUSTOMER_ADDRESS",
+        action: "ADDRESS_CREATED",
+        targetId: address._id,
+        targetType: "ADDRESS",
+        description: `Added address in ${address.city || "address book"}`,
+        changes: { before: null, after: { city: address.city, addressLine1: address.addressLine1 } },
+        ipAddress: req.ip || req.headers["x-forwarded-for"] || "",
+        userAgent: req.headers["user-agent"] || "",
+      });
+    }
 
     res.status(201).json({
       success: true,
@@ -69,6 +85,19 @@ export const deleteAddress = async (req, res, next) => {
       req.user._id,
       req.params.id
     );
+
+    sendCustomerAuditLog({
+      actorId: req.user._id,
+      actorRole: req.user.role || "CUSTOMER",
+      module: "CUSTOMER_ADDRESS",
+      action: "ADDRESS_DELETED",
+      targetId: req.params.id,
+      targetType: "ADDRESS",
+      description: "Deleted address from address book",
+      changes: null,
+      ipAddress: req.ip || req.headers["x-forwarded-for"] || "",
+      userAgent: req.headers["user-agent"] || "",
+    });
 
     res.status(200).json({
       success: true,

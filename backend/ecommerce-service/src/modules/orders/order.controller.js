@@ -12,10 +12,27 @@ import {
   processRefundService,
 } from "./order.service.js";
 import { sendNotification } from "../../services/notification.service.js";
+import { sendCustomerAuditLog } from "../../services/audit.service.js";
 
 export const createOrder = async (req, res, next) => {
   try {
     const order = await createOrderService(req.user._id, req.body);
+
+    if (order?._id) {
+      sendCustomerAuditLog({
+        actorId: req.user._id,
+        actorRole: req.user.role || "CUSTOMER",
+        module: "CUSTOMER_ORDER",
+        action: "ORDER_CREATED",
+        targetId: order._id,
+        targetType: "ORDER",
+        description: `Placed new order ${order.orderNumber || order._id} (Total: ${order.totalAmount})`,
+        changes: { before: null, after: { orderNumber: order.orderNumber, totalAmount: order.totalAmount, paymentMethod: order.paymentMethod } },
+        ipAddress: req.ip || req.headers["x-forwarded-for"] || "",
+        userAgent: req.headers["user-agent"] || "",
+      });
+    }
+
     try {
       await sendNotification({
         userId: req.user._id,
@@ -147,6 +164,22 @@ export const cancelOrder = async (req, res, next) => {
     const canceledOrder = await cancelOrderService(userId, orderId, {
       bankDetails: req.body?.bankDetails,
     });
+
+    if (canceledOrder?._id) {
+      sendCustomerAuditLog({
+        actorId: userId,
+        actorRole: req.user.role || "CUSTOMER",
+        module: "CUSTOMER_ORDER",
+        action: "ORDER_CANCELLED",
+        targetId: canceledOrder._id,
+        targetType: "ORDER",
+        description: `Cancelled order ${canceledOrder.orderNumber || canceledOrder._id}`,
+        changes: { before: { orderStatus: "PENDING" }, after: { orderStatus: "CANCELLED" } },
+        ipAddress: req.ip || req.headers["x-forwarded-for"] || "",
+        userAgent: req.headers["user-agent"] || "",
+      });
+    }
+
     return res.status(200).json({
       success: true,
       message: "Order cancelled successfully.",
