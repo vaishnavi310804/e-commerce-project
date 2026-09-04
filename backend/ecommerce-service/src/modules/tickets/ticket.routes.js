@@ -4,6 +4,7 @@ import {
   getMyTickets,
   getMyTicketDetails,
   getAllTickets,
+  getMyAssignedTickets,
   getTicketDetails,
   assignTicket,
   updateTicketPriority,
@@ -56,6 +57,14 @@ router.get(
   authorizePermission("TICKETS", "VIEW"),
   ticketQueryValidation,
   getAllTickets,
+);
+
+router.get(
+  "/admin/my-assigned",
+  protect,
+  authorizePermission("TICKETS", "VIEW"),
+  ticketQueryValidation,
+  getMyAssignedTickets,
 );
 
 router.get(

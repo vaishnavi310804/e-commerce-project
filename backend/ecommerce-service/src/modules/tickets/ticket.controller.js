@@ -3,6 +3,7 @@ import {
   getMyTicketsService,
   getMyTicketDetailsService,
   getAllTicketsService,
+  getMyAssignedTicketsService,
   getTicketDetailsService,
   assignTicketService,
   updateTicketPriorityService,
@@ -63,6 +64,19 @@ export const getAllTickets = async (req, res, next) => {
   }
 };
 
+export const getMyAssignedTickets = async (req, res, next) => {
+  try {
+    const tickets = await getMyAssignedTicketsService(req.user._id, req.query);
+
+    return res.status(200).json({
+      success: true,
+      data: tickets,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getTicketDetails = async (req, res, next) => {
   try {
     const ticket = await getTicketDetailsService(req.params.id);
@@ -111,7 +125,7 @@ export const updateTicketPriority = async (req, res, next) => {
 
 export const escalateTicket = async (req, res, next) => {
   try {
-    const ticket = await escalateTicketService(req.params.id);
+    const ticket = await escalateTicketService(req.params.id, req.user);
 
     return res.status(200).json({
       success: true,
@@ -129,6 +143,7 @@ export const updateTicketStatus = async (req, res, next) => {
       req.params.id,
       req.body.status,
       req.body.resolution,
+      req.user,
     );
 
     return res.status(200).json({

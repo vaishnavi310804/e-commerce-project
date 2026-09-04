@@ -1,4 +1,5 @@
 import React from "react";
+import { useAuth } from "../../context/AuthContext";
 import StatusBadge from "../orders/StatusBadge";
 import {
   FaEye,
@@ -322,6 +323,16 @@ const TicketActions = ({
   onViewTicket,
   onUpdateTicket,
 }) => {
+  const { user } = useAuth();
+  const assignedAdminId = ticket?.assignedTo?._id || ticket?.assignedTo;
+  const currentUserId = user?._id || user?.id;
+  const isAssignedAdmin =
+    assignedAdminId && String(assignedAdminId) === String(currentUserId);
+  const isSuperOrFullAdmin =
+    user?.role === "SUPER_ADMIN" ||
+    (user?.role === "ADMIN" && (!user?.roleId || user?.roleId?.name === "FULL_ADMIN"));
+  const canUpdateStatus = isSuperOrFullAdmin || isAssignedAdmin;
+
   return (
     <div className="flex shrink-0 items-center gap-1">
       <button
@@ -333,7 +344,7 @@ const TicketActions = ({
         <FaEye size={16} />
       </button>
 
-      {ticket.status !== "Closed" && (
+      {canUpdateStatus && ticket.status !== "Closed" && (
         <button
           type="button"
           onClick={() => onUpdateTicket(ticket)}

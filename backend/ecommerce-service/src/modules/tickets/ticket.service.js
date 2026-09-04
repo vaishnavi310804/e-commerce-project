@@ -197,13 +197,62 @@ export const updateTicketPriorityService = async (ticketId, priority) => {
   return ticket;
 };
 
-export const escalateTicketService = async (ticketId) => {
+const isSuperOrFullAdmin = (user) => {
+  if (!user) return false;
+  if (user.role === "SUPER_ADMIN") return true;
+  if (user.role === "ADMIN") {
+    if (!user.roleId || user.roleId?.name === "FULL_ADMIN") return true;
+  }
+  return false;
+};
+
+export const getMyAssignedTicketsService = async (adminId, query = {}) => {
+  const filter = {
+    assignedTo: adminId,
+  };
+
+  if (query.status) {
+    filter.status = query.status;
+  }
+
+  if (query.priority) {
+    filter.priority = query.priority;
+  }
+
+  if (query.category) {
+    filter.category = query.category;
+  }
+
+  if (query.isEscalated !== undefined) {
+    filter.isEscalated = query.isEscalated === "true";
+  }
+
+  return await Ticket.find(filter)
+    .populate("user", "fullName email phoneNumber")
+    .populate(
+      "order",
+      "orderNumber orderStatus paymentMethod paymentStatus totalAmount",
+    )
+    .populate("assignedTo", "fullName email")
+    .sort({ createdAt: -1 });
+};
+
+export const escalateTicketService = async (ticketId, user) => {
   const ticket = await Ticket.findById(ticketId);
 
   if (!ticket) {
     const error = new Error("Ticket not found.");
     error.statusCode = 404;
     throw error;
+  }
+
+  if (user && !isSuperOrFullAdmin(user)) {
+    const assignedId = ticket.assignedTo?._id || ticket.assignedTo;
+    if (!assignedId || assignedId.toString() !== user._id.toString()) {
+      const error = new Error("Only the assigned admin can escalate, resolve, or close this ticket.");
+      error.statusCode = 403;
+      throw error;
+    }
   }
 
   if (ticket.status === "Closed") {
@@ -248,6 +297,7 @@ export const updateTicketStatusService = async (
   ticketId,
   status,
   resolution = "",
+  user = null,
 ) => {
   const ticket = await Ticket.findById(ticketId);
 
@@ -255,6 +305,15 @@ export const updateTicketStatusService = async (
     const error = new Error("Ticket not found.");
     error.statusCode = 404;
     throw error;
+  }
+
+  if (user && !isSuperOrFullAdmin(user)) {
+    const assignedId = ticket.assignedTo?._id || ticket.assignedTo;
+    if (!assignedId || assignedId.toString() !== user._id.toString()) {
+      const error = new Error("Only the assigned admin can escalate, resolve, or close this ticket.");
+      error.statusCode = 403;
+      throw error;
+    }
   }
 
   if (ticket.status === "Closed") {

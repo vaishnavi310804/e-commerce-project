@@ -14,6 +14,7 @@ import Refunds from "../pages/refunds/Refunds";
 import Shipment from "../pages/shipments/Shipment";
 import Returns from "../pages/returns/Returns";
 import Tickets from "../pages/tickets/Tickets";
+import MyAssignedTickets from "../pages/tickets/MyAssignedTickets";
 import Admins from "../pages/admins/Admins";
 import AuditLogs from "../pages/audit/AuditLogs";
 import CustomerAuditLogs from "../pages/audit/CustomerAuditLogs";
@@ -100,6 +101,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <Tickets />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/my-assigned-tickets"
+        element={
+          <ProtectedRoute>
+            <MyAssignedTickets />
           </ProtectedRoute>
         }
       />

@@ -142,7 +142,12 @@ const Sidebar = () => {
             )}
 
             {hasPermission("TICKETS", "VIEW") && (
-              <SidebarItem icon={FaTicketAlt} title="Tickets" path="/tickets" />
+              <>
+                {(user?.role === "SUPER_ADMIN" || !user?.roleId || user?.roleId?.name === "FULL_ADMIN") && (
+                  <SidebarItem icon={FaTicketAlt} title="Tickets" path="/tickets" />
+                )}
+                <SidebarItem icon={FaTicketAlt} title="My Assigned Tickets" path="/my-assigned-tickets" />
+              </>
             )}
 
             {hasPermission("CUSTOMER_LOGS", "VIEW") && (

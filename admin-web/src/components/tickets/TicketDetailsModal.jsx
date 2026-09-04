@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 import {
   FaTimes,
   FaUser,
@@ -91,6 +92,16 @@ const TicketDetailsModal = ({
     "";
 
   const assignedAdmin = ticket.assignedTo;
+  const { user } = useAuth();
+  const assignedAdminId = assignedAdmin?._id || assignedAdmin;
+  const currentUserId = user?._id || user?.id;
+  const isAssignedAdmin =
+    assignedAdminId && String(assignedAdminId) === String(currentUserId);
+  const isSuperOrFullAdmin =
+    user?.role === "SUPER_ADMIN" ||
+    (user?.role === "ADMIN" && (!user?.roleId || user?.roleId?.name === "FULL_ADMIN"));
+  const canPerformActions = isSuperOrFullAdmin || isAssignedAdmin;
+  const canAssign = isSuperOrFullAdmin;
 
   return (
     <>
@@ -238,7 +249,7 @@ const TicketDetailsModal = ({
                       </h3>
                     </div>
 
-                    {ticket.status !== "Closed" && (
+                    {canAssign && ticket.status !== "Closed" && (
                       <button
                         type="button"
                         onClick={() => setShowAssignModal(true)}
@@ -327,7 +338,7 @@ const TicketDetailsModal = ({
           </div>
 
           <div className="flex flex-wrap items-center justify-end gap-3 bg-gray-50 px-6 py-4">
-            {ticket.status !== "Closed" && (
+            {canPerformActions && ticket.status !== "Closed" && (
               <button
                 type="button"
                 onClick={() => setShowUpdateStatusModal(true)}
@@ -339,7 +350,7 @@ const TicketDetailsModal = ({
               </button>
             )}
 
-            {ticket.status !== "Closed" && !ticket.isEscalated && (
+            {canPerformActions && ticket.status !== "Closed" && !ticket.isEscalated && (
               <button
                 type="button"
                 onClick={handleEscalate}

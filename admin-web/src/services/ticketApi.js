@@ -8,6 +8,14 @@ export const getAllTickets = async (params = {}) => {
   return response.data;
 };
 
+export const getMyAssignedTickets = async (params = {}) => {
+  const response = await ecommerceApi.get("/ticket/admin/my-assigned", {
+    params,
+  });
+
+  return response.data;
+};
+
 export const getTicketDetails = async (ticketId) => {
   const response = await ecommerceApi.get(`/ticket/admin/${ticketId}`);
 
