@@ -49,9 +49,12 @@ export const updateTicketStatus = async (
   return response.data;
 };
 
-export const escalateTicket = async (ticketId) => {
+export const escalateTicket = async (ticketId, targetAdminId) => {
   const response = await ecommerceApi.patch(
     `/ticket/admin/${ticketId}/escalate`,
+    {
+      targetAdminId,
+    },
   );
 
   return response.data;

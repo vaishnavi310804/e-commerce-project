@@ -77,6 +77,12 @@ export const escalateTicketValidation = [
   param("id")
     .isMongoId()
     .withMessage("Invalid ticket ID."),
+
+  body("targetAdminId")
+    .notEmpty()
+    .withMessage("Target admin ID is required.")
+    .isMongoId()
+    .withMessage("Invalid target admin ID."),
 ];
 
 export const assignTicketValidation = [

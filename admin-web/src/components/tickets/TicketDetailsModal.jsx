@@ -14,6 +14,7 @@ import {
 import StatusBadge from "../orders/StatusBadge";
 import AssignTicketModal from "./AssignTicketModal";
 import UpdateTicketStatusModal from "./UpdateTicketStatusModal";
+import EscalateTicketModal from "./EscalateTicketModal";
 import { escalateTicket } from "../../services/ticketApi";
 
 const TicketDetailsModal = ({
@@ -26,6 +27,7 @@ const TicketDetailsModal = ({
 }) => {
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [showUpdateStatusModal, setShowUpdateStatusModal] = useState(false);
+  const [showEscalateModal, setShowEscalateModal] = useState(false);
   const [escalating, setEscalating] = useState(false);
 
   if (!open || !ticket) {
@@ -37,18 +39,23 @@ const TicketDetailsModal = ({
 
     setShowAssignModal(false);
     setShowUpdateStatusModal(false);
+    setShowEscalateModal(false);
     onClose();
   };
 
-  const handleEscalate = async () => {
+  const handleEscalateClick = () => {
     if (escalating || ticket.isEscalated || ticket.status === "Closed") return;
+    setShowEscalateModal(true);
+  };
 
+  const handleConfirmEscalate = async (ticketData, targetAdminId) => {
     try {
       setEscalating(true);
 
-      const response = await escalateTicket(ticket._id);
+      const response = await escalateTicket(ticketData._id, targetAdminId);
       const updatedTicket = response?.data || response;
 
+      setShowEscalateModal(false);
       onEscalated?.(updatedTicket);
     } catch (error) {
       console.error("FAILED TO ESCALATE TICKET:", error);
@@ -353,7 +360,7 @@ const TicketDetailsModal = ({
             {canPerformActions && ticket.status !== "Closed" && !ticket.isEscalated && (
               <button
                 type="button"
-                onClick={handleEscalate}
+                onClick={handleEscalateClick}
                 disabled={escalating}
                 className="flex items-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
@@ -387,6 +394,14 @@ const TicketDetailsModal = ({
         ticket={ticket}
         onClose={() => setShowUpdateStatusModal(false)}
         onUpdated={handleTicketUpdated}
+      />
+
+      <EscalateTicketModal
+        open={showEscalateModal}
+        ticket={ticket}
+        onClose={() => setShowEscalateModal(false)}
+        onEscalate={handleConfirmEscalate}
+        processing={escalating}
       />
     </>
   );

@@ -125,7 +125,11 @@ export const updateTicketPriority = async (req, res, next) => {
 
 export const escalateTicket = async (req, res, next) => {
   try {
-    const ticket = await escalateTicketService(req.params.id, req.user);
+    const ticket = await escalateTicketService(
+      req.params.id,
+      req.body.targetAdminId,
+      req.user,
+    );
 
     return res.status(200).json({
       success: true,

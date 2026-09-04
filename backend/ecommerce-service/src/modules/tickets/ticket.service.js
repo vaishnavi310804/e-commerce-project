@@ -237,22 +237,13 @@ export const getMyAssignedTicketsService = async (adminId, query = {}) => {
     .sort({ createdAt: -1 });
 };
 
-export const escalateTicketService = async (ticketId, user) => {
+export const escalateTicketService = async (ticketId, targetAdminId, user) => {
   const ticket = await Ticket.findById(ticketId);
 
   if (!ticket) {
     const error = new Error("Ticket not found.");
     error.statusCode = 404;
     throw error;
-  }
-
-  if (user && !isSuperOrFullAdmin(user)) {
-    const assignedId = ticket.assignedTo?._id || ticket.assignedTo;
-    if (!assignedId || assignedId.toString() !== user._id.toString()) {
-      const error = new Error("Only the assigned admin can escalate, resolve, or close this ticket.");
-      error.statusCode = 403;
-      throw error;
-    }
   }
 
   if (ticket.status === "Closed") {
@@ -267,22 +258,97 @@ export const escalateTicketService = async (ticketId, user) => {
     throw error;
   }
 
+  if (user && !isSuperOrFullAdmin(user)) {
+    const assignedId = ticket.assignedTo?._id || ticket.assignedTo;
+    if (!assignedId || assignedId.toString() !== user._id.toString()) {
+      const error = new Error("Only the assigned admin can escalate, resolve, or close this ticket.");
+      error.statusCode = 403;
+      throw error;
+    }
+  }
+
+  if (!targetAdminId) {
+    const error = new Error("Target admin ID is required.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (user && user._id && String(targetAdminId) === String(user._id)) {
+    const error = new Error("You cannot escalate a ticket to yourself.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const targetAdmin = await Ticket.db
+    .model("User")
+    .findById(targetAdminId)
+    .populate("roleId");
+
+  if (!targetAdmin) {
+    const error = new Error("Target admin not found.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (!targetAdmin.isActive) {
+    const error = new Error("Target admin account is inactive.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (targetAdmin.role !== "ADMIN" && targetAdmin.role !== "SUPER_ADMIN") {
+    const error = new Error("Target user must be an admin.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (user && !isSuperOrFullAdmin(user)) {
+    if (isSuperOrFullAdmin(targetAdmin)) {
+      const error = new Error("Role-based admins can only escalate tickets to other role-based admins.");
+      error.statusCode = 403;
+      throw error;
+    }
+  }
+
+  ticket.assignedTo = targetAdminId;
   ticket.isEscalated = true;
   ticket.escalatedAt = new Date();
 
+  if (ticket.status === "Open") {
+    ticket.status = "In Progress";
+  }
+
   await ticket.save();
 
-  console.log("TICKET ESCALATED IN DB");
+  console.log("TICKET ESCALATED AND REASSIGNED IN DB");
 
-  await sendNotification({
-    userId: ticket.user,
-    title: "Ticket Escalated",
-    body: `Your support ticket ${ticket.ticketNumber} has been escalated.`,
-    type: "TICKET_ESCALATED",
-    data: {
-      ticketId: ticket._id,
-    },
-  });
+  try {
+    await sendNotification({
+      userId: ticket.user,
+      title: "Ticket Escalated",
+      body: `Your support ticket ${ticket.ticketNumber} has been escalated.`,
+      type: "TICKET_ESCALATED",
+      data: {
+        ticketId: ticket._id,
+      },
+    });
+  } catch (notifErr) {
+    console.error("Customer notification error on escalation:", notifErr.message);
+  }
+
+  try {
+    await sendNotification({
+      userId: targetAdminId,
+      title: "Ticket Escalated to You",
+      body: `Support ticket ${ticket.ticketNumber} has been escalated and assigned to you.`,
+      type: "TICKET_ESCALATED",
+      data: {
+        ticketId: ticket._id,
+      },
+    });
+  } catch (adminNotifErr) {
+    console.error("Admin notification error on escalation:", adminNotifErr.message);
+  }
 
   return await Ticket.findById(ticket._id)
     .populate("user", "fullName email phoneNumber")
