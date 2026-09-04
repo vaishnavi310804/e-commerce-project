@@ -4,6 +4,7 @@ import {
   getMyTicketDetailsService,
   getAllTicketsService,
   getMyAssignedTicketsService,
+  getEscalationTargetsService,
   getTicketDetailsService,
   assignTicketService,
   updateTicketPriorityService,
@@ -71,6 +72,19 @@ export const getMyAssignedTickets = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       data: tickets,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getEscalationTargets = async (req, res, next) => {
+  try {
+    const admins = await getEscalationTargetsService(req.user);
+
+    return res.status(200).json({
+      success: true,
+      data: admins,
     });
   } catch (error) {
     next(error);

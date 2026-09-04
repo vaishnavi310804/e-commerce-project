@@ -59,3 +59,9 @@ export const escalateTicket = async (ticketId, targetAdminId) => {
 
   return response.data;
 };
+
+export const getEscalationTargets = async () => {
+  const response = await ecommerceApi.get("/ticket/admin/escalation-targets");
+
+  return response.data;
+};

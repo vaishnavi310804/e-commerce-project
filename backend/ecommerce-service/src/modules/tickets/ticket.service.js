@@ -237,6 +237,49 @@ export const getMyAssignedTicketsService = async (adminId, query = {}) => {
     .sort({ createdAt: -1 });
 };
 
+export const getEscalationTargetsService = async (user) => {
+  if (!user) {
+    const error = new Error("Authentication required.");
+    error.statusCode = 401;
+    throw error;
+  }
+
+  const requestingIsSuperOrFull = isSuperOrFullAdmin(user);
+  const currentUserId = user._id ? user._id.toString() : user.id ? user.id.toString() : "";
+
+  const allAdmins = await Ticket.db
+    .model("User")
+    .find(
+      { role: { $in: ["ADMIN", "SUPER_ADMIN"] }, isActive: true },
+      "_id fullName email role roleId isActive createdAt"
+    )
+    .populate("roleId", "name description isSystemRole permissions isActive")
+    .sort({ createdAt: -1 });
+
+  const eligibleAdmins = allAdmins.filter((adminDoc) => {
+    if (currentUserId && adminDoc._id.toString() === currentUserId) {
+      return false;
+    }
+
+    if (!adminDoc.isActive) {
+      return false;
+    }
+
+    if (!requestingIsSuperOrFull) {
+      const targetIsSuperOrFull =
+        adminDoc.role === "SUPER_ADMIN" ||
+        (adminDoc.role === "ADMIN" && (!adminDoc.roleId || adminDoc.roleId?.name === "FULL_ADMIN"));
+      if (targetIsSuperOrFull) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  return eligibleAdmins;
+};
+
 export const escalateTicketService = async (ticketId, targetAdminId, user) => {
   const ticket = await Ticket.findById(ticketId);
 

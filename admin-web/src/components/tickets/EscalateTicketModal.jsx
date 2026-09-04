@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FaTimes, FaExclamationTriangle, FaUserTie, FaEnvelope } from "react-icons/fa";
-import { getAllAdmins } from "../../services/authApi";
+import { getEscalationTargets } from "../../services/ticketApi";
 import { useAuth } from "../../context/AuthContext";
 
 const EscalateTicketModal = ({
@@ -14,6 +14,7 @@ const EscalateTicketModal = ({
   const [admins, setAdmins] = useState([]);
   const [selectedAdmin, setSelectedAdmin] = useState("");
   const [loadingAdmins, setLoadingAdmins] = useState(false);
+  const [fetchError, setFetchError] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -21,35 +22,15 @@ const EscalateTicketModal = ({
     const fetchAdmins = async () => {
       try {
         setLoadingAdmins(true);
-        const adminsData = await getAllAdmins();
+        setFetchError(false);
+        const response = await getEscalationTargets();
+        const rawAdmins = Array.isArray(response) ? response : Array.isArray(response?.data) ? response.data : [];
 
-        const rawAdmins = Array.isArray(adminsData) ? adminsData : [];
-        const currentUserId = user?._id || user?.id;
-
-        const isSuperOrFullAdmin =
-          user?.role === "SUPER_ADMIN" ||
-          (user?.role === "ADMIN" && (!user?.roleId || user?.roleId?.name === "FULL_ADMIN"));
-
-        // Filter eligible escalation targets
-        const eligible = rawAdmins.filter((admin) => {
-          if (!admin.isActive) return false;
-          if (String(admin._id) === String(currentUserId)) return false;
-
-          if (!isSuperOrFullAdmin) {
-            // Normal admin can only escalate to another normal role-based admin
-            const isTargetSuperOrFull =
-              admin.role === "SUPER_ADMIN" ||
-              (admin.role === "ADMIN" && (!admin.roleId || admin.roleId?.name === "FULL_ADMIN"));
-            if (isTargetSuperOrFull) return false;
-          }
-
-          return true;
-        });
-
-        setAdmins(eligible);
+        setAdmins(rawAdmins);
         setSelectedAdmin("");
       } catch (error) {
         console.error("FAILED TO FETCH ADMINS FOR ESCALATION:", error);
+        setFetchError(true);
         setAdmins([]);
       } finally {
         setLoadingAdmins(false);
@@ -132,7 +113,7 @@ const EscalateTicketModal = ({
                 id="escalationTargetAdmin"
                 value={selectedAdmin}
                 onChange={(event) => setSelectedAdmin(event.target.value)}
-                disabled={processing}
+                disabled={processing || fetchError || admins.length === 0}
                 className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-red-500 focus:ring-2 focus:ring-red-100 disabled:cursor-not-allowed disabled:bg-gray-100"
               >
                 <option value="">Select an admin to escalate to</option>
@@ -171,7 +152,13 @@ const EscalateTicketModal = ({
             </div>
           )}
 
-          {admins.length === 0 && !loadingAdmins && (
+          {!loadingAdmins && fetchError && (
+            <p className="text-sm text-red-600">
+              Unable to load eligible admins.
+            </p>
+          )}
+
+          {!loadingAdmins && !fetchError && admins.length === 0 && (
             <p className="text-sm text-red-600">
               No eligible admins are available for escalation.
             </p>

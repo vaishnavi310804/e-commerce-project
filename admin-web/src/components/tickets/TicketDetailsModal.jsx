@@ -25,6 +25,7 @@ const TicketDetailsModal = ({
   onUpdated,
   onEscalated,
 }) => {
+  const { user } = useAuth();
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [showUpdateStatusModal, setShowUpdateStatusModal] = useState(false);
   const [showEscalateModal, setShowEscalateModal] = useState(false);
@@ -99,7 +100,6 @@ const TicketDetailsModal = ({
     "";
 
   const assignedAdmin = ticket.assignedTo;
-  const { user } = useAuth();
   const assignedAdminId = assignedAdmin?._id || assignedAdmin;
   const currentUserId = user?._id || user?.id;
   const isAssignedAdmin =

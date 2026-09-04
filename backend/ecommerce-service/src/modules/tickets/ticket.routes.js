@@ -5,6 +5,7 @@ import {
   getMyTicketDetails,
   getAllTickets,
   getMyAssignedTickets,
+  getEscalationTargets,
   getTicketDetails,
   assignTicket,
   updateTicketPriority,
@@ -65,6 +66,13 @@ router.get(
   authorizePermission("TICKETS", "VIEW"),
   ticketQueryValidation,
   getMyAssignedTickets,
+);
+
+router.get(
+  "/admin/escalation-targets",
+  protect,
+  authorizePermission("TICKETS", "VIEW"),
+  getEscalationTargets,
 );
 
 router.get(
