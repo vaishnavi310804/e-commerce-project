@@ -297,24 +297,60 @@ const TicketDetailsModal = ({
               {(ticket.isEscalated || ticket.slaBreached) && (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {ticket.isEscalated && (
-                    <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4">
-                      <FaExclamationTriangle className="text-red-600" />
+                    <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+                      <div className="flex items-start gap-3">
+                        <FaExclamationTriangle className="mt-0.5 shrink-0 text-red-600" size={16} />
 
-                      <div>
-                        <p className="text-sm font-semibold text-red-700">
-                          Escalated Ticket
-                        </p>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-red-700">
+                            Escalated Ticket
+                          </p>
 
-                        <p className="text-xs text-red-600">
-                          This ticket has been escalated.
-                        </p>
+                          {assignedAdmin &&
+                          typeof assignedAdmin === "object" &&
+                          (assignedAdmin.fullName || assignedAdmin.name || assignedAdmin.email) ? (
+                            <div className="mt-1.5 space-y-1.5">
+                              <p className="text-xs text-red-600">
+                                This ticket has been escalated to:
+                              </p>
+
+                              <div className="rounded-lg border border-red-100 bg-white/80 p-2.5">
+                                <p className="text-xs font-semibold text-gray-800">
+                                  {assignedAdmin.fullName || assignedAdmin.name || "Admin"}
+                                </p>
+
+                                {assignedAdmin.email && (
+                                  <div className="mt-1 flex items-center gap-1.5 text-xs text-gray-600">
+                                    <FaEnvelope size={10} className="shrink-0 text-gray-400" />
+                                    <span className="truncate">{assignedAdmin.email}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="mt-1 space-y-1">
+                              <p className="text-xs text-red-600">
+                                This ticket has been escalated.
+                              </p>
+                              <p className="text-xs italic text-red-500">
+                                Escalated admin information unavailable.
+                              </p>
+                            </div>
+                          )}
+
+                          {ticket.escalatedAt && (
+                            <p className="mt-2 text-[11px] font-medium text-red-600">
+                              Escalated on {new Date(ticket.escalatedAt).toLocaleString()}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )}
 
                   {ticket.slaBreached && (
-                    <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
-                      <FaExclamationTriangle className="text-amber-600" />
+                    <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                      <FaExclamationTriangle className="mt-0.5 shrink-0 text-amber-600" size={16} />
 
                       <div>
                         <p className="text-sm font-semibold text-amber-700">

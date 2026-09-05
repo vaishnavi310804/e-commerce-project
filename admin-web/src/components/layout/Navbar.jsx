@@ -5,6 +5,7 @@ import { getCurrentUser } from "../../services/authApi";
 import ConfirmationModel from "../common/ConfirmationModel";
 import SidebarItem from "./SidebarItem";
 import logo from "../../assets/logo.png";
+import { usePermission } from "../../hooks/usePermission";
 import {
   FaHome,
   FaBoxOpen,
@@ -22,79 +23,13 @@ import {
   FaTicketAlt,
   FaUserShield,
   FaClipboardList,
+  FaSlidersH,
 } from "react-icons/fa";
-
-const navigationItems = [
-  {
-    icon: FaHome,
-    title: "Dashboard",
-    path: "/dashboard",
-  },
-  {
-    icon: FaLayerGroup,
-    title: "Categories",
-    path: "/categories",
-  },
-  {
-    icon: FaBoxOpen,
-    title: "Products",
-    path: "/products",
-  },
-  {
-    icon: FaShoppingCart,
-    title: "Orders",
-    path: "/orders",
-  },
-  {
-    icon: FaUndoAlt,
-    title: "Refunds",
-    path: "/refund",
-  },
-  {
-    icon: FaTruck,
-    title: "Shipment",
-    path: "/shipment",
-  },
-  {
-    icon: FaBan,
-    title: "Return/Exchange",
-    path: "/return",
-  },
-  {
-    icon: FaUsers,
-    title: "Customers",
-    path: "/customers",
-  },
-  {
-    icon: FaStar,
-    title: "Reviews",
-    path: "/reviews",
-  },
-  {
-    icon: FaTicketAlt,
-    title: "Tickets",
-    path: "/tickets",
-  },
-  {
-    icon: FaClipboardList,
-    title: "Customer Logs",
-    path: "/customer-audit-logs",
-  },
-  {
-    icon: FaUserShield,
-    title: "Admins",
-    path: "/admins",
-  },
-  {
-    icon: FaClipboardList,
-    title: "Audit Logs",
-    path: "/audit-logs",
-  },
-];
 
 const Navbar = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { hasPermission } = usePermission();
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [openLogout, setOpenLogout] = useState(false);
@@ -111,10 +46,111 @@ const Navbar = () => {
     navigate("/");
   };
 
-  const superAdminPaths = ["/admins", "/audit-logs"];
-  const filteredNavigationItems = navigationItems.filter(
-    (item) => !superAdminPaths.includes(item.path) || user?.role === "SUPER_ADMIN"
-  );
+  const isSuperOrFullAdmin =
+    user?.role === "SUPER_ADMIN" ||
+    !user?.roleId ||
+    user?.roleId?.name === "FULL_ADMIN";
+
+  const navigationItems = [
+    {
+      icon: FaHome,
+      title: "Dashboard",
+      path: "/dashboard",
+      show: hasPermission("DASHBOARD", "VIEW"),
+    },
+    {
+      icon: FaLayerGroup,
+      title: "Categories",
+      path: "/categories",
+      show: hasPermission("CATEGORIES", "VIEW"),
+    },
+    {
+      icon: FaBoxOpen,
+      title: "Products",
+      path: "/products",
+      show: hasPermission("PRODUCTS", "VIEW"),
+    },
+    {
+      icon: FaShoppingCart,
+      title: "Orders",
+      path: "/orders",
+      show: hasPermission("ORDERS", "VIEW"),
+    },
+    {
+      icon: FaUndoAlt,
+      title: "Refunds",
+      path: "/refund",
+      show: hasPermission("REFUNDS", "VIEW"),
+    },
+    {
+      icon: FaTruck,
+      title: "Shipment",
+      path: "/shipment",
+      show: hasPermission("SHIPMENTS", "VIEW"),
+    },
+    {
+      icon: FaBan,
+      title: "Return/Exchange",
+      path: "/return",
+      show: hasPermission("RETURNS", "VIEW"),
+    },
+    {
+      icon: FaUsers,
+      title: "Customers",
+      path: "/customers",
+      show: hasPermission("CUSTOMERS", "VIEW"),
+    },
+    {
+      icon: FaStar,
+      title: "Reviews",
+      path: "/reviews",
+      show: hasPermission("REVIEWS", "VIEW"),
+    },
+    {
+      icon: FaTicketAlt,
+      title: "Tickets",
+      path: "/tickets",
+      show: hasPermission("TICKETS", "VIEW") && isSuperOrFullAdmin,
+    },
+    {
+      icon: FaTicketAlt,
+      title: "My Assigned Tickets",
+      path: "/my-assigned-tickets",
+      show: hasPermission("TICKETS", "VIEW"),
+    },
+    {
+      icon: FaClipboardList,
+      title: "Customer Logs",
+      path: "/customer-audit-logs",
+      show: hasPermission("CUSTOMER_LOGS", "VIEW"),
+    },
+    {
+      icon: FaUserShield,
+      title: "Admin Users",
+      path: "/admins",
+      show: user?.role === "SUPER_ADMIN",
+    },
+    {
+      icon: FaUserShield,
+      title: "Roles & Access",
+      path: "/roles",
+      show: user?.role === "SUPER_ADMIN",
+    },
+    {
+      icon: FaSlidersH,
+      title: "Module Dashboard",
+      path: "/feature-toggles",
+      show: user?.role === "SUPER_ADMIN",
+    },
+    {
+      icon: FaClipboardList,
+      title: "Audit Logs",
+      path: "/audit-logs",
+      show: user?.role === "SUPER_ADMIN",
+    },
+  ];
+
+  const filteredNavigationItems = navigationItems.filter((item) => item.show);
 
   return (
     <>

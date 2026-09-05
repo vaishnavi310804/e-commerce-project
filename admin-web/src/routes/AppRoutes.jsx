@@ -19,6 +19,8 @@ import Admins from "../pages/admins/Admins";
 import AuditLogs from "../pages/audit/AuditLogs";
 import CustomerAuditLogs from "../pages/audit/CustomerAuditLogs";
 import RoleManager from "../pages/roles/RoleManager";
+import FeatureToggles from "../pages/config/FeatureToggles";
+import FeatureGuard from "../components/common/FeatureGuard";
 
 function AppRoutes() {
   return (
@@ -36,7 +38,9 @@ function AppRoutes() {
         path="/categories"
         element={
           <ProtectedRoute>
-            <Categories />
+            <FeatureGuard moduleKey="CATEGORIES">
+              <Categories />
+            </FeatureGuard>
           </ProtectedRoute>
         }
       />
@@ -44,7 +48,9 @@ function AppRoutes() {
         path="/products"
         element={
           <ProtectedRoute>
-            <Products />
+            <FeatureGuard moduleKey="PRODUCTS">
+              <Products />
+            </FeatureGuard>
           </ProtectedRoute>
         }
       />
@@ -52,7 +58,9 @@ function AppRoutes() {
         path="/orders"
         element={
           <ProtectedRoute>
-            <Orders />
+            <FeatureGuard moduleKey="ORDERS">
+              <Orders />
+            </FeatureGuard>
           </ProtectedRoute>
         }
       />
@@ -60,7 +68,9 @@ function AppRoutes() {
         path="/refund"
         element={
           <ProtectedRoute>
-            <Refunds />
+            <FeatureGuard moduleKey="REFUNDS">
+              <Refunds />
+            </FeatureGuard>
           </ProtectedRoute>
         }
       />
@@ -68,7 +78,9 @@ function AppRoutes() {
         path="/return"
         element={
           <ProtectedRoute>
-            <Returns />
+            <FeatureGuard moduleKey="RETURNS">
+              <Returns />
+            </FeatureGuard>
           </ProtectedRoute>
         }
       />
@@ -76,7 +88,9 @@ function AppRoutes() {
         path="/shipment"
         element={
           <ProtectedRoute>
-            <Shipment />
+            <FeatureGuard moduleKey="SHIPMENTS">
+              <Shipment />
+            </FeatureGuard>
           </ProtectedRoute>
         }
       />
@@ -84,7 +98,9 @@ function AppRoutes() {
         path="/customers"
         element={
           <ProtectedRoute>
-            <Customers />
+            <FeatureGuard moduleKey="CUSTOMERS">
+              <Customers />
+            </FeatureGuard>
           </ProtectedRoute>
         }
       />
@@ -92,7 +108,9 @@ function AppRoutes() {
         path="/reviews"
         element={
           <ProtectedRoute>
-            <Reviews />
+            <FeatureGuard moduleKey="REVIEWS">
+              <Reviews />
+            </FeatureGuard>
           </ProtectedRoute>
         }
       />
@@ -100,7 +118,9 @@ function AppRoutes() {
         path="/tickets"
         element={
           <ProtectedRoute>
-            <Tickets />
+            <FeatureGuard moduleKey="TICKETS">
+              <Tickets />
+            </FeatureGuard>
           </ProtectedRoute>
         }
       />
@@ -108,7 +128,9 @@ function AppRoutes() {
         path="/my-assigned-tickets"
         element={
           <ProtectedRoute>
-            <MyAssignedTickets />
+            <FeatureGuard moduleKey="TICKETS">
+              <MyAssignedTickets />
+            </FeatureGuard>
           </ProtectedRoute>
         }
       />
@@ -129,6 +151,14 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/feature-toggles"
+        element={
+          <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
+            <FeatureToggles />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/audit-logs"
         element={
           <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
@@ -140,7 +170,9 @@ function AppRoutes() {
         path="/customer-audit-logs"
         element={
           <ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN"]}>
-            <CustomerAuditLogs />
+            <FeatureGuard moduleKey="CUSTOMER_LOGS">
+              <CustomerAuditLogs />
+            </FeatureGuard>
           </ProtectedRoute>
         }
       />

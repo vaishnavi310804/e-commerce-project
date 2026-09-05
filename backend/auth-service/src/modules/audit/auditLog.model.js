@@ -36,6 +36,7 @@ const auditLogSchema = new mongoose.Schema(
         "ORDER_CANCELLED",
         "RETURN_REQUESTED",
         "REVIEW_CREATED",
+        "FEATURE_TOGGLE_UPDATED",
       ],
       required: true,
     },

@@ -25,6 +25,7 @@ import { protect } from "../../middleware/auth.middleware.js";
 import validate from "../../middleware/validate.js";
 import { authorize } from "../../middleware/role.middleware.js";
 import { authorizePermission } from "../../middleware/permission.middleware.js";
+import { checkAdminFeatureEnabled } from "../../middleware/featureToggle.middleware.js";
 
 const router = express.Router();
 
@@ -56,6 +57,7 @@ router.get(
   "/",
   protect,
   authorizePermission("TICKETS", "VIEW"),
+  checkAdminFeatureEnabled("TICKETS"),
   ticketQueryValidation,
   getAllTickets,
 );
@@ -64,6 +66,7 @@ router.get(
   "/admin/my-assigned",
   protect,
   authorizePermission("TICKETS", "VIEW"),
+  checkAdminFeatureEnabled("TICKETS"),
   ticketQueryValidation,
   getMyAssignedTickets,
 );
@@ -72,6 +75,7 @@ router.get(
   "/admin/escalation-targets",
   protect,
   authorizePermission("TICKETS", "VIEW"),
+  checkAdminFeatureEnabled("TICKETS"),
   getEscalationTargets,
 );
 
@@ -79,6 +83,7 @@ router.get(
   "/admin/:id",
   protect,
   authorizePermission("TICKETS", "VIEW"),
+  checkAdminFeatureEnabled("TICKETS"),
   ticketIdValidation,
   getTicketDetails,
 );
@@ -87,6 +92,7 @@ router.patch(
   "/admin/:id/assign",
   protect,
   authorizePermission("TICKETS", "EDIT"),
+  checkAdminFeatureEnabled("TICKETS"),
   assignTicketValidation,
   assignTicket,
 );
@@ -95,6 +101,7 @@ router.patch(
   "/admin/:id/priority",
   protect,
   authorizePermission("TICKETS", "EDIT"),
+  checkAdminFeatureEnabled("TICKETS"),
   updateTicketPriorityValidation,
   updateTicketPriority,
 );
@@ -103,6 +110,7 @@ router.patch(
   "/admin/:id/escalate",
   protect,
   authorizePermission("TICKETS", "EDIT"),
+  checkAdminFeatureEnabled("TICKETS"),
   escalateTicketValidation,
   escalateTicket,
 );
@@ -111,6 +119,7 @@ router.patch(
   "/admin/:id/status",
   protect,
   authorizePermission("TICKETS", "EDIT"),
+  checkAdminFeatureEnabled("TICKETS"),
   updateTicketStatusValidation,
   updateTicketStatus,
 );

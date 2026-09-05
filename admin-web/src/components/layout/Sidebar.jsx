@@ -21,6 +21,7 @@ import {
   FaTicketAlt,
   FaUserShield,
   FaClipboardList,
+  FaSlidersH,
 } from "react-icons/fa";
 
 const Sidebar = () => {
@@ -158,6 +159,7 @@ const Sidebar = () => {
               <>
                 <SidebarItem icon={FaUserShield} title="Admin Users" path="/admins" />
                 <SidebarItem icon={FaUserShield} title="Roles & Access" path="/roles" />
+                <SidebarItem icon={FaSlidersH} title="Module Dashboard" path="/feature-toggles" />
                 <SidebarItem icon={FaClipboardList} title="Audit Logs" path="/audit-logs" />
               </>
             )}
