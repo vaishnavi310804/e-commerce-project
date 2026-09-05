@@ -14,7 +14,6 @@ const FeatureToggles = () => {
     useFeatureToggle();
   const [updatingKey, setUpdatingKey] = useState(null);
   const [pendingToggle, setPendingToggle] = useState(null); // { toggle, targetState }
-  const [feedback, setFeedback] = useState(null); // { type: 'success'|'error', message }
 
   const handleToggleClick = (toggle, nextState) => {
     setPendingToggle({ toggle, targetState: nextState });
@@ -23,25 +22,14 @@ const FeatureToggles = () => {
   const executeToggle = async (toggle, targetState) => {
     try {
       setUpdatingKey(toggle.key);
-      setFeedback(null);
 
       await setToggleState(toggle.key, targetState);
-
-      setFeedback({
-        type: "success",
-        message: `Module '${toggle.name || toggle.key}' has been ${targetState ? "enabled" : "disabled"} successfully.`,
-      });
     } catch (err) {
       console.error("Failed to update feature toggle:", err);
       const errMsg =
         err.response?.data?.message ||
         err.message ||
         "Failed to update feature toggle status.";
-
-      setFeedback({
-        type: "error",
-        message: errMsg,
-      });
 
       refetchFeatures();
     } finally {
@@ -63,31 +51,6 @@ const FeatureToggles = () => {
             </p>
           </div>
         </div>
-
-        {feedback && (
-          <div
-            className={`flex items-center justify-between p-4 rounded-xl border text-sm font-medium transition-all ${
-              feedback.type === "success"
-                ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-                : "bg-red-50 border-red-200 text-red-800"
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              {feedback.type === "success" ? (
-                <FaCheckCircle className="text-emerald-600" />
-              ) : (
-                <FaExclamationTriangle className="text-red-600" />
-              )}
-              <span>{feedback.message}</span>
-            </div>
-            <button
-              onClick={() => setFeedback(null)}
-              className="text-xs hover:underline font-bold"
-            >
-              Dismiss
-            </button>
-          </div>
-        )}
 
         {loading && togglesList.length === 0 ? (
           <div className="flex h-64 w-full items-center justify-center">
