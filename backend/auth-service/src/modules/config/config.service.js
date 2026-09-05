@@ -26,6 +26,19 @@ export const seedDefaultFeatureToggles = async () => {
           isEnabled: true,
           version: 1,
         });
+      } else {
+        let isChanged = false;
+        if (existing.name !== toggle.name) {
+          existing.name = toggle.name;
+          isChanged = true;
+        }
+        if (existing.description !== toggle.description) {
+          existing.description = toggle.description;
+          isChanged = true;
+        }
+        if (isChanged) {
+          await existing.save();
+        }
       }
     }
   } catch (error) {

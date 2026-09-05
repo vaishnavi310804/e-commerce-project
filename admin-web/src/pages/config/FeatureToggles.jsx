@@ -1,8 +1,5 @@
 import React, { useState } from "react";
 import {
-  FaSlidersH,
-  FaShieldAlt,
-  FaSync,
   FaExclamationTriangle,
   FaCheckCircle,
   FaBan,
@@ -11,23 +8,6 @@ import { useFeatureToggle } from "../../context/FeatureContext";
 import ToggleSwitch from "../../components/common/ToggleSwitch";
 import ConfirmationModel from "../../components/common/ConfirmationModel";
 import DashboardLayout from "../../layouts/DashboardLayout";
-
-const MODULE_DESCRIPTIONS = {
-  PRODUCTS:
-    "Controls Product and product listing in Admin Dashboard.",
-  CATEGORIES: "Controls product category in Admin Dashboard",
-  ORDERS:
-    "Controls order management and processing in Admin Dashboard.",
-  REVIEWS:
-    "Controls Customer product review in Admin Dashboard.",
-  TICKETS:
-    "Controls support ticket management in Admin Dashboard.",
-  RETURNS: "Controls customer return/exchange management in Admin Dashboard.",
-  SHIPMENTS: "Controls shipment dispatch and tracking in Admin Dashboard.",
-  REFUNDS: "Controls customer refund processing in Admin Dashboard.",
-  CUSTOMER_LOGS: "Controls customer action audit logs viewing in Admin Dashboard.",
-  CUSTOMERS: "Controls customer account management in Admin Dashboard.",
-};
 
 const FeatureToggles = () => {
   const { togglesList, loading, refetchFeatures, setToggleState } =
@@ -118,9 +98,7 @@ const FeatureToggles = () => {
             {togglesList.map((toggle) => {
               const isUpdating = updatingKey === toggle.key;
               const description =
-                toggle.description ||
-                MODULE_DESCRIPTIONS[toggle.key] ||
-                "Admin Web module";
+                toggle.description || "Admin Web module";
 
               return (
                 <div
