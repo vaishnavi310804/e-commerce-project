@@ -2,16 +2,16 @@ import FeatureToggle from "./featureToggle.model.js";
 import { createAuditLog } from "../audit/auditLog.service.js";
 
 const DEFAULT_FEATURE_TOGGLES = [
-  { key: "PRODUCTS", name: "Products Management", description: "Controls product catalog administration in Admin Web." },
-  { key: "CATEGORIES", name: "Category Management", description: "Controls product category administration in Admin Web." },
-  { key: "ORDERS", name: "Order Processing", description: "Controls order management and processing in Admin Web." },
-  { key: "REVIEWS", name: "Review Moderation", description: "Controls product review moderation in Admin Web." },
-  { key: "TICKETS", name: "Support Tickets", description: "Controls support ticket management in Admin Web." },
-  { key: "RETURNS", name: "Returns & Exchanges", description: "Controls customer return/exchange management in Admin Web." },
-  { key: "SHIPMENTS", name: "Shipment Tracking", description: "Controls shipment dispatch and tracking in Admin Web." },
-  { key: "REFUNDS", name: "Refund Processing", description: "Controls customer refund processing in Admin Web." },
-  { key: "CUSTOMER_LOGS", name: "Customer Audit Logs", description: "Controls customer action audit logs viewing in Admin Web." },
-  { key: "CUSTOMERS", name: "Customer Management", description: "Controls customer account management in Admin Web." },
+  { key: "PRODUCTS", name: "Products Management", description: "Controls Product and product listing in Admin Dashboard." },
+  { key: "CATEGORIES", name: "Category Management", description: "Controls product category in Admin Dashboard." },
+  { key: "ORDERS", name: "Order Processing", description: "Controls order management and processing in Admin Dashboard." },
+  { key: "REVIEWS", name: "Review", description: "Controls Customer product review in Admin Dashboard." },
+  { key: "TICKETS", name: "Support Tickets", description: "Controls support ticket management in Admin Dashboard." },
+  { key: "RETURNS", name: "Returns & Exchanges", description: "Controls customer return/exchange management in Admin Dashboard." },
+  { key: "SHIPMENTS", name: "Shipment Tracking", description: "Controls shipment dispatch and tracking in Admin Dashboard." },
+  { key: "REFUNDS", name: "Refund Processing", description: "Controls customer refund processing in Admin Dashboard." },
+  { key: "CUSTOMER_LOGS", name: "Customer Audit Logs", description: "Controls customer action audit logs viewing in Admin Dashboard." },
+  { key: "CUSTOMERS", name: "Customer Management", description: "Controls customer account management in Admin Dashboard." },
 ];
 
 export const seedDefaultFeatureToggles = async () => {

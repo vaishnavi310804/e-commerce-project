@@ -208,6 +208,7 @@ const Navbar = () => {
         isOpen={openLogout}
         title="Confirm Logout"
         message="Are you sure you want to logout?"
+        confirmText="Logout"
         onCancel={() => setOpenLogout(false)}
         onConfirm={handleLogout}
       />

@@ -137,12 +137,11 @@ const RoleManager = () => {
           role={selectedRole}
           loading={actionLoading}
         />
-
-        {/* Delete Confirmation Modal */}
         <ConfirmationModel
           isOpen={!!roleToDelete}
           title="Delete Role"
           message={`Are you sure you want to delete role "${roleToDelete?.name}"?`}
+          confirmText="Delete"
           onCancel={() => setRoleToDelete(null)}
           onConfirm={handleDeleteRole}
         />
