@@ -6,7 +6,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { router } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import ScreenWrapper from "@/src/components/common/ScreenWrapper";
 import BackButton from "@/src/components/common/BackButton";
 import CategoryItem from "@/src/components/home/CategoryItem";
@@ -18,12 +18,19 @@ import Colors from "@/src/constants/colors";
 import Fonts from "@/src/constants/fonts";
 
 const CategoriesScreen = () => {
+  const navigation = useNavigation();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+
+    const unsubscribe = navigation.addListener("focus", () => {
+      fetchCategories();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   const fetchCategories = async () => {
     try {

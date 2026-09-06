@@ -3,16 +3,22 @@ import { FlatList, StyleSheet, View } from "react-native";
 import { Category, getCategories } from "@/src/api/category.api";
 import CategoryItem from "./CategoryItem";
 import SectionHeader from "./SectionHeader";
-import { router } from "expo-router";
-
+import { router, useNavigation } from "expo-router";
 
 const CategorySection = () => {
+  const navigation = useNavigation();
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+
+    const unsubscribe = navigation.addListener("focus", () => {
+      fetchCategories();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   const fetchCategories = async () => {
     try {
