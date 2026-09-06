@@ -64,3 +64,34 @@ export const authorizePermission = (moduleName, actionName) => {
     }
   };
 };
+
+export const authorizePromotionalAdmin = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({
+      success: false,
+      message: "Authentication required.",
+    });
+  }
+
+  if (req.user.role === "CUSTOMER") {
+    return res.status(403).json({
+      success: false,
+      message: "Access denied. Only Super Admin and Full Admin can send promotional notifications.",
+    });
+  }
+
+  const isSuperAdmin = req.user.role === "SUPER_ADMIN";
+  const isFullAdmin =
+    req.user.role === "ADMIN" &&
+    (!req.user.roleId || req.user.roleId?.name === "FULL_ADMIN");
+
+  if (isSuperAdmin || isFullAdmin) {
+    return next();
+  }
+
+  return res.status(403).json({
+    success: false,
+    message: "Access denied. Only Super Admin and Full Admin can send promotional notifications.",
+  });
+};
+

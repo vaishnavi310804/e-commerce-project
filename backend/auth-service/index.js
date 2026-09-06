@@ -21,6 +21,7 @@ app.use(express.json());
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/notification", notificationRoutes);
+app.use("/api/v1/notifications", notificationRoutes);
 app.use("/api/v1/audit-logs", auditLogRoutes);
 app.use("/api/v1/roles", roleRoutes);
 app.use("/api/v1/config", configRoutes);

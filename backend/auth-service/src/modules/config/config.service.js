@@ -12,6 +12,7 @@ const DEFAULT_FEATURE_TOGGLES = [
   { key: "REFUNDS", name: "Refund Processing", description: "Controls customer refund processing in Admin Dashboard." },
   { key: "CUSTOMER_LOGS", name: "Customer Audit Logs", description: "Controls customer action audit logs viewing in Admin Dashboard." },
   { key: "CUSTOMERS", name: "Customer Management", description: "Controls customer account management in Admin Dashboard." },
+  { key: "NOTIFICATIONS", name: "Notifications", description: "Controls promotional notification management in Admin Dashboard." },
 ];
 
 export const seedDefaultFeatureToggles = async () => {

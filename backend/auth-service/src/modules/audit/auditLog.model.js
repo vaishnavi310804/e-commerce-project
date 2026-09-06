@@ -37,6 +37,7 @@ const auditLogSchema = new mongoose.Schema(
         "RETURN_REQUESTED",
         "REVIEW_CREATED",
         "FEATURE_TOGGLE_UPDATED",
+        "PROMOTIONAL_NOTIFICATION_SENT",
       ],
       required: true,
     },

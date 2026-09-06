@@ -28,3 +28,18 @@ export const createNotificationValidation = [
     .optional()
     .isObject(),
 ];
+
+export const sendPromotionalNotificationValidation = [
+  body("title")
+    .trim()
+    .notEmpty()
+    .withMessage("Notification title is required."),
+
+  body().custom((value, { req }) => {
+    const msg = (req.body.message || req.body.body || "").trim();
+    if (!msg) {
+      throw new Error("Notification message is required.");
+    }
+    return true;
+  }),
+];

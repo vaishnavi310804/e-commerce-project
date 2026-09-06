@@ -13,6 +13,7 @@ export const ALL_MODULES = [
   "REVIEWS",
   "TICKETS",
   "CUSTOMER_LOGS",
+  "NOTIFICATIONS",
   "ADMIN_LOGS",
   "ADMIN_USERS",
   "ROLES",
@@ -54,6 +55,7 @@ export const seedDefaultRoles = async () => {
         "REVIEWS",
         "TICKETS",
         "CUSTOMER_LOGS",
+        "NOTIFICATIONS",
       ];
       fullAdminRole = await Role.create({
         name: "FULL_ADMIN",

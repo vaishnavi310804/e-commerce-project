@@ -24,6 +24,7 @@ import {
   FaUserShield,
   FaClipboardList,
   FaSlidersH,
+  FaBell,
 } from "react-icons/fa";
 
 const Navbar = () => {
@@ -123,6 +124,12 @@ const Navbar = () => {
       title: "Customer Logs",
       path: "/customer-audit-logs",
       show: hasPermission("CUSTOMER_LOGS", "VIEW"),
+    },
+    {
+      icon: FaBell,
+      title: "Notifications",
+      path: "/notifications",
+      show: isSuperOrFullAdmin,
     },
     {
       icon: FaUserShield,

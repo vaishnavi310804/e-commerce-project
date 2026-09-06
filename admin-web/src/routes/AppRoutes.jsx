@@ -1,4 +1,5 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import Login from "../pages/auth/Login";
 import Dashboard from "../pages/dashboard/Dashboard";
 import ProtectedRoute from "./ProtectedRoutes";
@@ -21,6 +22,22 @@ import CustomerAuditLogs from "../pages/audit/CustomerAuditLogs";
 import RoleManager from "../pages/roles/RoleManager";
 import FeatureToggles from "../pages/config/FeatureToggles";
 import FeatureGuard from "../components/common/FeatureGuard";
+import Notifications from "../pages/notifications/Notifications";
+
+function PromotionalRouteGuard({ children }) {
+  const { user } = useAuth();
+
+  const isSuperOrFullAdmin =
+    user?.role === "SUPER_ADMIN" ||
+    !user?.roleId ||
+    user?.roleId?.name === "FULL_ADMIN";
+
+  if (!isSuperOrFullAdmin) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+}
 
 function AppRoutes() {
   return (
@@ -173,6 +190,18 @@ function AppRoutes() {
             <FeatureGuard moduleKey="CUSTOMER_LOGS">
               <CustomerAuditLogs />
             </FeatureGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/notifications"
+        element={
+          <ProtectedRoute allowedRoles={["SUPER_ADMIN", "ADMIN"]}>
+            <PromotionalRouteGuard>
+              <FeatureGuard moduleKey="NOTIFICATIONS">
+                <Notifications />
+              </FeatureGuard>
+            </PromotionalRouteGuard>
           </ProtectedRoute>
         }
       />

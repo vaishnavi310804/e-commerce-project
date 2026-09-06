@@ -1,4 +1,5 @@
 import Notification from "./notification.model.js";
+import User from "../auth/auth.model.js";
 import { sendNotificationToUser } from "../../services/firebaseNotification.service.js";
 
 export const createNotificationService = async ({
@@ -26,6 +27,58 @@ export const createNotificationService = async ({
   });
 
   return notification;
+};
+
+export const sendPromotionalNotificationService = async ({
+  title,
+  body,
+  image = "",
+  data = {},
+}) => {
+  const customers = await User.find({
+    role: "CUSTOMER",
+    isActive: true,
+  }).select("_id fcmToken");
+
+  if (!customers || customers.length === 0) {
+    return { recipientCount: 0 };
+  }
+
+  const notificationDocs = customers.map((customer) => ({
+    user: customer._id,
+    title,
+    body,
+    type: "PROMOTIONAL",
+    image,
+    data: {
+      ...data,
+      type: "PROMOTIONAL",
+    },
+  }));
+
+  await Notification.insertMany(notificationDocs);
+
+  const fcmPromises = customers
+    .filter((customer) => customer.fcmToken)
+    .map((customer) =>
+      sendNotificationToUser({
+        userId: customer._id,
+        title,
+        body,
+        data: {
+          ...data,
+          type: "PROMOTIONAL",
+        },
+      }).catch((err) => {
+        console.error(`FCM dispatch error for customer ${customer._id}:`, err.message);
+      })
+    );
+
+  await Promise.allSettled(fcmPromises);
+
+  return {
+    recipientCount: customers.length,
+  };
 };
 
 export const getNotificationsService = async (userId) => {

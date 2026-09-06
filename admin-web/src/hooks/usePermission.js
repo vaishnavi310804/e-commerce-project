@@ -36,6 +36,7 @@ export const usePermission = () => {
       "REVIEWS",
       "TICKETS",
       "CUSTOMER_LOGS",
+      "NOTIFICATIONS",
     ];
 
     if (user.role === "ADMIN" && standardModules.includes(reqModule)) {

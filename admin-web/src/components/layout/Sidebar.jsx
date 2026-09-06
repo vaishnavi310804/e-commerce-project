@@ -22,6 +22,7 @@ import {
   FaUserShield,
   FaClipboardList,
   FaSlidersH,
+  FaBell,
 } from "react-icons/fa";
 
 const Sidebar = () => {
@@ -153,6 +154,10 @@ const Sidebar = () => {
 
             {hasPermission("CUSTOMER_LOGS", "VIEW") && (
               <SidebarItem icon={FaClipboardList} title="Customer Logs" path="/customer-audit-logs" />
+            )}
+
+            {(user?.role === "SUPER_ADMIN" || !user?.roleId || user?.roleId?.name === "FULL_ADMIN") && (
+              <SidebarItem icon={FaBell} title="Notifications" path="/notifications" />
             )}
 
             {user?.role === "SUPER_ADMIN" && (
