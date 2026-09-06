@@ -1,4 +1,5 @@
 import Notification from "./notification.model.js";
+import NotificationHistory from "./notificationHistory.model.js";
 import User from "../auth/auth.model.js";
 import { sendNotificationToUser } from "../../services/firebaseNotification.service.js";
 
@@ -34,6 +35,7 @@ export const sendPromotionalNotificationService = async ({
   body,
   image = "",
   data = {},
+  adminUser = null,
 }) => {
   const customers = await User.find({
     role: "CUSTOMER",
@@ -58,6 +60,26 @@ export const sendPromotionalNotificationService = async ({
 
   await Notification.insertMany(notificationDocs);
 
+  if (adminUser) {
+    try {
+      await NotificationHistory.create({
+        title,
+        message: body,
+        type: "PROMOTIONAL",
+        targetAudience: "ALL_CUSTOMERS",
+        sentBy: {
+          adminId: adminUser._id,
+          name: adminUser.fullName || adminUser.name || adminUser.email || "Admin",
+          email: adminUser.email || "",
+          role: adminUser.roleId?.name || adminUser.role || "ADMIN",
+        },
+        recipientCount: customers.length,
+      });
+    } catch (historyErr) {
+      console.error("Failed to create notification history record:", historyErr.message);
+    }
+  }
+
   const fcmPromises = customers
     .filter((customer) => customer.fcmToken)
     .map((customer) =>
@@ -78,6 +100,31 @@ export const sendPromotionalNotificationService = async ({
 
   return {
     recipientCount: customers.length,
+  };
+};
+
+export const getNotificationHistoryService = async ({
+  page = 1,
+  limit = 10,
+}) => {
+  const pageNum = Math.max(1, parseInt(page, 10) || 1);
+  const limitNum = Math.max(1, Math.min(100, parseInt(limit, 10) || 10));
+  const skip = (pageNum - 1) * limitNum;
+
+  const total = await NotificationHistory.countDocuments();
+  const history = await NotificationHistory.find()
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limitNum);
+
+  return {
+    history,
+    pagination: {
+      total,
+      page: pageNum,
+      limit: limitNum,
+      totalPages: Math.ceil(total / limitNum) || 1,
+    },
   };
 };
 

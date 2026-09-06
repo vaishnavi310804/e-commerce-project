@@ -12,6 +12,7 @@ import {
   sendTestNotification,
   createNotification,
   sendPromotionalNotification,
+  getNotificationHistory,
 } from "./notification.controller.js";
 import validate  from "../../middleware/validate.js";
 import {
@@ -47,6 +48,20 @@ router.post(
   sendPromotionalNotificationValidation,
   validate,
   sendPromotionalNotification
+);
+
+router.get(
+  "/admin/history",
+  authorizePromotionalAdmin,
+  checkAdminFeatureEnabled("NOTIFICATIONS"),
+  getNotificationHistory
+);
+
+router.get(
+  "/promotional/history",
+  authorizePromotionalAdmin,
+  checkAdminFeatureEnabled("NOTIFICATIONS"),
+  getNotificationHistory
 );
 
 router.post("/test", sendTestNotification);

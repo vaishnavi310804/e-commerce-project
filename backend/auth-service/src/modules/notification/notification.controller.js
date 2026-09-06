@@ -1,6 +1,7 @@
 import {
   createNotificationService,
   sendPromotionalNotificationService,
+  getNotificationHistoryService,
   deleteNotificationService,
   getNotificationsService,
   getUnreadNotificationCountService,
@@ -157,6 +158,7 @@ export const sendPromotionalNotification = async (req, res, next) => {
     const result = await sendPromotionalNotificationService({
       title,
       body: message,
+      adminUser: req.user,
     });
 
     try {
@@ -190,6 +192,25 @@ export const sendPromotionalNotification = async (req, res, next) => {
       data: {
         recipientsCount: result.recipientCount,
       },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getNotificationHistory = async (req, res, next) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+
+    const result = await getNotificationHistoryService({
+      page,
+      limit,
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: result.history,
+      pagination: result.pagination,
     });
   } catch (error) {
     next(error);
