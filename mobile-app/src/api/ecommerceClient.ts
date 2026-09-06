@@ -24,4 +24,19 @@ ecommerceClient.interceptors.request.use(async (config) => {
   return config;
 });
 
+ecommerceClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const status = error.response?.status;
+    const code = error.response?.data?.code;
+
+    if (status === 401 && code === "SESSION_REVOKED") {
+      const { handleSessionRevocation } = await import("../utils/sessionHandler");
+      await handleSessionRevocation();
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 export default ecommerceClient;
