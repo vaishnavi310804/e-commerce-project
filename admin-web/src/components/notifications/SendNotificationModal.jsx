@@ -115,7 +115,7 @@ const SendNotificationModal = ({ open, onClose, onSuccess }) => {
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g. Hurry! Big Sale!"
+                  placeholder="e.g. Hurry!!"
                   disabled={submitting}
                   className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-800 outline-none transition focus:border-[#6547C9] focus:ring-2 focus:ring-purple-100 disabled:bg-gray-50 disabled:text-gray-400"
                 />
@@ -137,7 +137,6 @@ const SendNotificationModal = ({ open, onClose, onSuccess }) => {
               </div>
             </div>
 
-            {/* Modal Footer */}
             <div className="flex shrink-0 items-center justify-end gap-3 border-t border-gray-100 bg-gray-50/50 px-6 py-4">
               <button
                 type="button"
