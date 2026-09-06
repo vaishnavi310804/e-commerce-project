@@ -61,10 +61,11 @@ export const registerUser = async (req, res, next) => {
 export const verifyRegistrationOtp = async (req, res, next) => {
   try {
     const { email, otp } = req.body;
-    const { user, accessToken } = await verifyRegistrationOTPService({
-      email,
-      otp,
-    });
+    const userAgent = req.headers["user-agent"] || "";
+    const { user, accessToken } = await verifyRegistrationOTPService(
+      { email, otp },
+      userAgent
+    );
     return res.status(200).json({
       success: true,
       message: "Email verified successfully.",
@@ -80,7 +81,8 @@ export const verifyRegistrationOtp = async (req, res, next) => {
 
 export const loginUser = async (req, res, next) => {
   try {
-    const { user, accessToken } = await loginUserService(req.body);
+    const userAgent = req.headers["user-agent"] || "";
+    const { user, accessToken } = await loginUserService(req.body, userAgent);
 
     if (user?._id) {
       createAuditLog({
@@ -93,7 +95,7 @@ export const loginUser = async (req, res, next) => {
         description: `Customer logged in: ${user.email}`,
         changes: null,
         ipAddress: req.ip || req.headers["x-forwarded-for"] || "",
-        userAgent: req.headers["user-agent"] || "",
+        userAgent,
       });
     }
 
@@ -229,7 +231,8 @@ export const updateProfile = async (req, res, next) => {
 
 export const adminLogin = async (req, res, next) => {
   try {
-    const data = await adminLoginService(req.body);
+    const userAgent = req.headers["user-agent"] || "";
+    const data = await adminLoginService(req.body, userAgent);
 
     return res.status(200).json({
       success: true,

@@ -2,6 +2,7 @@ import express from "express"
 import db from "./src/config/db.js"
 import cors from 'cors'
 import authRoutes from "./src/modules/auth/auth.routes.js"
+import sessionRoutes from "./src/modules/sessions/session.routes.js";
 import notificationRoutes from "./src/modules/notification/notification.routes.js";
 import auditLogRoutes from "./src/modules/audit/auditLog.routes.js";
 import roleRoutes from "./src/modules/roles/role.routes.js";
@@ -19,6 +20,7 @@ await seedDefaultFeatureToggles();
 app.use(cors())
 app.use(express.json());
 
+app.use("/api/v1/auth/sessions", sessionRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/notification", notificationRoutes);
 app.use("/api/v1/notifications", notificationRoutes);

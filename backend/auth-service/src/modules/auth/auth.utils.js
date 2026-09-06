@@ -11,13 +11,19 @@ export const comparePassword = async (password, hashedPassword) => {
   return await bcrypt.compare(password, hashedPassword);
 };
 
-export const generateAccessToken = (user) => {
+export const generateAccessToken = (user, sessionId = null) => {
+  const payload = {
+    id: user._id,
+    email: user.email,
+    role: user.role,
+  };
+
+  if (sessionId) {
+    payload.sessionId = sessionId;
+  }
+
   return jwt.sign(
-    {
-      id: user._id,
-      email: user.email,
-      role: user.role,
-    },
+    payload,
     process.env.JWT_SECRET,
     {
       expiresIn: process.env.ACCESS_TOKEN_EXPIRES || "7d",

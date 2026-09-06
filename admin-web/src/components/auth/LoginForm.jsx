@@ -1,5 +1,5 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../../services/authApi";
 import { useAuth } from "../../context/AuthContext";
@@ -18,6 +18,12 @@ const LoginForm = () => {
   const [error, setError] = useState("");
 
   const { isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    if (window.location.search.includes("session_expired=true")) {
+      setError("Your session has been terminated or expired. Please log in again.");
+    }
+  }, []);
 
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;

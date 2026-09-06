@@ -23,6 +23,7 @@ import RoleManager from "../pages/roles/RoleManager";
 import FeatureToggles from "../pages/config/FeatureToggles";
 import FeatureGuard from "../components/common/FeatureGuard";
 import Notifications from "../pages/notifications/Notifications";
+import SessionManagement from "../pages/sessions/SessionManagement";
 
 function PromotionalRouteGuard({ children }) {
   const { user } = useAuth();
@@ -164,6 +165,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
             <RoleManager />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/session-management"
+        element={
+          <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
+            <SessionManagement />
           </ProtectedRoute>
         }
       />

@@ -38,6 +38,7 @@ const auditLogSchema = new mongoose.Schema(
         "REVIEW_CREATED",
         "FEATURE_TOGGLE_UPDATED",
         "PROMOTIONAL_NOTIFICATION_SENT",
+        "SESSION_FORCE_LOGOUT",
       ],
       required: true,
     },

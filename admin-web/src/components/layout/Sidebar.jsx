@@ -23,6 +23,7 @@ import {
   FaClipboardList,
   FaSlidersH,
   FaBell,
+  FaLaptop,
 } from "react-icons/fa";
 
 const Sidebar = () => {
@@ -164,6 +165,7 @@ const Sidebar = () => {
               <>
                 <SidebarItem icon={FaUserShield} title="Admin Users" path="/admins" />
                 <SidebarItem icon={FaUserShield} title="Roles & Access" path="/roles" />
+                <SidebarItem icon={FaLaptop} title="Session Management" path="/session-management" />
                 <SidebarItem icon={FaSlidersH} title="Module Dashboard" path="/feature-toggles" />
                 <SidebarItem icon={FaClipboardList} title="Audit Logs" path="/audit-logs" />
               </>

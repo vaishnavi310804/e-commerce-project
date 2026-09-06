@@ -1,4 +1,7 @@
 import User from "./auth.model.js";
+import Role from "../roles/role.model.js";
+import Session from "../sessions/session.model.js";
+import { parseUserAgent } from "../../utils/userAgent.js";
 import {
   hashPassword,
   comparePassword,
@@ -88,7 +91,7 @@ export const registerUserService = async (userData) => {
   }
 };
 
-export const verifyRegistrationOTPService = async ({ email, otp }) => {
+export const verifyRegistrationOTPService = async ({ email, otp }, userAgent = "") => {
   const formattedEmail = email ? String(email).trim().toLowerCase() : "";
   const formattedOtp = otp ? String(otp).trim() : "";
 
@@ -120,7 +123,19 @@ export const verifyRegistrationOTPService = async ({ email, otp }) => {
 
   await user.save();
 
-  const accessToken = generateAccessToken(user);
+  const { device, browser } = parseUserAgent(userAgent);
+  const session = await Session.create({
+    userId: user._id,
+    role: user.role || "CUSTOMER",
+    device,
+    browser,
+    loginAt: new Date(),
+    lastActivityAt: new Date(),
+    isRevoked: false,
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  });
+
+  const accessToken = generateAccessToken(user, session._id);
   const userObject = user.toObject();
   delete userObject.password;
   delete userObject.emailVerificationOTP;
@@ -132,7 +147,7 @@ export const verifyRegistrationOTPService = async ({ email, otp }) => {
   };
 };
 
-export const loginUserService = async ({ email, password }) => {
+export const loginUserService = async ({ email, password }, userAgent = "") => {
   const formattedEmail = email ? String(email).trim().toLowerCase() : "";
   const user = await User.findOne({ email: formattedEmail }).select("+password");
 
@@ -152,7 +167,19 @@ export const loginUserService = async ({ email, password }) => {
     throw new Error("Invalid email or password");
   }
 
-  const accessToken = generateAccessToken(user);
+  const { device, browser } = parseUserAgent(userAgent);
+  const session = await Session.create({
+    userId: user._id,
+    role: user.role || "CUSTOMER",
+    device,
+    browser,
+    loginAt: new Date(),
+    lastActivityAt: new Date(),
+    isRevoked: false,
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  });
+
+  const accessToken = generateAccessToken(user, session._id);
 
   const userObject = user.toObject();
   delete userObject.password;
@@ -300,7 +327,7 @@ export const updateProfileService = async (userId, body, file) => {
   }).select("-password");
 };
 
-export const adminLoginService = async ({ email, password }) => {
+export const adminLoginService = async ({ email, password }, userAgent = "") => {
   const formattedEmail = email ? String(email).trim().toLowerCase() : "";
   const user = await User.findOne({ email: formattedEmail }).select("+password");
 
@@ -330,9 +357,31 @@ export const adminLoginService = async ({ email, password }) => {
     await user.save();
   }
 
-  const accessToken = generateAccessToken(user);
-
   const populatedUser = await User.findById(user._id).select("-password").populate("roleId");
+
+  let sessionRole = user.role;
+  if (user.role === "ADMIN") {
+    if (populatedUser?.roleId?.name === "FULL_ADMIN" || !populatedUser?.roleId) {
+      sessionRole = "FULL_ADMIN";
+    } else {
+      sessionRole = "ADMIN";
+    }
+  }
+
+  const { device, browser } = parseUserAgent(userAgent);
+  const session = await Session.create({
+    userId: user._id,
+    role: sessionRole,
+    device,
+    browser,
+    loginAt: new Date(),
+    lastActivityAt: new Date(),
+    isRevoked: false,
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  });
+
+  const accessToken = generateAccessToken(user, session._id);
+
   const userObject = populatedUser ? populatedUser.toObject() : user.toObject();
   delete userObject.password;
 
